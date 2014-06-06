@@ -4,6 +4,8 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.log4j.Logger;
+
 import audiodrive.audio.AudioAnalyzer;
 import audiodrive.audio.AudioAnalyzer.Results;
 import audiodrive.audio.AudioFile;
@@ -14,6 +16,8 @@ import audiodrive.ui.Plot;
 
 public class TrackGenerator {
 
+	private static Logger logger = Logger.getLogger(TrackGenerator.class);
+
 	private AudioAnalyzer analyzer = new AudioAnalyzer();
 	private int smoothing;
 	private boolean useAverage = false;
@@ -23,30 +27,32 @@ public class TrackGenerator {
 
 	public Track generate(AudioFile file, int smoothing) {
 		this.smoothing = smoothing;
-		System.out.println("analyzing " + file.getName() + " ...");
-		System.out.println("Samplerate: " + file.getAudioFormat().getSampleRate());
-		System.out.println("Framerate: " + file.getAudioFormat().getFrameRate());
+		logger.debug("analyzing " + file.getName() + " ...");
+		logger.debug("Samplerate: " + file.getAudioFormat().getSampleRate());
+		logger.debug("Framerate: " + file.getAudioFormat().getFrameRate());
 		analyzer.analyze(file);
 		Samples samples = analyzer.getSamples();
-		System.out.println(samples.getCount() + " samples");
+		logger.debug(samples.getCount() + " samples");
 		double duration = samples.getCount() / samples.getSampleRate();
-		System.out.println(duration + " seconds");
+		logger.debug(duration + " seconds");
 
 		mixed = analyzer.getResultsOfMixedChannels();
 		left = analyzer.getResults(0);
 		right = analyzer.getResults(1);
-		System.out.println(mixed.spectralFlux.size() + " spectra");
-		
-		List<Vector> vectorinates = useAverage ? calculate() : calculateUsingAverage();
+		logger.debug(mixed.spectralFlux.size() + " spectra");
 
-		System.out.println(vectorinates.size() + " vectorinates");
-		plot("Left", analyzer.getResults(0));
-		plot("Right", analyzer.getResults(1));
+		List<Vector> vectorinates = useAverage ? calculateUsingAverage()
+				: calculate();
+
+		logger.debug(vectorinates.size() + " vectorinates");
+		// plot("Left", analyzer.getResults(0));
+		// plot("Right", analyzer.getResults(1));
 		return new Track(vectorinates, duration, smoothing);
 	}
-	
+
 	private List<Vector> calculate() {
-		double max = mixed.threshold.stream().mapToDouble(v -> v).max().getAsDouble();
+		double max = mixed.threshold.stream().mapToDouble(v -> v).max()
+				.getAsDouble();
 		List<Vector> vectorinates = new ArrayList<>();
 		double x = 0;
 		double y = 0;
@@ -56,7 +62,8 @@ public class TrackGenerator {
 			if (index % smoothing == 0) {
 				vectorinates.add(new Vector(x, y, z));
 			}
-			int direction = left.threshold.get(index) > right.threshold.get(index) ? 1 : -1;
+			int direction = left.threshold.get(index) > right.threshold
+					.get(index) ? 1 : -1;
 			x += 0.005;
 			y += (0.5 - (value / max)) * 0.01;
 			z += direction * 0.01;
@@ -66,7 +73,8 @@ public class TrackGenerator {
 	}
 
 	private List<Vector> calculateUsingAverage() {
-		double max = mixed.threshold.stream().mapToDouble(v -> v).max().getAsDouble();
+		double max = mixed.threshold.stream().mapToDouble(v -> v).max()
+				.getAsDouble();
 		List<Vector> vectorinates = new ArrayList<>();
 		double x = 0;
 		double y = 0;
@@ -78,9 +86,11 @@ public class TrackGenerator {
 			vectorinates.add(new Vector(x, y, z));
 			for (int j = 0; j < smoothing; j++) {
 				int index = i + j;
-				if (index >= mixed.threshold.size()) return vectorinates;
+				if (index >= mixed.threshold.size())
+					return vectorinates;
 				double value = mixed.threshold.get(i + j);
-				int direction = left.threshold.get(index) > right.threshold.get(index) ? 1 : -1;
+				int direction = left.threshold.get(index) > right.threshold
+						.get(index) ? 1 : -1;
 				xi += 0.005;
 				yi += (0.5 - (value / max)) * 0.01;
 				zi += direction * 0.01;
