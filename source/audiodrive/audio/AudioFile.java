@@ -12,9 +12,13 @@ import javax.sound.sampled.UnsupportedAudioFileException;
 public class AudioFile extends File {
 	
 	private AudioInputStream inputStream;
-
+	
 	public AudioFile(String name) {
 		super(name);
+	}
+	
+	public AudioFile(File file) {
+		super(file, "");
 	}
 	
 	public AudioFileFormat getFormat() {
@@ -28,7 +32,7 @@ public class AudioFile extends File {
 	public AudioFormat getAudioFormat() {
 		return getFormat().getFormat();
 	}
-
+	
 	/**
 	 * Opens an audio input stream on the file.
 	 */
@@ -53,5 +57,5 @@ public class AudioFile extends File {
 			throw new RuntimeException(exception);
 		}
 	}
-
+	
 }

@@ -41,8 +41,7 @@ public class TrackGenerator {
 		right = analyzer.getResults(1);
 		logger.debug(mixed.spectralFlux.size() + " spectra");
 
-		List<Vector> vectorinates = useAverage ? calculateUsingAverage()
-				: calculate();
+		List<Vector> vectorinates = useAverage ? calculateUsingAverage() : calculate();
 
 		logger.debug(vectorinates.size() + " vectorinates");
 		// plot("Left", analyzer.getResults(0));
@@ -51,8 +50,7 @@ public class TrackGenerator {
 	}
 
 	private List<Vector> calculate() {
-		double max = mixed.threshold.stream().mapToDouble(v -> v).max()
-				.getAsDouble();
+		double max = mixed.threshold.stream().mapToDouble(v -> v).max().getAsDouble();
 		List<Vector> vectorinates = new ArrayList<>();
 		double x = 0;
 		double y = 0;
@@ -62,19 +60,17 @@ public class TrackGenerator {
 			if (index % smoothing == 0) {
 				vectorinates.add(new Vector(x, y, z));
 			}
-			int direction = left.threshold.get(index) > right.threshold
-					.get(index) ? 1 : -1;
+			int direction = left.threshold.get(index) > right.threshold.get(index) ? 1 : -1;
 			x += 0.005;
-			y += (0.5 - (value / max)) * 0.01;
-			z += direction * 0.01;
+			y += (0.5 - (value / max)) * 0.005;
+			z += direction * 0.005;
 			index++;
 		}
 		return vectorinates;
 	}
 
 	private List<Vector> calculateUsingAverage() {
-		double max = mixed.threshold.stream().mapToDouble(v -> v).max()
-				.getAsDouble();
+		double max = mixed.threshold.stream().mapToDouble(v -> v).max().getAsDouble();
 		List<Vector> vectorinates = new ArrayList<>();
 		double x = 0;
 		double y = 0;
@@ -86,11 +82,9 @@ public class TrackGenerator {
 			vectorinates.add(new Vector(x, y, z));
 			for (int j = 0; j < smoothing; j++) {
 				int index = i + j;
-				if (index >= mixed.threshold.size())
-					return vectorinates;
+				if (index >= mixed.threshold.size()) return vectorinates;
 				double value = mixed.threshold.get(i + j);
-				int direction = left.threshold.get(index) > right.threshold
-						.get(index) ? 1 : -1;
+				int direction = left.threshold.get(index) > right.threshold.get(index) ? 1 : -1;
 				xi += 0.005;
 				yi += (0.5 - (value / max)) * 0.01;
 				zi += direction * 0.01;
