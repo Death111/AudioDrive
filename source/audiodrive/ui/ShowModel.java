@@ -34,8 +34,6 @@ import audiodrive.ui.control.Input;
 
 public class ShowModel {
 
-	private static final String MODEL_PATH = "D:\\Desktop\\untitled2.obj";
-
 	/** Application title. */
 	public static final String Title = "Modeltest";
 	/** Frame rate in frames per second. */
@@ -61,8 +59,8 @@ public class ShowModel {
 		throw new IllegalStateException("This class shall not be instantiated.");
 	}
 
-	public static void show() {
-		model = ModelLoader.loadModel(MODEL_PATH);
+	public static void show(String modelPath) {
+		model = ModelLoader.loadModel(modelPath);
 		try {
 			if (Fullscreen)
 				Window.setBorderless(true);
@@ -133,7 +131,6 @@ public class ShowModel {
 		GL11.glPushMatrix();
 		float scaleFactor = .1f;
 		GL11.glScalef(scaleFactor, scaleFactor, scaleFactor);
-		glTranslated(3, 0, 0);
 		model.render();
 		// logger.info(model);
 		GL11.glPopMatrix();

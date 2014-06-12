@@ -65,6 +65,7 @@ public class ModelLoader {
 		final List<TextureCoordinate> textureCoordinates = new ArrayList<TextureCoordinate>();
 
 		FileInputStream fstream;
+		int modelCount = 0;
 		try {
 			fstream = new FileInputStream(file);
 
@@ -81,7 +82,8 @@ public class ModelLoader {
 				Vector currentVector;
 				int length = splitted.length;
 				switch (splitted[0]) {
-				case "v": // Vertex - Format: v x y z
+				case "v":
+					// Vertex - Format: v x y z
 					if (length != 4) {
 						logger.error("Vertex with '" + length
 								+ "' coordinates was given. Expected '3'.");
@@ -90,7 +92,8 @@ public class ModelLoader {
 					currentVector = getVector(splitted);
 					vectors.add(currentVector);
 					break;
-				case "vt": // Texture coordinates - Format: vt x y
+				case "vt":
+					// Texture coordinates - Format: vt x y
 					if (length != 3) {
 						logger.error("TextureCoordinate with '" + length
 								+ "' coordinates was given. Expected '2'.");
@@ -101,7 +104,8 @@ public class ModelLoader {
 							Double.parseDouble(splitted[2]));
 					textureCoordinates.add(textureCoordinate);
 					break;
-				case "vn": // Normale - Format: vn x y z
+				case "vn":
+					// Normale - Format: vn x y z
 					if (length != 4) {
 						logger.error("Normal with '" + length
 								+ "' coordinates was given. Expected '3'.");
@@ -110,12 +114,12 @@ public class ModelLoader {
 					currentVector = getVector(splitted);
 					normals.add(currentVector);
 					break;
-				case "f": // Face - Format: f v1/vt1/vn1 v2/vt2/vn2
-							// v3/vt3/vn3
+				case "f":
+					// Face - Format: f v1/vt1/vn1 v2/vt2/vn2 v3/vt3/vn3
 					if (length != 4) {
 						logger.error("Face with '"
 								+ length
-								+ "' items was given. Only faces out of '3' vertexes are supported!");
+								+ "' corners was given. Only faces out of '3' vertexes are supported!");
 						return null;
 					}
 
@@ -137,8 +141,10 @@ public class ModelLoader {
 
 				case "#": // Comment
 					break;
-				case "o": // Anfang definition des Objektes o (muss nicht
-							// beachtet werden)
+				case "o":
+					modelCount++;
+					logger.debug("Found object-declaration: '" + splitted[1]
+							+ "'.");
 					break;
 				case "s": // smooth shading
 					logger.warn("Smooth Shading was used, but is not yet supported.");
@@ -150,6 +156,10 @@ public class ModelLoader {
 				}
 			}
 
+			if (modelCount > 1) {
+				logger.warn("More than '1' model was found in file. This model does now include '"
+						+ modelCount + "' models.");
+			}
 			logger.info("Successfully loaded '" + faces.size() + "' faces.");
 			Model model = new Model(faces);
 			return model;
