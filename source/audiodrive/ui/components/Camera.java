@@ -51,10 +51,10 @@ public class Camera {
 		projection(() -> {
 			glOrtho(x, x + width, y + height, y, near, far);
 		});
-		glEnable(GL_DEPTH_TEST);
+		glDisable(GL_DEPTH_TEST);
 	}
 	
-	public static void overlay(double width, double height) {
+	public static void overlay(int width, int height) {
 		projection(() -> {
 			glOrtho(0, width, height, 0, 0, -1);
 		});
