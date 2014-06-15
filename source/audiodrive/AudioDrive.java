@@ -16,6 +16,7 @@ import audiodrive.model.track.TrackGenerator;
 import audiodrive.ui.Drive;
 import audiodrive.ui.Show;
 import audiodrive.ui.ShowModel;
+import audiodrive.utilities.Log;
 
 public class AudioDrive extends Application {
 	
@@ -27,6 +28,8 @@ public class AudioDrive extends Application {
 	
 	@Override
 	public void start(Stage stage) throws Exception {
+		Log.info("AudioDrive");
+
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setInitialDirectory(new File("music"));
 		fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Audiodateien (*.mp3, *.ogg, *.wav)", "*.mp3", "*.ogg", "*.wav"));
@@ -47,7 +50,7 @@ public class AudioDrive extends Application {
 		player.play(file);
 		Drive.track(track);
 		player.stop();
-		
+
 		Platform.exit();
 	}
 }

@@ -1,3 +1,5 @@
 binary/
 music/
 .settings/
+logs/
+*.orig
