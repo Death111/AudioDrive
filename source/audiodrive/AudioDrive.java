@@ -6,9 +6,6 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-
-import org.apache.log4j.Logger;
-
 import audiodrive.audio.AudioFile;
 import audiodrive.audio.AudioPlayer;
 import audiodrive.model.Track;
@@ -16,12 +13,10 @@ import audiodrive.model.track.TrackGenerator;
 import audiodrive.ui.Drive;
 import audiodrive.ui.Show;
 import audiodrive.ui.ShowModel;
+import audiodrive.ui.Visualizer;
 import audiodrive.utilities.Log;
 
 public class AudioDrive extends Application {
-	
-	private static Logger logger = Logger.getLogger(AudioDrive.class);
-	
 	public static void main(String[] args) {
 		launch(args);
 	}
@@ -41,8 +36,11 @@ public class AudioDrive extends Application {
 
 		ShowModel.show("models/xwing/xwing.obj");
 		
+		Log.info(selected.getName());
 		AudioFile file = new AudioFile(selected);
-		logger.debug(file.getFormat().getType());
+		Log.debug(file.getFormat().getType());
+		Visualizer.visualize(file);
+
 		TrackGenerator trackGenerator = new TrackGenerator();
 		Track track = trackGenerator.generate(file, 25);
 		AudioPlayer player = new AudioPlayer();
