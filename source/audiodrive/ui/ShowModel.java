@@ -132,7 +132,7 @@ public class ShowModel {
 		float scaleFactor = .1f;
 		GL11.glScalef(scaleFactor, scaleFactor, scaleFactor);
 		model.render();
-		// logger.info(model);
+		// Log.info(model);
 		GL11.glPopMatrix();
 	}
 

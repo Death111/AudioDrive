@@ -6,7 +6,6 @@ import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.log4j.Logger;
 import org.lwjgl.LWJGLException;
 import org.lwjgl.opengl.Display;
 
@@ -18,11 +17,10 @@ import audiodrive.model.geometry.Vector;
 import audiodrive.ui.components.Camera;
 import audiodrive.ui.components.Window;
 import audiodrive.ui.control.Input;
+import audiodrive.utilities.Log;
 
 public class Visualizer {
 	
-	private static Logger logger = Logger.getLogger(Visualizer.class);
-
 	/** Application title. */
 	public static final String Title = "Spline";
 	/** Frame rate in frames per second. */
@@ -42,7 +40,7 @@ public class Visualizer {
 	}
 	
 	public static void visualize(AudioFile file) {
-		logger.info("analyzing...");
+		Log.info("analyzing...");
 		analyzer = new AudioAnalyzer().analyze(file);
 		AudioPlayer player = new AudioPlayer();
 		try {

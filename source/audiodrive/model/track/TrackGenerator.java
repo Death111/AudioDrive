@@ -4,8 +4,6 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.log4j.Logger;
-
 import audiodrive.audio.AudioAnalyzer;
 import audiodrive.audio.AudioAnalyzer.Results;
 import audiodrive.audio.AudioFile;
@@ -13,10 +11,9 @@ import audiodrive.audio.Samples;
 import audiodrive.model.Track;
 import audiodrive.model.geometry.Vector;
 import audiodrive.ui.Plot;
+import audiodrive.utilities.Log;
 
 public class TrackGenerator {
-
-	private static Logger logger = Logger.getLogger(TrackGenerator.class);
 
 	private AudioAnalyzer analyzer = new AudioAnalyzer();
 	private int smoothing;
@@ -27,23 +24,23 @@ public class TrackGenerator {
 
 	public Track generate(AudioFile file, int smoothing) {
 		this.smoothing = smoothing;
-		logger.debug("analyzing " + file.getName() + " ...");
-		logger.debug("Samplerate: " + file.getAudioFormat().getSampleRate());
-		logger.debug("Framerate: " + file.getAudioFormat().getFrameRate());
+		Log.debug("analyzing " + file.getName() + " ...");
+		Log.debug("Samplerate: " + file.getAudioFormat().getSampleRate());
+		Log.debug("Framerate: " + file.getAudioFormat().getFrameRate());
 		analyzer.analyze(file);
 		Samples samples = analyzer.getSamples();
-		logger.debug(samples.getCount() + " samples");
+		Log.debug(samples.getCount() + " samples");
 		double duration = samples.getCount() / samples.getSampleRate();
-		logger.debug(duration + " seconds");
+		Log.debug(duration + " seconds");
 
 		mixed = analyzer.getResultsOfMixedChannels();
 		left = analyzer.getResults(0);
 		right = analyzer.getResults(1);
-		logger.debug(mixed.spectralFlux.size() + " spectra");
+		Log.debug(mixed.spectralFlux.size() + " spectra");
 
 		List<Vector> vectorinates = useAverage ? calculateUsingAverage() : calculate();
 
-		logger.debug(vectorinates.size() + " vectorinates");
+		Log.debug(vectorinates.size() + " vectorinates");
 		// plot("Left", analyzer.getResults(0));
 		// plot("Right", analyzer.getResults(1));
 		return new Track(vectorinates, duration, smoothing);

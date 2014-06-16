@@ -17,6 +17,5 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="lib" path="libraries/game/slick-util.jar" sourcepath="libraries/game/slick-util.zip"/>
-	<classpathentry kind="lib" path="libraries/game/log4j-1.2.17.jar"/>
 	<classpathentry kind="output" path="binary"/>
 </classpath>

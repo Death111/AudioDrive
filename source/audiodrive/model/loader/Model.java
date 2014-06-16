@@ -18,7 +18,7 @@ public class Model {
 	}
 
 	public void render() {
-		// logger.info("rendering");
+		// Log.info("rendering");
 		for (Face face : faces) {
 
 			List<VertexObject> vertexes = face.vertexes;
