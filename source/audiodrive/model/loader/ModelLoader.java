@@ -32,15 +32,41 @@ public class ModelLoader {
 	}
 
 	/**
-	 * Loads a .obj file into an Model-Object
+	 * Loads a .obj file into one Model-Object (combines multiple objects to
+	 * one)
 	 * 
 	 * @param fileName
 	 *            Name of the file to be opened and parsed
 	 * @return Loaded Model or null if an error occured
 	 */
-	public static Model loadModel(String fileName) {
-		// TODO Implement exception handling
+	public static Model loadSingleModel(String fileName) {
+		List<Model> models = loadModels(fileName);
+		List<Face> faces = new ArrayList<Face>();
 
+		if (models == null)
+			return null;
+
+		logger.info("As requested combine '" + models.size()
+				+ "' models into one.");
+		for (Model model : models) {
+			final List<Face> currentFaces = model.getFaces();
+			faces.addAll(currentFaces);
+		}
+
+		// TODO What shall the name of the model be?
+		return new Model("NA", faces);
+	}
+
+	/**
+	 * Loads a .obj file into n Model-Objects ( where n is the number of
+	 * declared objects in the file)
+	 * 
+	 * @param fileName
+	 *            Name of the file to be opened and parsed
+	 * @return Loaded Model or null if an error occured
+	 */
+	public static List<Model> loadModels(String fileName) {
+		// TODO Implement exception handling
 		logger.info("Model from file '" + fileName + "' shall be loaded.");
 
 		logger.debug("Loading file '" + fileName + "' as Model");
@@ -58,13 +84,16 @@ public class ModelLoader {
 					+ "' is not supported!");
 			return null;
 		}
+		List<Model> models = new ArrayList<Model>();
 
 		final List<Vector> vectors = new ArrayList<Vector>();
-		final List<Face> faces = new ArrayList<Face>();
 		final List<Vector> normals = new ArrayList<Vector>();
 		final List<TextureCoordinate> textureCoordinates = new ArrayList<TextureCoordinate>();
 
+		List<Face> faces = null;
+
 		FileInputStream fstream;
+		String modelName = "";
 		int modelCount = 0;
 		try {
 			fstream = new FileInputStream(file);
@@ -81,6 +110,7 @@ public class ModelLoader {
 
 				Vector currentVector;
 				int length = splitted.length;
+
 				switch (splitted[0]) {
 				case "v":
 					// Vertex - Format: v x y z
@@ -142,9 +172,18 @@ public class ModelLoader {
 				case "#": // Comment
 					break;
 				case "o":
-					modelCount++;
-					logger.debug("Found object-declaration: '" + splitted[1]
+					String newModelName = splitted[1];
+					logger.debug("Found object-declaration: '" + newModelName
 							+ "'.");
+					modelCount++;
+
+					if (faces != null) {
+						logger.debug("Saving model '" + modelName + "'.");
+						Model model = new Model(modelName, faces);
+						models.add(model);
+					}
+					modelName = newModelName;
+					faces = new ArrayList<Face>();
 					break;
 				case "s": // smooth shading
 					logger.warn("Smooth Shading was used, but is not yet supported.");
@@ -156,18 +195,21 @@ public class ModelLoader {
 				}
 			}
 
-			if (modelCount > 1) {
-				logger.warn("More than '1' model was found in file. This model does now include '"
-						+ modelCount + "' models.");
+			if (faces != null) {
+				logger.debug("Saving model '" + modelName + "'.");
+				Model model = new Model(modelName, faces);
+				models.add(model);
 			}
-			logger.info("Successfully loaded '" + faces.size() + "' faces.");
-			Model model = new Model(faces);
-			return model;
+
+			logger.info("Successfully loaded '" + modelCount + "' models.");
+
+			return models;
 
 		} catch (FileNotFoundException fnfe) {
 			logger.error(fnfe);
 		} catch (NumberFormatException | IOException e) {
-			logger.error(e);
+			logger.error(e.getMessage());
+			e.printStackTrace();
 		}
 
 		return null;
@@ -193,7 +235,7 @@ public class ModelLoader {
 			v1.textureCoordinate = textureCoordinates
 					.get(textureCoordinateIndex - 1);
 		} catch (NumberFormatException nfe) {
-			logger.debug("No textureCoordinate was given.");
+			logger.trace("No textureCoordinate was given.");
 		}
 
 		// Parse Normal

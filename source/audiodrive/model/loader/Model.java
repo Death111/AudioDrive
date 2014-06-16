@@ -10,7 +10,10 @@ import audiodrive.model.geometry.VertexObject;
 public class Model {
 	private List<Face> faces;
 
-	public Model(List<Face> faces) {
+	private String modelName;
+
+	public Model(String modelName, List<Face> faces) {
+		this.modelName = modelName;
 		this.faces = faces;
 	}
 
@@ -25,5 +28,13 @@ public class Model {
 			}
 			GL11.glEnd();
 		}
+	}
+
+	public final List<Face> getFaces() {
+		return faces;
+	}
+
+	public final String getModelName() {
+		return modelName;
 	}
 }

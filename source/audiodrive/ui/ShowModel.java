@@ -60,7 +60,7 @@ public class ShowModel {
 	}
 
 	public static void show(String modelPath) {
-		model = ModelLoader.loadModel(modelPath);
+		model = ModelLoader.loadSingleModel(modelPath);
 		try {
 			if (Fullscreen)
 				Window.setBorderless(true);
