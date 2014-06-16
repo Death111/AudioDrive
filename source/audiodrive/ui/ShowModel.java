@@ -60,7 +60,6 @@ public class ShowModel {
 	}
 
 	public static void show(String modelPath) {
-		model = ModelLoader.loadSingleModel(modelPath);
 		try {
 			if (Fullscreen)
 				Window.setBorderless(true);
@@ -69,6 +68,7 @@ public class ShowModel {
 			Display.setTitle(Title);
 			Display.create();
 			Input.addObserver(observer);
+			model = ModelLoader.loadSingleModel(modelPath);
 			while (!Display.isCloseRequested()) {
 				ShowModel.tick();
 				ShowModel.render();
@@ -217,8 +217,7 @@ public class ShowModel {
 		};
 
 		@Override
-		public void mouseDragged(int button, int mouseX, int mouseY, int dx,
-				int dy) {
+		public void mouseDragged(int button, int mouseX, int mouseY, int dx, int dy) {
 			double horizontal = dx * 0.1;
 			double vertical = dy * -0.1;
 			switch (button) {

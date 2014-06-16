@@ -20,7 +20,7 @@ public class AudioDrive extends Application {
 	public static void main(String[] args) {
 		launch(args);
 	}
-	
+
 	@Override
 	public void start(Stage stage) throws Exception {
 		Log.info("AudioDrive");
@@ -34,8 +34,8 @@ public class AudioDrive extends Application {
 			return;
 		}
 
-		ShowModel.show("models/xwing/xwing.obj");
-		
+		ShowModel.show("models/xwing/xwing");
+
 		Log.info(selected.getName());
 		AudioFile file = new AudioFile(selected);
 		Log.debug(file.getFormat().getType());
