@@ -43,15 +43,16 @@ public class AudioAnalyzer {
 		}
 		return this;
 	}
-	
+
 	private Results analyze(Channel channel) {
 		float duration = samples.getCount() / samples.getSampleRate();
 		List<float[]> spectra = calculateSpectra(channel);
+		List<Float> spectralSum = calculateSpectralSum(spectra, channel);
 		List<Float> spectralFlux = calculateSpectralFlux(spectra, channel);
 		List<Float> threshold = calculateThreshold(spectralFlux);
 		List<Float> prunnedSpectralFlux = calculatePrunnedSpectralFlux(spectralFlux, threshold);
 		List<Float> peaks = calculatePeaks(prunnedSpectralFlux);
-		return new Results(duration, spectra, spectralFlux, threshold, prunnedSpectralFlux, peaks);
+		return new Results(duration, spectra, spectralSum, spectralFlux, threshold, prunnedSpectralFlux, peaks);
 	}
 
 	private List<float[]> calculateSpectra(Channel channel) {
@@ -64,6 +65,18 @@ public class AudioAnalyzer {
 			spectra.add(fft.getSpectrum());
 		}
 		return spectra;
+	}
+
+	private List<Float> calculateSpectralSum(List<float[]> spectra, Channel channel) {
+		List<Float> spectralSum = new ArrayList<Float>();
+		for (float[] spectrum : spectra) {
+			float sum = 0;
+			for (int i = 0; i < spectrum.length; i++) {
+				sum += spectrum[i];
+			}
+			spectralSum.add(sum);
+		}
+		return spectralSum;
 	}
 
 	private List<Float> calculateSpectralFlux(List<float[]> spectra, Channel channel) {
@@ -114,15 +127,15 @@ public class AudioAnalyzer {
 		}
 		return peaks;
 	}
-	
+
 	public Samples getSamples() {
 		return samples;
 	}
-	
+
 	public List<Results> getResults() {
 		return results;
 	}
-	
+
 	public Results getResults(int channel) {
 		return results.get(channel);
 	}
@@ -131,18 +144,26 @@ public class AudioAnalyzer {
 		if (mixedResult == null) mixedResult = analyze(samples.mixed());
 		return mixedResult;
 	}
-	
+
 	public static class Results {
 		public final float duration;
 		public final List<float[]> spectra;
+		public final List<Float> spectralSum;
 		public final List<Float> spectralFlux;
 		public final List<Float> threshold;
 		public final List<Float> prunnedSpectralFlux;
 		public final List<Float> peaks;
-		
-		private Results(float duration, List<float[]> spectra, List<Float> spectralFlux, List<Float> threshold, List<Float> prunnedSpectralFlux, List<Float> peaks) {
+
+		private Results(float duration,
+						List<float[]> spectra,
+						List<Float> spectralSum,
+						List<Float> spectralFlux,
+						List<Float> threshold,
+						List<Float> prunnedSpectralFlux,
+						List<Float> peaks) {
 			this.duration = duration;
 			this.spectra = spectra;
+			this.spectralSum = spectralSum;
 			this.spectralFlux = spectralFlux;
 			this.threshold = threshold;
 			this.prunnedSpectralFlux = prunnedSpectralFlux;

@@ -60,7 +60,9 @@ public class TrackGenerator {
 			if (index % smoothing == 0) {
 				vectorinates.add(new Vector(x, y, z));
 			}
-			int direction = left.threshold.get(index) > right.threshold.get(index) ? 1 : -1;
+			// float difference = right.threshold.get(index) - left.threshold.get(index);
+			float difference = right.spectralSum.get(index) - left.spectralSum.get(index);
+			int direction = Math.abs(difference) > 100 ? (int) Math.signum(difference) : 0;
 			x += 0.005;
 			y += (0.5 - (value / max)) * 0.005;
 			z += direction * 0.005;
