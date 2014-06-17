@@ -22,6 +22,8 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.newdawn.slick.util.LogSystem;
+
 import sun.misc.JavaLangAccess;
 import sun.misc.SharedSecrets;
 
@@ -83,6 +85,7 @@ public class Log {
 			if (clear.toLowerCase().equals("true")) for (File log : new File(directory).listFiles()) {
 				log.delete();
 			}
+			org.newdawn.slick.util.Log.setLogSystem(new SlickLogAdapter());
 		} catch (SecurityException | IOException exception) {}
 	}
 
@@ -94,7 +97,7 @@ public class Log {
 			// Calling getStackTraceElement directly prevents the VM from paying the cost of building the entire stack frame.
 			StackTraceElement frame = Access.getStackTraceElement(throwable, i);
 			String cname = frame.getClassName();
-			boolean isLogger = Log.class.getName().equals(cname);
+			boolean isLogger = cname.startsWith(Log.class.getName()) || cname.startsWith(org.newdawn.slick.util.Log.class.getName());
 			if (lookingForLogger) {
 				// Skip all frames until we have found the first logger frame.
 				if (isLogger) {
@@ -240,8 +243,13 @@ public class Log {
 			if (sourceClassName == null) {
 				String sourceClassPath = getSourceClassPath();
 				if (sourceClassPath != null) {
-					int index = sourceClassPath.lastIndexOf(".");
-					sourceClassName = (index > 0) ? sourceClassPath.substring(index + 1) : sourceClassPath;
+					int start = sourceClassPath.lastIndexOf(".");
+					int end = sourceClassPath.indexOf("$");
+					if (end > 0) {
+						sourceClassName = (start > 0) ? sourceClassPath.substring(start + 1, end) : sourceClassPath.substring(0, end);
+					} else {
+						sourceClassName = (start > 0) ? sourceClassPath.substring(start + 1) : sourceClassPath;
+					}
 				}
 			}
 			return sourceClassName;
@@ -420,6 +428,45 @@ public class Log {
 			return "";
 		}
 
+	}
+
+	private static class SlickLogAdapter implements LogSystem {
+
+		@Override
+		public void debug(String message) {
+			Log.debug(message);
+		}
+
+		@Override
+		public void error(Throwable throwable) {
+			Log.error(throwable);
+		}
+
+		@Override
+		public void error(String message) {
+			Log.error(message);
+		}
+
+		@Override
+		public void error(String message, Throwable throwable) {
+			Log.error(message, throwable);
+		}
+
+		@Override
+		public void info(String message) {
+			Log.info(message);
+		}
+
+		@Override
+		public void warn(String message) {
+			Log.warning(message);
+		}
+
+		@Override
+		public void warn(String message, Throwable throwable) {
+			Log.warning(message, throwable);
+		}
+		
 	}
 
 }
