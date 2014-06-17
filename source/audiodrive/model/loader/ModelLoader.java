@@ -130,7 +130,7 @@ public class ModelLoader {
 						Log.error("TextureCoordinate with '" + length + "' coordinates was given. Expected '2'.");
 						return null;
 					}
-					TextureCoordinate textureCoordinate = new TextureCoordinate(Double.parseDouble(splitted[1]), Double.parseDouble(splitted[2]));
+					TextureCoordinate textureCoordinate = new TextureCoordinate(Double.parseDouble(splitted[1]), -1 * Double.parseDouble(splitted[2]));
 					textureCoordinates.add(textureCoordinate);
 					break;
 				case "vn":
