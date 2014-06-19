@@ -6,6 +6,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.nio.file.AccessDeniedException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Collections;
@@ -44,10 +45,10 @@ public class Log {
 		// get configuration file
 		String fileName = System.getProperty("java.util.logging.config.file");
 		if (fileName == null) fileName = DefaultPropertyFileName;
-		File file = new File(fileName);
+		File propertyFile = new File(fileName);
 		try {
-			if (!file.exists()) {
-				// if no configuration file exists create a default one
+			// if no configuration file exists, create a default one
+			if (!propertyFile.exists()) {
 				Properties properties = new Properties() {
 					@Override
 					public synchronized Enumeration<Object> keys() {
@@ -64,29 +65,29 @@ public class Log {
 				properties.setProperty(FileHandler.class.getName() + ".format.origin", Formatter.DefaultOriginFormat);
 				properties.setProperty(FileHandler.class.getName() + ".format.time", Formatter.DefaultTimeFormat);
 				properties.setProperty(FileHandler.class.getName() + ".pattern", "logs/log.txt");
-				try (FileOutputStream outputStream = new FileOutputStream(file)) {
+				try (FileOutputStream outputStream = new FileOutputStream(propertyFile)) {
 					properties.store(outputStream, null);
 				}
 			}
 			// load configuration
-			try (FileInputStream inputStream = new FileInputStream(file)) {
+			try (FileInputStream inputStream = new FileInputStream(propertyFile)) {
 				LogManager.getLogManager().readConfiguration(inputStream);
 			}
-			// workaround to create missing folders
-			String pattern = LogManager.getLogManager().getProperty(FileHandler.class.getName() + ".pattern");
-			int index = pattern.lastIndexOf('/');
-			String directory = ".";
-			if (index > 0) {
-				directory = pattern.substring(0, index);
-				new File(directory).mkdirs();
-			}
-			// remove old logs if specified
-			String clear = LogManager.getLogManager().getProperty(FileHandler.class.getName() + ".clear");
-			if (clear.toLowerCase().equals("true")) for (File log : new File(directory).listFiles()) {
-				log.delete();
-			}
-			org.newdawn.slick.util.Log.setLogSystem(new SlickLogAdapter());
 		} catch (SecurityException | IOException exception) {}
+		// workaround to create missing folders
+		String pattern = LogManager.getLogManager().getProperty(FileHandler.class.getName() + ".pattern");
+		int index = (pattern != null) ? pattern.lastIndexOf('/') : -1;
+		String directory = ".";
+		if (index > 0) {
+			directory = pattern.substring(0, index);
+			new File(directory).mkdirs();
+		}
+		// remove old lock files
+		for (File file : new File(directory).listFiles()) {
+			if (file.getName().endsWith(".lck")) file.delete();
+		}
+		// set slick log adapter
+		org.newdawn.slick.util.Log.setLogSystem(new SlickLogAdapter());
 	}
 
 	private static StackTraceElement getCaller() {
@@ -265,7 +266,7 @@ public class Log {
 
 		public ConsoleHandler() {
 			setOutputStream(System.out);
-			setFormatter(getFormatterProperty(getClass().getName()));
+			setFormatter(getFormatterProperty(ConsoleHandler.class.getName()));
 		}
 
 		@Override
@@ -282,10 +283,38 @@ public class Log {
 	}
 
 	public static class FileHandler extends java.util.logging.FileHandler {
-		
-		public FileHandler() throws IOException, SecurityException {
-			setFormatter(getFormatterProperty(getClass().getName()));
+
+		public static final String DefaultTimePattern = "yyyy-MM-dd_HH-mm-ss-SSS";
+
+		public FileHandler() throws SecurityException, IOException {
+			super(getPatternProperty(FileHandler.class.getName()));
+			setFormatter(getFormatterProperty(FileHandler.class.getName()));
 		}
+
+		private static String getPatternProperty(String className) throws SecurityException, IOException {
+			LogManager manager = LogManager.getLogManager();
+			String pattern = manager.getProperty(className + ".pattern");
+			if (pattern == null) return null;
+			String timePattern = manager.getProperty(className + ".pattern.time");
+			if (timePattern == null) timePattern = DefaultTimePattern;
+			pattern = pattern.replace("{time}", new SimpleDateFormat(timePattern).format(new Date()));
+			try {
+				new java.util.logging.FileHandler(pattern).close();
+				return pattern;
+			} catch (AccessDeniedException multipleInstances) {
+				int instance = 2;
+				while (true) {
+					try {
+						String instancePattern = pattern + ".instance" + instance;
+						new java.util.logging.FileHandler(instancePattern).close();
+						return instancePattern;
+					} catch (AccessDeniedException evenMoreInstances) {
+						instance++;
+					}
+				}
+			}
+		}
+
 	}
 
 	private static Formatter getFormatterProperty(String className) {
@@ -306,7 +335,7 @@ public class Log {
 
 		private static final Pattern LogPattern = Pattern.compile("\\{(\\d+_)?(time|origin|level|message|exception)(_\\d+)?\\}");
 		private static final Pattern OriginPattern = Pattern.compile("\\{(classpath|class|method|line)\\}");
-		
+
 		private Map<String, String> lengths = new HashMap<>();
 
 		private String format;
@@ -329,7 +358,7 @@ public class Log {
 			this.timeFormat = (timeFormat != null) ? new SimpleDateFormat(timeFormat) : new SimpleDateFormat(DefaultTimeFormat);
 			this.format = format.replace("\n", System.lineSeparator());
 			this.originFormat = originFormat.replace("\n", System.lineSeparator());
-			
+
 			// parse and remember specified group lengths
 			Matcher matcher = LogPattern.matcher(format);
 			while (matcher.find()) {
@@ -466,7 +495,7 @@ public class Log {
 		public void warn(String message, Throwable throwable) {
 			Log.warning(message, throwable);
 		}
-		
+
 	}
 
 }
