@@ -393,7 +393,23 @@ public class Log {
 					replacement = formatThrowable(record);
 				}
 				if (lengths.containsKey(group)) {
-					buffer.append(String.format("%" + lengths.get(group) + "s", replacement));
+					if (replacement.contains("\n") || replacement.contains(System.lineSeparator())) {
+						String length = lengths.get(group);
+						String prefix = buffer.length() == 0 ? "" : String.valueOf(length.startsWith("-") ? buffer.length() * -1 : buffer.length());
+						String multilineFormat = "%" + prefix + "s%" + length + "s";
+						boolean first = true;
+						for (String line : replacement.split("\n|" + System.lineSeparator())) {
+							if (first) {
+								buffer.append(String.format("%" + length + "s", line));
+								first = false;
+							} else {
+								buffer.append(System.lineSeparator());
+								buffer.append(String.format(multilineFormat, "", line));
+							}
+						}
+					} else {
+						buffer.append(String.format("%" + lengths.get(group) + "s", replacement));
+					}
 				} else {
 					buffer.append(replacement);
 				}
