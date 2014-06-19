@@ -20,19 +20,19 @@ public class Samples {
 		}
 		mixed = new Channel(-1);
 	}
-
+	
 	public Channel channel(int channel) {
 		return channels.get(channel);
 	}
-
+	
 	public Channel mixed() {
 		return mixed;
 	}
-
+	
 	public FloatSampleBuffer getBuffer() {
 		return buffer;
 	}
-
+	
 	/**
 	 * Indicates the total number of samples.
 	 */
@@ -65,21 +65,21 @@ public class Samples {
 	}
 	
 	public class Channel {
-
+		
 		private int channel;
 		private int offset = 0;
 		
 		public Channel(int index) {
 			channel = index;
 		}
-
+		
 		/**
 		 * Indicates whether there are more samples to iterate over.
 		 */
 		public boolean hasMoreSamples() {
 			return buffer.getSampleCount() - offset > 0;
 		}
-
+		
 		/**
 		 * Returns the next iteration of samples.
 		 */
@@ -109,7 +109,7 @@ public class Samples {
 			offset = 0;
 			return this;
 		}
-
+		
 		/**
 		 * Indicates the number of samples per second.
 		 */
@@ -123,7 +123,7 @@ public class Samples {
 		public int getIteration() {
 			return iteration;
 		}
-
+		
 	}
-
+	
 }

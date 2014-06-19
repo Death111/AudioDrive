@@ -10,7 +10,7 @@ import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 
 public class Input {
-
+	
 	private static final Set<Observer> observers = new HashSet<>();
 	private static final Map<Integer, Character> pressedKeys = new HashMap<>();
 	
@@ -18,7 +18,7 @@ public class Input {
 	private Input() {
 		throw new IllegalStateException("This class shall not be instantiated.");
 	}
-
+	
 	public static void update() {
 		while (Mouse.next()) {
 			int x = Mouse.getEventX();
@@ -61,7 +61,7 @@ public class Input {
 				synchronized (pressedKeys) {
 					pressedKeys.put(key, character);
 				}
-
+				
 			} else {
 				fire(o -> o.keyReleased(key, character));
 				synchronized (pressedKeys) {
@@ -71,19 +71,19 @@ public class Input {
 		}
 		pressedKeys.entrySet().forEach(entry -> fire(observer -> observer.keyPressed(entry.getKey(), entry.getValue())));
 	}
-
+	
 	public static void fire(Consumer<? super Observer> action) {
 		observers.forEach(action);
 	}
-
+	
 	public static void addObserver(Observer observer) {
 		observers.add(observer);
 	}
-
+	
 	public static void removeObserver(Observer observer) {
 		observers.remove(observer);
 	}
-
+	
 	public interface Observer {
 		
 		default void mouseMoved(int x, int y, int dx, int dy) {}
@@ -91,15 +91,15 @@ public class Input {
 		default void mouseDragged(int button, int x, int y, int dx, int dy) {}
 		
 		default void mouseButtonPressed(int button, int x, int y) {}
-
+		
 		default void mouseButtonReleased(int button, int x, int y) {}
 		
 		default void mouseWheelRotated(int rotation, int x, int y) {}
 		
 		default void keyPressed(int key, char character) {}
-
+		
 		default void keyReleased(int key, char character) {}
 		
 	}
-
+	
 }

@@ -9,11 +9,11 @@ public class Camera {
 	private static Vector eye = new Vector();
 	private static Vector at = new Vector();
 	private static Vector up = new Vector();
-
+	
 	static {
 		reset();
 	}
-
+	
 	/** Private constructor to prevent instantiation. */
 	private Camera() {
 		throw new IllegalStateException("This class shall not be instantiated.");
@@ -35,7 +35,7 @@ public class Camera {
 		});
 		glEnable(GL_DEPTH_TEST);
 	}
-
+	
 	public static void perspective(double fov, double width, double height, double near, double far) {
 		perspective(fov, width / height, near, far);
 	}
@@ -46,7 +46,7 @@ public class Camera {
 		});
 		glEnable(GL_DEPTH_TEST);
 	}
-
+	
 	public static void orthograpic(double x, double y, double width, double height, double near, double far) {
 		projection(() -> {
 			glOrtho(x, x + width, y + height, y, near, far);
@@ -60,7 +60,7 @@ public class Camera {
 		});
 		glDisable(GL_DEPTH_TEST);
 	}
-
+	
 	public static void lookAt(Vector position, Vector up) {
 		Camera.at.set(position);
 		Camera.up.set(up);
@@ -80,7 +80,7 @@ public class Camera {
 		Camera.eye.set(position);
 		update();
 	}
-
+	
 	public static void position(double x, double y, double z) {
 		position(new Vector(x, y, z));
 	}
@@ -89,7 +89,7 @@ public class Camera {
 		glLoadIdentity();
 		gluLookAt((float) eye.x(), (float) eye.y(), (float) eye.z(), (float) at.x(), (float) at.y(), (float) at.z(), (float) up.x(), (float) up.y(), (float) up.z());
 	}
-
+	
 	public static void projection(Runnable runnable) {
 		glMatrixMode(GL_PROJECTION);
 		glLoadIdentity();

@@ -1,23 +1,22 @@
 package audiodrive.model.geometry;
 
-
 public class Rotation extends Vector {
-
+	
 	@Override
 	public Rotation x(double x) {
 		return (Rotation) super.x(unify180(x));
 	}
-
+	
 	@Override
 	public Rotation y(double y) {
 		return (Rotation) super.y(unify180(y));
 	}
-
+	
 	@Override
 	public Rotation z(double z) {
 		return (Rotation) super.z(unify180(z));
 	}
-
+	
 	/**
 	 * Limits the given angle to the range 0 to 360. <br>
 	 * <br>
@@ -52,5 +51,5 @@ public class Rotation extends Vector {
 		if (remainder == -0.0) return 0.0;
 		return remainder;
 	}
-
+	
 }

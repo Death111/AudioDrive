@@ -23,10 +23,10 @@ import javax.swing.SwingUtilities;
 public class Plot {
 	/** the frame **/
 	private JFrame frame;
-
+	
 	/** the scroll pane **/
 	private JScrollPane scrollPane;
-
+	
 	/** the image gui component **/
 	private JPanel panel;
 	
@@ -35,14 +35,16 @@ public class Plot {
 	
 	/** the last scaling factor to normalize samples **/
 	private float scalingFactor = 1;
-
-	/** wheter the plot was cleared, if true we have to recalculate the scaling factor **/
+	
+	/**
+	 * wheter the plot was cleared, if true we have to recalculate the scaling factor
+	 **/
 	private boolean cleared = true;
-
+	
 	/** current marker position and color **/
 	private int markerPosition = 0;
 	private Color markerColor = Color.white;
-
+	
 	/**
 	 * Creates a new Plot with the given title and dimensions.
 	 *
@@ -52,7 +54,7 @@ public class Plot {
 	 */
 	public Plot(final String title, final int width, final int height) {
 		image = new BufferedImage(1, 1, BufferedImage.TYPE_4BYTE_ABGR);
-
+		
 		try {
 			SwingUtilities.invokeAndWait(new Runnable() {
 				@Override
@@ -99,7 +101,7 @@ public class Plot {
 					frame.pack();
 					frame.setLocationRelativeTo(null);
 					frame.setVisible(true);
-
+					
 				}
 			});
 		} catch (Exception ex) {
@@ -107,7 +109,7 @@ public class Plot {
 			ex.printStackTrace();
 		}
 	}
-
+	
 	public void clear() {
 		SwingUtilities.invokeLater(new Runnable() {
 			
@@ -121,7 +123,7 @@ public class Plot {
 			}
 		});
 	}
-
+	
 	public void plot(float[] samples, final float samplesPerPixel, final Color color) {
 		synchronized (image) {
 			if (image.getWidth() < samples.length / samplesPerPixel) {
@@ -143,7 +145,7 @@ public class Plot {
 				scalingFactor = max - min;
 				cleared = false;
 			}
-
+			
 			Graphics2D g = image.createGraphics();
 			g.setColor(color);
 			float lastValue = (samples[0] / scalingFactor) * image.getHeight() / 3 + image.getHeight() / 2;
@@ -155,7 +157,7 @@ public class Plot {
 			g.dispose();
 		}
 	}
-
+	
 	public void plot(List<Float> samples, final float samplesPerPixel, final Color color) {
 		synchronized (image) {
 			if (image.getWidth() < samples.size() / samplesPerPixel) {
@@ -177,7 +179,7 @@ public class Plot {
 				scalingFactor = max - min;
 				cleared = false;
 			}
-
+			
 			Graphics2D g = image.createGraphics();
 			g.setColor(color);
 			float lastValue = (samples.get(0) / scalingFactor) * image.getHeight() / 3 + image.getHeight() / 2;
@@ -189,7 +191,7 @@ public class Plot {
 			g.dispose();
 		}
 	}
-
+	
 	public void plot(float[] samples, final float samplesPerPixel, final float offset, final boolean useLastScale, final Color color) {
 		synchronized (image) {
 			if (image.getWidth() < samples.length / samplesPerPixel) {
@@ -222,7 +224,7 @@ public class Plot {
 			g.dispose();
 		}
 	}
-
+	
 	public void plot(List<Float> samples, final float samplesPerPixel, final float offset, final boolean useLastScale, final Color color) {
 		synchronized (image) {
 			if (image.getWidth() < samples.size() / samplesPerPixel) {
@@ -255,7 +257,7 @@ public class Plot {
 			g.dispose();
 		}
 	}
-
+	
 	public void setMarker(int x, Color color) {
 		markerPosition = x;
 		markerColor = color;

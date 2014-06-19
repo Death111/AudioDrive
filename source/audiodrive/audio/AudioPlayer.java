@@ -10,7 +10,7 @@ import javax.sound.sampled.SourceDataLine;
 public class AudioPlayer {
 	
 	private boolean stop;
-
+	
 	public void play(AudioFile file) {
 		stop = false;
 		new Thread(() -> {
@@ -27,7 +27,7 @@ public class AudioPlayer {
 	public void stop() {
 		stop = true;
 	}
-
+	
 	private void rawplay(AudioInputStream stream) throws IOException, LineUnavailableException {
 		SourceDataLine line = AudioSystem.getSourceDataLine(stream.getFormat());
 		byte[] buffer = new byte[4096];

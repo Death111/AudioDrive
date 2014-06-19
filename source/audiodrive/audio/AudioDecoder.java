@@ -11,9 +11,9 @@ import javax.sound.sampled.AudioSystem;
 import org.tritonus.share.sampled.FloatSampleBuffer;
 
 public class AudioDecoder {
-
+	
 	private AudioFormat.Encoding encoding = AudioFormat.Encoding.PCM_SIGNED;
-
+	
 	public AudioInputStream decode(AudioFile file) {
 		return AudioSystem.getAudioInputStream(getDecodingFormat(file), file.open());
 	}
@@ -21,7 +21,7 @@ public class AudioDecoder {
 	public Samples samplify(AudioFile file) {
 		return samplify(decode(file));
 	}
-
+	
 	public Samples samplify(AudioInputStream stream) {
 		AudioFormat format = stream.getFormat();
 		if (!format.getEncoding().equals(encoding)) throw new IllegalArgumentException("Encoding of the audio input stream differs from the decoder's encoding.");
@@ -54,7 +54,7 @@ public class AudioDecoder {
 		AudioFormat format = file.getAudioFormat();
 		return new AudioFormat(encoding, format.getSampleRate(), 16, format.getChannels(), format.getChannels() * 2, format.getSampleRate(), false);
 	}
-
+	
 	public AudioDecoder setEncoding(AudioFormat.Encoding encoding) {
 		this.encoding = encoding;
 		return this;

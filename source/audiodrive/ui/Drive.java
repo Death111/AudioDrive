@@ -23,9 +23,9 @@ public class Drive {
 	public static final String Title = "Spline";
 	/** Frame rate in frames per second. */
 	public static final int Framerate = 100;
-
+	
 	public static final boolean Fullscreen = false;
-
+	
 	private static double increment;
 	private static double incrementPerSecond;
 	private static double elapsedSeconds;
@@ -40,7 +40,7 @@ public class Drive {
 	private static Vector up = new Vector().y(1);
 	private static Vector camera = new Vector(0, 0, 2.5);
 	private static int cameraIndex = -1;
-
+	
 	private static boolean thirdPersonView = false;
 	private static boolean fill = false;
 	private static boolean showPlayer = true;
@@ -51,7 +51,7 @@ public class Drive {
 	private static boolean showDualSpline = true;
 	private static boolean showCoordinateSystem = false;
 	private static boolean adjustWidth = false;
-
+	
 	private static boolean pause = false;
 	private static double sideSpeed;
 	private static double sideWidth;
@@ -60,7 +60,7 @@ public class Drive {
 	private static int sightOffset;
 	private static double sightHeight;
 	private static double flightHeight;
-
+	
 	private static List<Vector> right, rightSpline;
 	private static List<Vector> left, leftSpline;
 	private static List<Vector> centerSpline;
@@ -89,11 +89,11 @@ public class Drive {
 	private Drive() {
 		throw new IllegalStateException("This class shall not be instantiated.");
 	}
-
+	
 	public static void demo() {
 		track(new Track(defaultVectorinates(), 15, 50));
 	}
-
+	
 	public static void track(Track track) {
 		int vectors = (1 + (track.getVectors().size() - 1) * track.getSmoothing());
 		Drive.resolution = 1 + track.getSmoothing();
@@ -121,7 +121,7 @@ public class Drive {
 			throw new RuntimeException(exception);
 		}
 	}
-
+	
 	private static List<Vector> defaultVectorinates() {
 		List<Vector> vectorinates = new ArrayList<>();
 		vectorinates.add(new Vector(-1, 0, 0));
@@ -154,7 +154,7 @@ public class Drive {
 		glRotated(rotation.x(), 1, 0, 0);
 		glRotated(rotation.y(), 0, 1, 0);
 		glRotated(rotation.z(), 0, 0, 1);
-
+		
 		if (showCoordinateSystem) drawCoordinateSystem();
 		if (showPlayer) drawPlayer();
 		else drawCameraPosition();
@@ -226,7 +226,7 @@ public class Drive {
 		glVertex3d(0, 0, -1);
 		glEnd();
 	}
-
+	
 	private static void drawSpline() {
 		glColor4d(1, 1, 1, 1);
 		glBegin(GL_LINES);
@@ -242,7 +242,7 @@ public class Drive {
 		}
 		glEnd();
 	}
-
+	
 	private static void drawSplineArea() {
 		glColor4d(0.0, 0.5, 0.5, 0.5);
 		glBegin(GL_QUADS);
@@ -298,7 +298,7 @@ public class Drive {
 		}
 		glEnd();
 	}
-
+	
 	private static void drawDualSpline() {
 		glColor4d(1, 1, 0, 1);
 		glBegin(GL_LINES);
@@ -312,7 +312,7 @@ public class Drive {
 		}
 		glEnd();
 	}
-
+	
 	private static void drawLinesBetweenDualSpline() {
 		glColor4d(0.5, 0.5, 0, 0.5);
 		if (fill) {
@@ -333,7 +333,7 @@ public class Drive {
 			glEnd();
 		}
 	}
-
+	
 	private static void calculateSplines() {
 		if (vectorinates == null && vectorinates.isEmpty()) return;
 		centerSpline = CatmullRom.interpolate(vectorinates, resolution, type);
@@ -385,7 +385,7 @@ public class Drive {
 		rightSpline = CatmullRom.interpolate(right, resolution, type);
 		leftSpline = CatmullRom.interpolate(left, resolution, type);
 	}
-
+	
 	private static void tick() {
 		long time = System.nanoTime();
 		elapsedSeconds = (time - timestamp) / 1000000000.0;
@@ -403,7 +403,7 @@ public class Drive {
 	public static void update() {
 		Display.setTitle(Title + " : " + vectorinates.size() + " > " + points + " points (" + resolution + " interpolation points per segment)  (" + fps + " FPS)");
 	}
-
+	
 	public static int getFramerate() {
 		return fps;
 	}
@@ -417,7 +417,7 @@ public class Drive {
 		}
 		return 0;
 	}
-
+	
 	public static void moveForward() {
 		int movement = getMovement();
 		int max = centerSpline.size() - 2;
@@ -434,7 +434,7 @@ public class Drive {
 		else cameraIndex = 0;
 		updatePosition();
 	}
-
+	
 	public static void moveRight() {
 		sidePosition = Math.min(1, sidePosition + sideSpeed * 0.01);
 		updatePosition();
@@ -462,7 +462,7 @@ public class Drive {
 			translate.set(direction.add(upward));
 		}
 	}
-
+	
 	private static Input.Observer observer = new Input.Observer() {
 		@Override
 		public void mouseWheelRotated(int rotation, int x, int y) {
@@ -478,158 +478,158 @@ public class Drive {
 			boolean leftControl = Keyboard.isKeyDown(Keyboard.KEY_LCONTROL);
 			boolean rightControl = Keyboard.isKeyDown(Keyboard.KEY_RCONTROL);
 			switch (key) {
-				case Keyboard.KEY_NUMPAD0:
-					translate.add(0, 0, -0.01);
-					break;
-				case Keyboard.KEY_NUMPAD2:
-					translate.add(0, 0.01, 0);
-					break;
-				case Keyboard.KEY_NUMPAD4:
-					translate.add(0.01, 0, 0);
-					break;
-				case Keyboard.KEY_NUMPAD5:
-					translate.add(0, 0, 0.01);
-					break;
-				case Keyboard.KEY_NUMPAD6:
-					translate.add(-0.01, 0, 0);
-					break;
-				case Keyboard.KEY_NUMPAD8:
-					translate.add(0, -0.01, 0);
-					break;
-				case Keyboard.KEY_ADD:
-					translate.add(look.minus(camera).length(0.1));
-					break;
-				case Keyboard.KEY_SUBTRACT:
-					translate.add(camera.minus(look).length(0.1));
-					break;
-				case Keyboard.KEY_INSERT:
-					sideWidth += 0.0001;
-					calculateSplines();
-					break;
-				case Keyboard.KEY_DELETE:
-					sideWidth -= 0.0001;
-					if (sideWidth < 0) sideWidth = 0;
-					calculateSplines();
-					break;
-				case Keyboard.KEY_UP:
-					if (pause) moveForward();
-					break;
-				case Keyboard.KEY_DOWN:
-					if (pause) moveBackward();
-					break;
-				case Keyboard.KEY_LEFT:
-					moveLeft();
-					break;
-				case Keyboard.KEY_RIGHT:
-					moveRight();
-					break;
-				case Keyboard.KEY_PRIOR:
-					if (!leftControl && !rightControl) {
-						flightHeight += 0.0001;
-						sightHeight += 0.0001;
-					} else {
-						if (leftControl) flightHeight += 0.0001;
-						if (rightControl) sightHeight += 0.0001;
-					}
-					updatePosition();
-					break;
-				case Keyboard.KEY_NEXT:
-					if (!leftControl && !rightControl) {
-						flightHeight -= 0.0001;
-						sightHeight -= 0.0001;
-					} else {
-						if (leftControl) flightHeight -= 0.0001;
-						if (rightControl) sightHeight -= 0.0001;
-					}
-					updatePosition();
-					break;
-				default:
-					break;
+			case Keyboard.KEY_NUMPAD0:
+				translate.add(0, 0, -0.01);
+				break;
+			case Keyboard.KEY_NUMPAD2:
+				translate.add(0, 0.01, 0);
+				break;
+			case Keyboard.KEY_NUMPAD4:
+				translate.add(0.01, 0, 0);
+				break;
+			case Keyboard.KEY_NUMPAD5:
+				translate.add(0, 0, 0.01);
+				break;
+			case Keyboard.KEY_NUMPAD6:
+				translate.add(-0.01, 0, 0);
+				break;
+			case Keyboard.KEY_NUMPAD8:
+				translate.add(0, -0.01, 0);
+				break;
+			case Keyboard.KEY_ADD:
+				translate.add(look.minus(camera).length(0.1));
+				break;
+			case Keyboard.KEY_SUBTRACT:
+				translate.add(camera.minus(look).length(0.1));
+				break;
+			case Keyboard.KEY_INSERT:
+				sideWidth += 0.0001;
+				calculateSplines();
+				break;
+			case Keyboard.KEY_DELETE:
+				sideWidth -= 0.0001;
+				if (sideWidth < 0) sideWidth = 0;
+				calculateSplines();
+				break;
+			case Keyboard.KEY_UP:
+				if (pause) moveForward();
+				break;
+			case Keyboard.KEY_DOWN:
+				if (pause) moveBackward();
+				break;
+			case Keyboard.KEY_LEFT:
+				moveLeft();
+				break;
+			case Keyboard.KEY_RIGHT:
+				moveRight();
+				break;
+			case Keyboard.KEY_PRIOR:
+				if (!leftControl && !rightControl) {
+					flightHeight += 0.0001;
+					sightHeight += 0.0001;
+				} else {
+					if (leftControl) flightHeight += 0.0001;
+					if (rightControl) sightHeight += 0.0001;
+				}
+				updatePosition();
+				break;
+			case Keyboard.KEY_NEXT:
+				if (!leftControl && !rightControl) {
+					flightHeight -= 0.0001;
+					sightHeight -= 0.0001;
+				} else {
+					if (leftControl) flightHeight -= 0.0001;
+					if (rightControl) sightHeight -= 0.0001;
+				}
+				updatePosition();
+				break;
+			default:
+				break;
 			}
 		}
 		
 		@Override
 		public void keyReleased(int key, char character) {
 			switch (key) {
-				case Keyboard.KEY_SPACE:
-					showPlayer = !showPlayer;
-					break;
-				case Keyboard.KEY_V:
-					thirdPersonView = !thirdPersonView;
-					updatePosition();
-					break;
-				case Keyboard.KEY_C:
-					showCoordinateSystem = !showCoordinateSystem;
-					break;
-				case Keyboard.KEY_PAUSE:
-					pause = !pause;
-					break;
-				case Keyboard.KEY_F:
-					fill = !fill;
-					break;
-				case Keyboard.KEY_U:
-					showUpVectors = !showUpVectors;
-					break;
-				case Keyboard.KEY_P:
-					showInterpolationPoints = !showInterpolationPoints;
-					break;
-				case Keyboard.KEY_S:
-					showSpline = !showSpline;
-					break;
-				case Keyboard.KEY_D:
-					showDualSpline = !showDualSpline;
-					break;
-				case Keyboard.KEY_O:
-					showOrthogonalSpline = !showOrthogonalSpline;
-					break;
-				case Keyboard.KEY_W:
-					adjustWidth = !adjustWidth;
-					calculateSplines();
-					break;
-				case Keyboard.KEY_1:
-					type = CatmullRom.Type.Uniform;
-					calculateSplines();
-					break;
-				case Keyboard.KEY_2:
-					type = CatmullRom.Type.Chordal;
-					calculateSplines();
-					break;
-				case Keyboard.KEY_3:
-					type = CatmullRom.Type.Centripetal;
-					calculateSplines();
-					break;
-				case Keyboard.KEY_HOME:
-					camera.set(0, 0, 2.5);
-					look.set(Vector.Null);
-					up.set(0, 1, 0);
-					cameraIndex = -1;
-					break;
-				case Keyboard.KEY_ESCAPE:
-					rotation.set(Vector.Null);
-					translate.set(Vector.Null);
-					reset();
-					break;
-				default:
-					break;
+			case Keyboard.KEY_SPACE:
+				showPlayer = !showPlayer;
+				break;
+			case Keyboard.KEY_V:
+				thirdPersonView = !thirdPersonView;
+				updatePosition();
+				break;
+			case Keyboard.KEY_C:
+				showCoordinateSystem = !showCoordinateSystem;
+				break;
+			case Keyboard.KEY_PAUSE:
+				pause = !pause;
+				break;
+			case Keyboard.KEY_F:
+				fill = !fill;
+				break;
+			case Keyboard.KEY_U:
+				showUpVectors = !showUpVectors;
+				break;
+			case Keyboard.KEY_P:
+				showInterpolationPoints = !showInterpolationPoints;
+				break;
+			case Keyboard.KEY_S:
+				showSpline = !showSpline;
+				break;
+			case Keyboard.KEY_D:
+				showDualSpline = !showDualSpline;
+				break;
+			case Keyboard.KEY_O:
+				showOrthogonalSpline = !showOrthogonalSpline;
+				break;
+			case Keyboard.KEY_W:
+				adjustWidth = !adjustWidth;
+				calculateSplines();
+				break;
+			case Keyboard.KEY_1:
+				type = CatmullRom.Type.Uniform;
+				calculateSplines();
+				break;
+			case Keyboard.KEY_2:
+				type = CatmullRom.Type.Chordal;
+				calculateSplines();
+				break;
+			case Keyboard.KEY_3:
+				type = CatmullRom.Type.Centripetal;
+				calculateSplines();
+				break;
+			case Keyboard.KEY_HOME:
+				camera.set(0, 0, 2.5);
+				look.set(Vector.Null);
+				up.set(0, 1, 0);
+				cameraIndex = -1;
+				break;
+			case Keyboard.KEY_ESCAPE:
+				rotation.set(Vector.Null);
+				translate.set(Vector.Null);
+				reset();
+				break;
+			default:
+				break;
 			}
 		};
-
+		
 		@Override
 		public void mouseDragged(int button, int mouseX, int mouseY, int dx, int dy) {
 			double horizontal = dx * 0.1;
 			double vertical = dy * -0.1;
 			switch (button) {
-				case 0:
-					rotation.add(vertical, horizontal, 0);
-					break;
-				case 1:
-					rotation.add(vertical, 0, horizontal);
-					break;
-				case 2:
-					rotation.add(0, vertical, horizontal);
-					break;
-				default:
-					break;
+			case 0:
+				rotation.add(vertical, horizontal, 0);
+				break;
+			case 1:
+				rotation.add(vertical, 0, horizontal);
+				break;
+			case 2:
+				rotation.add(0, vertical, horizontal);
+				break;
+			default:
+				break;
 			}
 		}
 	};

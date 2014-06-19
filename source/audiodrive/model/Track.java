@@ -5,11 +5,11 @@ import java.util.List;
 import audiodrive.model.geometry.Vector;
 
 public class Track {
-
+	
 	private List<Vector> vectors;
 	private double duration;
 	private int smoothing;
-
+	
 	public Track(List<Vector> vectors, double duration, int smoothing) {
 		this.vectors = vectors;
 		this.duration = duration;
@@ -27,5 +27,5 @@ public class Track {
 	public int getSmoothing() {
 		return smoothing;
 	}
-
+	
 }

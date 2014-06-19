@@ -31,7 +31,7 @@ public class Visualizer {
 	private static long secondTimestamp;
 	private static int frames;
 	private static int fps;
-
+	
 	private static AudioAnalyzer analyzer;
 	
 	/** Private constructor to prevent instantiation. */
@@ -67,12 +67,12 @@ public class Visualizer {
 			throw new RuntimeException(exception);
 		}
 	}
-
+	
 	private static long startTime;
-
+	
 	private static void render() {
 		if (startTime == 0) startTime = System.currentTimeMillis();
-
+		
 		Results left = analyzer.getResults(0);
 		Results right = analyzer.getResults(1);
 		
@@ -114,7 +114,7 @@ public class Visualizer {
 		}
 		glEnd();
 	}
-
+	
 	private static void tick() {
 		long time = System.nanoTime();
 		if (time - secondTimestamp >= TimeUnit.SECONDS.toNanos(1)) {
@@ -125,7 +125,7 @@ public class Visualizer {
 		}
 		frames++;
 	}
-
+	
 	public static void update() {
 		Display.setTitle(Title + " : " + fps + " FPS)");
 	}
@@ -135,5 +135,5 @@ public class Visualizer {
 	}
 	
 	private static Input.Observer observer = new Input.Observer() {};
-
+	
 }

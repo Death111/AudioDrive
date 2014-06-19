@@ -6,7 +6,7 @@ import java.util.List;
 import audiodrive.model.geometry.Vector;
 
 public class CatmullRom {
-
+	
 	/**
 	 * This method will calculate the Catmull-Rom interpolation curve, returning it as a list of Vector Vectorinate objects. This method in particular adds the first and last
 	 * control points which are not visible, but required for calculating the spline.
@@ -23,14 +23,19 @@ public class CatmullRom {
 		for (Vector c : vectorinates) {
 			vertices.add(c.clone());
 		}
-		if (pointsPerSegment < 2) { throw new RuntimeException("The pointsPerSegment parameter must be >= 2, since 2 points is just the linear segment."); }
+		if (pointsPerSegment < 2) {
+			throw new RuntimeException("The pointsPerSegment parameter must be >= 2, since 2 points is just the linear segment.");
+		}
 		
 		// Cannot interpolate curves given only two points. Two points
 		// is best represented as a simple line segment.
-		if (vertices.size() < 3) { return vertices; }
+		if (vertices.size() < 3) {
+			return vertices;
+		}
 		
 		// Test whether the shape is open or closed by checking to see if
-		// the first point intersects with the last point. M and z() are ignored.
+		// the first point intersects with the last point. M and z() are
+		// ignored.
 		boolean isClosed = vertices.get(0).equals(vertices.get(vertices.size() - 1));
 		if (isClosed) {
 			// Use the second and second from last points as control points.
@@ -39,7 +44,8 @@ public class CatmullRom {
 			// get the point before the last point
 			Vector secondLast = vertices.get(vertices.size() - 2).clone();
 			
-			// insert the second from the last point as the first point in the list
+			// insert the second from the last point as the first point in the
+			// list
 			// because when the shape is closed it keeps wrapping around to
 			// the second point.
 			vertices.add(0, secondLast);
@@ -49,12 +55,14 @@ public class CatmullRom {
 			// The shape is open, so use control points that simply extend
 			// the first and last segments
 			
-			// Get the change in x,y,z between the first and second Vectorinates.
+			// Get the change in x,y,z between the first and second
+			// Vectorinates.
 			double dx = vertices.get(1).x() - vertices.get(0).x();
 			double dy = vertices.get(1).y() - vertices.get(0).y();
 			double dz = vertices.get(1).z() - vertices.get(0).z();
 			
-			// Then using the change, extrapolate backwards to find a control point.
+			// Then using the change, extrapolate backwards to find a control
+			// point.
 			double x1 = vertices.get(0).x() - dx;
 			double y1 = vertices.get(0).y() - dy;
 			double z1 = vertices.get(0).z() - dz;
@@ -173,9 +181,9 @@ public class CatmullRom {
 		double C12 = L012 * (time[2] - t) / (time[2] - time[1]) + L123 * (t - time[1]) / (time[2] - time[1]);
 		return C12;
 	}
-
+	
 	public enum Type {
 		Uniform, Chordal, Centripetal
 	}
-
+	
 }

@@ -20,11 +20,11 @@ public class AudioDrive extends Application {
 	public static void main(String[] args) {
 		launch(args);
 	}
-
+	
 	@Override
 	public void start(Stage stage) throws Exception {
 		Log.info("AudioDrive");
-
+		
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setInitialDirectory(new File("music"));
 		fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Audiodateien (*.mp3, *.ogg, *.wav)", "*.mp3", "*.ogg", "*.wav"));
@@ -33,14 +33,14 @@ public class AudioDrive extends Application {
 			Platform.exit();
 			return;
 		}
-
+		
 		ShowModel.show("models/xwing/xwing");
-
+		
 		Log.info(selected.getName());
 		AudioFile file = new AudioFile(selected);
 		Log.debug(file.getFormat().getType());
 		Visualizer.visualize(file);
-
+		
 		TrackGenerator trackGenerator = new TrackGenerator();
 		Track track = trackGenerator.generate(file, 25);
 		AudioPlayer player = new AudioPlayer();
@@ -48,7 +48,7 @@ public class AudioDrive extends Application {
 		player.play(file);
 		Drive.track(track);
 		player.stop();
-
+		
 		Platform.exit();
 	}
 }
