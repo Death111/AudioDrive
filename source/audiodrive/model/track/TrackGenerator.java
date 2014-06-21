@@ -43,7 +43,7 @@ public class TrackGenerator {
 		Log.debug(vectorinates.size() + " vectorinates");
 		// plot("Left", analyzer.getResults(0));
 		// plot("Right", analyzer.getResults(1));
-		return new Track(vectorinates, duration, smoothing);
+		return new Track(vectorinates, duration, smoothing, analyzer);
 	}
 	
 	private List<Vector> calculate() {

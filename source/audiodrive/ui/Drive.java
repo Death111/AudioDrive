@@ -9,6 +9,8 @@ import org.lwjgl.LWJGLException;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.Display;
 
+import audiodrive.audio.AudioAnalyzer;
+import audiodrive.audio.AudioAnalyzer.Results;
 import audiodrive.model.Track;
 import audiodrive.model.geometry.Rotation;
 import audiodrive.model.geometry.Vector;
@@ -42,13 +44,13 @@ public class Drive {
 	private static int cameraIndex = -1;
 	
 	private static boolean thirdPersonView = false;
-	private static boolean fill = false;
+	private static boolean fill = true;
 	private static boolean showPlayer = true;
 	private static boolean showUpVectors = false;
 	private static boolean showInterpolationPoints = false;
-	private static boolean showSpline = false;
+	private static boolean showSpline = true;
 	private static boolean showOrthogonalSpline = false;
-	private static boolean showDualSpline = true;
+	private static boolean showDualSpline = false;
 	private static boolean showCoordinateSystem = false;
 	private static boolean adjustWidth = false;
 	
@@ -70,6 +72,7 @@ public class Drive {
 	
 	private static CatmullRom.Type type = CatmullRom.Type.Centripetal;
 	private static int resolution = 25;
+	private static Track track;
 	
 	static {
 		reset();
@@ -91,10 +94,11 @@ public class Drive {
 	}
 	
 	public static void demo() {
-		track(new Track(defaultVectorinates(), 15, 50));
+		track(new Track(defaultVectorinates(), 15, 50, null));
 	}
 	
 	public static void track(Track track) {
+		Drive.track = track;
 		int vectors = (1 + (track.getVectors().size() - 1) * track.getSmoothing());
 		Drive.resolution = 1 + track.getSmoothing();
 		Drive.incrementPerSecond = vectors / track.getDuration();
@@ -167,6 +171,55 @@ public class Drive {
 			drawDualSpline();
 			drawLinesBetweenDualSpline();
 		}
+		drawAudio();
+	}
+	
+	private static long startTime;
+	
+	private static void drawAudio() {
+		AudioAnalyzer analyzer = track.getAnalyzer();
+		if (analyzer == null) return;
+		
+		if (startTime == 0) startTime = System.currentTimeMillis();
+		
+		Results left = analyzer.getResults(0);
+		Results right = analyzer.getResults(1);
+		
+		long time = System.currentTimeMillis();
+		double seconds = (time - startTime) / 1000.0;
+		double spectraPerSecond = (double) analyzer.getSamples().getSampleRate() / analyzer.getSamples().getIteration();
+		int spectaIndex = (int) Math.round(spectraPerSecond * seconds);
+		if (spectaIndex >= left.spectra.size()) spectaIndex = 0;
+		
+		float[] leftSpectrum = left.spectra.get(spectaIndex);
+		float[] rightSpectrum = right.spectra.get(spectaIndex);
+		
+		Camera.overlay(Display.getWidth(), Display.getHeight());
+		
+		glBegin(GL_QUADS);
+		double x = 0;
+		double y = Display.getHeight();
+		double height = Display.getHeight() / (leftSpectrum.length / 2.0);
+		double widthFactor = 2.0;
+		for (int band = 0; band < leftSpectrum.length; band++) {
+			double amplitude = leftSpectrum[band] * widthFactor;
+			new Vector().x(x).y(y).gl();
+			new Vector().x(x).y(y + height).gl();
+			new Vector().x(x + amplitude).y(y + height).gl();
+			new Vector().x(x + amplitude).y(y).gl();
+			y -= height;
+		}
+		x = Display.getWidth();
+		y = Display.getHeight();
+		for (int band = 0; band < rightSpectrum.length; band++) {
+			double amplitude = rightSpectrum[band] * widthFactor;
+			new Vector().x(x).y(y).gl();
+			new Vector().x(x).y(y + height).gl();
+			new Vector().x(x - amplitude).y(y + height).gl();
+			new Vector().x(x - amplitude).y(y).gl();
+			y -= height;
+		}
+		glEnd();
 	}
 	
 	private static void drawInterpolationPoints() {

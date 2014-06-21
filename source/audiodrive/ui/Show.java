@@ -62,7 +62,7 @@ public class Show {
 	}
 	
 	public static void demo() {
-		track(new Track(defaultVectorinates(), 0, 0));
+		track(new Track(defaultVectorinates(), 0, 0, null));
 	}
 	
 	public static void track(Track track) {
