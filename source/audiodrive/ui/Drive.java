@@ -12,12 +12,16 @@ import org.lwjgl.opengl.Display;
 import audiodrive.audio.AudioAnalyzer;
 import audiodrive.audio.AudioAnalyzer.Results;
 import audiodrive.model.Track;
+import audiodrive.model.geometry.Matrix;
 import audiodrive.model.geometry.Rotation;
 import audiodrive.model.geometry.Vector;
+import audiodrive.model.loader.Model;
+import audiodrive.model.loader.ModelLoader;
 import audiodrive.model.track.interpolation.CatmullRom;
 import audiodrive.ui.components.Camera;
 import audiodrive.ui.components.Window;
 import audiodrive.ui.control.Input;
+import audiodrive.utilities.Buffers;
 
 public class Drive {
 	
@@ -45,6 +49,7 @@ public class Drive {
 	
 	private static boolean thirdPersonView = false;
 	private static boolean fill = true;
+	private static boolean showBasics = false;
 	private static boolean showPlayer = true;
 	private static boolean showUpVectors = false;
 	private static boolean showInterpolationPoints = false;
@@ -73,6 +78,7 @@ public class Drive {
 	private static CatmullRom.Type type = CatmullRom.Type.Centripetal;
 	private static int resolution = 25;
 	private static Track track;
+	private static Model model;
 	
 	static {
 		reset();
@@ -112,6 +118,7 @@ public class Drive {
 			Display.setTitle(Title);
 			// Display.setVSyncEnabled(true);
 			Display.create();
+			model = ModelLoader.loadSingleModel("models/xwing/xwing");
 			Input.addObserver(observer);
 			while (!Display.isCloseRequested()) {
 				Drive.tick();
@@ -141,7 +148,7 @@ public class Drive {
 	}
 	
 	private static void render() {
-		moveForward();
+		if (!pause) moveForward();
 		
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glDisable(GL_CULL_FACE);
@@ -149,6 +156,11 @@ public class Drive {
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		if (fill) glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 		else glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		
+		glEnable(GL_NORMALIZE);
+		glEnable(GL_LIGHT0);
+		glLight(GL_LIGHT0, GL_AMBIENT, Buffers.create(1f, 1f, 1f, 1f));
+		glShadeModel(GL_SMOOTH);
 		
 		Camera.perspective(45, 1, 0.001, 100);
 		Camera.position(camera);
@@ -162,8 +174,10 @@ public class Drive {
 		if (showCoordinateSystem) drawCoordinateSystem();
 		if (showPlayer) drawPlayer();
 		else drawCameraPosition();
-		drawVectorinates();
-		drawSpline();
+		if (showBasics) {
+			drawVectorinates();
+			drawSpline();
+		}
 		if (showInterpolationPoints) drawInterpolationPoints();
 		if (showSpline) drawSplineArea();
 		if (showOrthogonalSpline) drawOrthogonalSplineArea();
@@ -248,6 +262,8 @@ public class Drive {
 		glEnd();
 	}
 	
+	static double roll = 0;
+	
 	private static void drawPlayer() {
 		glColor4d(0, 0, 1, 0.5);
 		if (cameraIndex < centerSpline.size() - playerOffset - 1) {
@@ -256,14 +272,72 @@ public class Drive {
 			Vector front = centerSpline.get(cameraIndex + playerOffset + 1).plus(frontSide.multiplied(sidePosition)).plus(up.multiplied(sightHeight));
 			Vector back = centerSpline.get(cameraIndex + playerOffset).plus(backSide.multiplied(sidePosition)).plus(up.multiplied(sightHeight));
 			backSide.length(0.0001);
-			if (!fill) glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-			glBegin(GL_TRIANGLES);
-			front.gl();
-			back.plus(backSide).gl();
-			back.plus(backSide.negated()).gl();
-			glEnd();
-			if (!fill) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+			
+			Vector direction = front.minus(back);
+			Matrix matrix = rotationMatrixToAlign(Vector.Z, direction);
+			Vector rotatedX = matrix.multiplied(Vector.X);
+			// deviation angle
+			double angle = -rotatedX.degrees(backSide);
+			matrix.rotate(angle, Vector.Z);
+			Vector alignedX = matrix.multiplied(Vector.X);
+			if (showCoordinateSystem) {
+				// draw triangle
+				if (!fill) glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+				glBegin(GL_TRIANGLES);
+				front.gl();
+				back.plus(backSide).gl();
+				back.plus(backSide.negated()).gl();
+				glEnd();
+				if (!fill) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+				// draw side
+				glColor4d(1, 1, 0, 1);
+				glBegin(GL_LINES);
+				back.gl();
+				back.plus(backSide.normalized()).gl();
+				glEnd();
+				// draw rotated x axis
+				glColor4d(1, 0, 1, 1);
+				glBegin(GL_LINES);
+				back.gl();
+				back.plus(rotatedX.normalized()).gl();
+				glEnd();
+				// draw hopefully aligned x axis
+				glColor4d(0, 1, 1, 1);
+				glBegin(GL_LINES);
+				back.gl();
+				back.plus(alignedX.normalized()).gl();
+				glEnd();
+			}
+			
+			glPushMatrix();
+			glTranslated(back.x(), back.y(), back.z());
+			glRotateToAlign(Vector.Z, direction);
+			glRotated(angle, 0, 0, 1);
+			if (showCoordinateSystem) drawCoordinateSystem();
+			double scaleFactor = .0001;
+			glScaled(scaleFactor, scaleFactor, scaleFactor);
+			glEnable(GL_LIGHTING);
+			model.render();
+			glDisable(GL_LIGHTING);
+			glPopMatrix();
+			
 		}
+	}
+	
+	private static void glRotateToAlign(Vector from, Vector to) {
+		from = from.normalized();
+		to = to.normalized();
+		Vector vector = from.cross(to).normalize();
+		double angle = Math.toDegrees(Math.acos(from.dot(to)));
+		glRotated(angle, vector.x(), vector.y(), vector.z());
+	}
+	
+	private static Matrix rotationMatrixToAlign(Vector from, Vector to) {
+		from = from.normalized();
+		to = to.normalized();
+		Vector vector = from.cross(to).normalize();
+		double angle = Math.toDegrees(Math.acos(from.dot(to)));
+		return Matrix.rotation(angle, vector);
 	}
 	
 	private static void drawCoordinateSystem() {
@@ -606,6 +680,10 @@ public class Drive {
 			switch (key) {
 			case Keyboard.KEY_SPACE:
 				showPlayer = !showPlayer;
+				break;
+			case Keyboard.KEY_B:
+				showBasics = !showBasics;
+				updatePosition();
 				break;
 			case Keyboard.KEY_V:
 				thirdPersonView = !thirdPersonView;

@@ -2,9 +2,15 @@ package audiodrive.model.geometry;
 
 import static org.lwjgl.opengl.GL11.glVertex3d;
 
+import java.util.stream.Stream;
+
+import audiodrive.utilities.Matrices;
+
 public class Vector implements Cloneable {
 	
-	/** Unit vector in x direction. */
+	public static final int Dimension = 3;
+	
+	/** Null vector. */
 	public static final Vector Null = new Vector();
 	/** Unit vector in x direction. */
 	public static final Vector X = new Vector().x(1);
@@ -26,6 +32,12 @@ public class Vector implements Cloneable {
 		return this;
 	}
 	
+	public Vector set(double[] values) {
+		if (values.length < Dimension) throw new IllegalArgumentException("Array length has to be >= " + Dimension);
+		set(values[0], values[1], values[2]);
+		return this;
+	}
+	
 	public Vector set(double x, double y, double z) {
 		x(x).y(y).z(z);
 		return this;
@@ -37,9 +49,10 @@ public class Vector implements Cloneable {
 	}
 	
 	public Vector add(double x, double y, double z) {
-		x(x() + x);
-		y(y() + y);
-		z(z() + z);
+		assertModifiable();
+		this.x += x;
+		this.y += y;
+		this.z += z;
 		return this;
 	}
 	
@@ -49,6 +62,7 @@ public class Vector implements Cloneable {
 	}
 	
 	public Vector subtract(double x, double y, double z) {
+		assertModifiable();
 		this.x -= x;
 		this.y -= y;
 		this.z -= z;
@@ -56,6 +70,7 @@ public class Vector implements Cloneable {
 	}
 	
 	public Vector multiply(double factor) {
+		assertModifiable();
 		x *= factor;
 		y *= factor;
 		z *= factor;
@@ -63,9 +78,36 @@ public class Vector implements Cloneable {
 	}
 	
 	public Vector divide(double factor) {
+		assertModifiable();
 		x /= factor;
 		y /= factor;
 		z /= factor;
+		return this;
+	}
+	
+	public Vector negate() {
+		assertModifiable();
+		x = -x;
+		y = -y;
+		z = -z;
+		return this;
+	}
+	
+	public Vector x(double x) {
+		assertModifiable();
+		this.x = x;
+		return this;
+	}
+	
+	public Vector y(double y) {
+		assertModifiable();
+		this.y = y;
+		return this;
+	}
+	
+	public Vector z(double z) {
+		assertModifiable();
+		this.z = z;
 		return this;
 	}
 	
@@ -109,31 +151,13 @@ public class Vector implements Cloneable {
 		return this;
 	}
 	
-	public Vector negate() {
-		x = -x;
-		y = -y;
-		z = -z;
-		return this;
-	}
-	
-	public Vector x(double x) {
-		this.x = x;
-		return this;
-	}
-	
-	public Vector y(double y) {
-		this.y = y;
-		return this;
-	}
-	
-	public Vector z(double z) {
-		this.z = z;
-		return this;
-	}
-	
 	public Vector length(double length) {
 		if (x == 0 && y == 0 && z == 0) throw new RuntimeException("Can't set the length of a vector without direction.");
 		return normalize().multiply(length);
+	}
+	
+	public double length() {
+		return Math.sqrt(x * x + y * y + z * z);
 	}
 	
 	public double x() {
@@ -146,10 +170,6 @@ public class Vector implements Cloneable {
 	
 	public double z() {
 		return z;
-	}
-	
-	public double length() {
-		return Math.sqrt(x * x + y * y + z * z);
 	}
 	
 	@Override
@@ -193,13 +213,34 @@ public class Vector implements Cloneable {
 		return clone().negate();
 	}
 	
+	public Vector multiplied(Matrix matrix) {
+		return new Vector().set(Matrices.multiply(toHomogeneous(), matrix.toArray()));
+	}
+	
 	@Override
-	public boolean equals(Object object) {
-		if (this == object) return true;
-		if (object == null) return false;
-		if (getClass() != object.getClass()) return false;
-		Vector other = (Vector) object;
-		return (x == other.x && y == other.y && z == other.z);
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		long temp;
+		temp = Double.doubleToLongBits(x);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
+		temp = Double.doubleToLongBits(y);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
+		temp = Double.doubleToLongBits(z);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
+		return result;
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) return true;
+		if (obj == null) return false;
+		if (getClass() != obj.getClass()) return false;
+		Vector other = (Vector) obj;
+		if (Double.doubleToLongBits(x) != Double.doubleToLongBits(other.x)) return false;
+		if (Double.doubleToLongBits(y) != Double.doubleToLongBits(other.y)) return false;
+		if (Double.doubleToLongBits(z) != Double.doubleToLongBits(other.z)) return false;
+		return true;
 	}
 	
 	@Override
@@ -207,8 +248,20 @@ public class Vector implements Cloneable {
 		return "(" + x + ", " + y + ", " + z + ")";
 	}
 	
+	public double[] toArray() {
+		return new double[]{x, y, z};
+	}
+	
+	public double[] toHomogeneous() {
+		return new double[]{x, y, z, 1};
+	}
+	
 	public void gl() {
 		glVertex3d(x(), y(), z());
+	}
+	
+	private void assertModifiable() {
+		if (Stream.of(Null, X, Y, Z).anyMatch(vector -> vector == this)) throw new UnsupportedOperationException("Can't modify a constant vector.");
 	}
 	
 }
