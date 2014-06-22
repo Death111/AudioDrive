@@ -7,6 +7,7 @@ import java.awt.Toolkit;
 import java.util.concurrent.TimeUnit;
 
 import org.lwjgl.LWJGLException;
+import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.Display;
 
 import audiodrive.audio.AudioAnalyzer;
@@ -48,8 +49,8 @@ public class Visualizer {
 			else {
 				Dimension size = Toolkit.getDefaultToolkit().getScreenSize();
 				Window.setSize(size.width - 100, 600);
+				Display.setResizable(true);
 			}
-			Display.setResizable(true);
 			Display.setTitle(Title);
 			Display.create();
 			Input.addObserver(observer);
@@ -134,6 +135,36 @@ public class Visualizer {
 		return fps;
 	}
 	
-	private static Input.Observer observer = new Input.Observer() {};
+	static boolean fullscreen = Fullscreen;
+	
+	private static Input.Observer observer = new Input.Observer() {
+		@Override
+		public void keyReleased(int key, char character) {
+			if (key == Keyboard.KEY_F10) {
+				try {
+					fullscreen = !fullscreen;
+					Display.setFullscreen(fullscreen);
+					// if (fullscreen) {
+					// Display.destroy();
+					// System.setProperty("org.lwjgl.opengl.Window.undecorated", "true");
+					// Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
+					// Display.setDisplayMode(new DisplayMode(screen.width, screen.height));
+					// Display.setResizable(false);
+					// Display.create();
+					// Display.setFullscreen(true);
+					// } else {
+					// Display.destroy();
+					// System.setProperty("org.lwjgl.opengl.Window.undecorated", "false");
+					// Display.setDisplayMode(new DisplayMode(1600, 600));
+					// Display.create();
+					// }
+					System.out.println("fullscreen " + fullscreen);
+					System.out.println("windowed " + System.getProperty("org.lwjgl.opengl.Window.undecorated"));
+				} catch (LWJGLException exception) {
+					throw new RuntimeException(exception);
+				}
+			}
+		};
+	};
 	
 }

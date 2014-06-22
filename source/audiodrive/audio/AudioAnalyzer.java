@@ -2,6 +2,7 @@ package audiodrive.audio;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import audiodrive.audio.Samples.Channel;
 import audiodrive.audio.analysis.FFT;
@@ -10,6 +11,8 @@ public class AudioAnalyzer {
 	
 	private int thresholdWindowSize = 20;
 	private float thresholdMultiplier = 1.8f;
+	
+	private AtomicBoolean done = new AtomicBoolean();
 	
 	private AudioFile file;
 	private Samples samples;
@@ -32,7 +35,12 @@ public class AudioAnalyzer {
 		return this;
 	}
 	
+	public boolean isDone() {
+		return done.get();
+	}
+	
 	public AudioAnalyzer analyze(AudioFile file) {
+		done.set(false);
 		if (file.equals(this.file)) return this;
 		this.file = file;
 		samples = new AudioDecoder().samplify(file);
@@ -41,6 +49,7 @@ public class AudioAnalyzer {
 		for (int i = 0; i < channels; i++) {
 			results.add(analyze(samples.channel(i)));
 		}
+		done.set(true);
 		return this;
 	}
 	
@@ -52,7 +61,7 @@ public class AudioAnalyzer {
 		List<Float> threshold = calculateThreshold(spectralFlux);
 		List<Float> prunnedSpectralFlux = calculatePrunnedSpectralFlux(spectralFlux, threshold);
 		List<Float> peaks = calculatePeaks(prunnedSpectralFlux);
-		return new Results(duration, spectra, spectralSum, spectralFlux, threshold, prunnedSpectralFlux, peaks);
+		return new Results(file, duration, spectra, spectralSum, spectralFlux, threshold, prunnedSpectralFlux, peaks);
 	}
 	
 	private List<float[]> calculateSpectra(Channel channel) {
@@ -146,6 +155,7 @@ public class AudioAnalyzer {
 	}
 	
 	public static class Results {
+		public final AudioFile file;
 		public final float duration;
 		public final List<float[]> spectra;
 		public final List<Float> spectralSum;
@@ -154,13 +164,15 @@ public class AudioAnalyzer {
 		public final List<Float> prunnedSpectralFlux;
 		public final List<Float> peaks;
 		
-		private Results(float duration,
+		private Results(AudioFile file,
+						float duration,
 						List<float[]> spectra,
 						List<Float> spectralSum,
 						List<Float> spectralFlux,
 						List<Float> threshold,
 						List<Float> prunnedSpectralFlux,
 						List<Float> peaks) {
+			this.file = file;
 			this.duration = duration;
 			this.spectra = spectra;
 			this.spectralSum = spectralSum;
