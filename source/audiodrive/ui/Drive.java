@@ -30,7 +30,7 @@ public class Drive {
 	/** Frame rate in frames per second. */
 	public static final int Framerate = 100;
 	
-	public static final boolean Fullscreen = false;
+	public static final boolean Fullscreen = true;
 	
 	private static double increment;
 	private static double incrementPerSecond;
@@ -47,7 +47,7 @@ public class Drive {
 	private static Vector camera = new Vector(0, 0, 2.5);
 	private static int cameraIndex = -1;
 	
-	private static boolean thirdPersonView = false;
+	private static boolean stableView = true;
 	private static boolean fill = true;
 	private static boolean showBasics = false;
 	private static boolean showPlayer = true;
@@ -65,6 +65,7 @@ public class Drive {
 	private static double sidePosition;
 	private static int playerOffset;
 	private static int sightOffset;
+	private static double sightDistance;
 	private static double sightHeight;
 	private static double flightHeight;
 	
@@ -90,8 +91,9 @@ public class Drive {
 		sidePosition = 0.0;
 		playerOffset = 1;
 		sightOffset = 3;
+		sightDistance = 0.005;
 		sightHeight = 0.001;
-		flightHeight = 0.002;
+		flightHeight = 0.001;
 	}
 	
 	/** Private constructor to prevent instantiation. */
@@ -162,7 +164,7 @@ public class Drive {
 		glLight(GL_LIGHT0, GL_AMBIENT, Buffers.create(1f, 1f, 1f, 1f));
 		glShadeModel(GL_SMOOTH);
 		
-		Camera.perspective(45, 1, 0.001, 100);
+		Camera.perspective(45, Display.getWidth(), Display.getHeight(), 0.001, 100);
 		Camera.position(camera);
 		Camera.lookAt(look);
 		
@@ -210,11 +212,13 @@ public class Drive {
 		
 		Camera.overlay(Display.getWidth(), Display.getHeight());
 		
+		glColor4d(1, 1, 1, 1);
+		if (fill) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 		glBegin(GL_QUADS);
-		double x = 0;
+		double x = -1;
 		double y = Display.getHeight();
-		double height = Display.getHeight() / (leftSpectrum.length / 2.0);
-		double widthFactor = 2.0;
+		double height = Display.getHeight() / (leftSpectrum.length / 4.0);
+		double widthFactor = 4.0;
 		for (int band = 0; band < leftSpectrum.length; band++) {
 			double amplitude = leftSpectrum[band] * widthFactor;
 			new Vector().x(x).y(y).gl();
@@ -223,7 +227,7 @@ public class Drive {
 			new Vector().x(x + amplitude).y(y).gl();
 			y -= height;
 		}
-		x = Display.getWidth();
+		x = Display.getWidth() + 1;
 		y = Display.getHeight();
 		for (int band = 0; band < rightSpectrum.length; band++) {
 			double amplitude = rightSpectrum[band] * widthFactor;
@@ -234,6 +238,7 @@ public class Drive {
 			y -= height;
 		}
 		glEnd();
+		if (fill) glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	}
 	
 	private static void drawInterpolationPoints() {
@@ -269,17 +274,21 @@ public class Drive {
 		if (cameraIndex < centerSpline.size() - playerOffset - 1) {
 			Vector frontSide = sides[cameraIndex + playerOffset + 1];
 			Vector backSide = sides[cameraIndex + playerOffset].clone();
-			Vector front = centerSpline.get(cameraIndex + playerOffset + 1).plus(frontSide.multiplied(sidePosition)).plus(up.multiplied(sightHeight));
-			Vector back = centerSpline.get(cameraIndex + playerOffset).plus(backSide.multiplied(sidePosition)).plus(up.multiplied(sightHeight));
+			Vector front = centerSpline.get(cameraIndex + playerOffset + 1).plus(frontSide.multiplied(sidePosition)).plus(up.multiplied(flightHeight));
+			Vector back = centerSpline.get(cameraIndex + playerOffset).plus(backSide.multiplied(sidePosition)).plus(up.multiplied(flightHeight));
 			backSide.length(0.0001);
 			
 			Vector direction = front.minus(back);
 			Matrix matrix = rotationMatrixToAlign(Vector.Z, direction);
 			Vector rotatedX = matrix.multiplied(Vector.X);
 			// deviation angle
-			double angle = -rotatedX.degrees(backSide);
-			matrix.rotate(angle, Vector.Z);
-			Vector alignedX = matrix.multiplied(Vector.X);
+			double angle = rotatedX.degrees(backSide);
+			Vector positiv = matrix.rotated(angle, Vector.Z).multiplied(Vector.X);
+			Vector negativ = matrix.rotated(-angle, Vector.Z).multiplied(Vector.X);
+			boolean negate = negativ.degrees(backSide) < positiv.degrees(backSide);
+			if (negate) angle = -angle;
+			Vector alignedX = matrix.rotated(angle, Vector.Z).multiplied(Vector.X);
+			
 			if (showCoordinateSystem) {
 				// draw triangle
 				if (!fill) glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -574,19 +583,25 @@ public class Drive {
 	
 	public static void updatePosition() {
 		if (cameraIndex < 0 || cameraIndex >= centerSpline.size() - 2) return;
-		int lookIndex = Math.min(centerSpline.size() - 1, cameraIndex + sightOffset);
-		Vector one = centerSpline.get(cameraIndex);
-		Vector two = centerSpline.get(lookIndex);
-		Vector back = one.plus(sides[cameraIndex].multiplied(sidePosition));
-		Vector front = two.plus(sides[lookIndex].multiplied(sidePosition));
-		camera = back.plus(up.multiplied(flightHeight));
-		look = front.plus(up.multiplied(sightHeight));
 		rotation.set(Vector.Null);
 		translate.set(Vector.Null);
-		if (thirdPersonView) {
-			Vector direction = front.minus(back).length(0.1);
-			Vector upward = direction.cross(sides[cameraIndex]).length(0.01);
-			translate.set(direction.add(upward));
+		if (stableView) {
+			Vector frontSide = sides[cameraIndex + playerOffset + 1];
+			Vector backSide = sides[cameraIndex + playerOffset].clone();
+			Vector front = centerSpline.get(cameraIndex + playerOffset + 1).plus(frontSide.multiplied(sidePosition)).plus(up.multiplied(flightHeight));
+			Vector back = centerSpline.get(cameraIndex + playerOffset).plus(backSide.multiplied(sidePosition)).plus(up.multiplied(flightHeight));
+			Vector direction = front.minus(back).normalize();
+			Vector upward = backSide.cross(direction).normalize();
+			look = front.plus(up.multiplied(flightHeight));
+			camera = back.plus(direction.multiplied(-sightDistance)).plus(upward.multiplied(sightHeight));
+		} else {
+			int lookIndex = Math.min(centerSpline.size() - 1, cameraIndex + sightOffset);
+			Vector one = centerSpline.get(cameraIndex);
+			Vector two = centerSpline.get(lookIndex);
+			Vector back = one.plus(sides[cameraIndex].multiplied(sidePosition));
+			Vector front = two.plus(sides[lookIndex].multiplied(sidePosition));
+			look = front.plus(up.multiplied(flightHeight));
+			camera = back.plus(up.multiplied(sightHeight));
 		}
 	}
 	
@@ -651,7 +666,9 @@ public class Drive {
 				moveRight();
 				break;
 			case Keyboard.KEY_PRIOR:
-				if (!leftControl && !rightControl) {
+				if (Keyboard.isKeyDown(Keyboard.KEY_LSHIFT)) {
+					sightDistance += 0.0001;
+				} else if (!leftControl && !rightControl) {
 					flightHeight += 0.0001;
 					sightHeight += 0.0001;
 				} else {
@@ -661,7 +678,9 @@ public class Drive {
 				updatePosition();
 				break;
 			case Keyboard.KEY_NEXT:
-				if (!leftControl && !rightControl) {
+				if (Keyboard.isKeyDown(Keyboard.KEY_LSHIFT)) {
+					sightDistance -= 0.0001;
+				} else if (!leftControl && !rightControl) {
 					flightHeight -= 0.0001;
 					sightHeight -= 0.0001;
 				} else {
@@ -686,7 +705,7 @@ public class Drive {
 				updatePosition();
 				break;
 			case Keyboard.KEY_V:
-				thirdPersonView = !thirdPersonView;
+				stableView = !stableView;
 				updatePosition();
 				break;
 			case Keyboard.KEY_C:

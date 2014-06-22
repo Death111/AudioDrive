@@ -73,6 +73,10 @@ public class Matrix {
 		return multiply(rotation(angle, vector));
 	}
 	
+	public Matrix rotated(double angle, Vector vector) {
+		return multiplied(rotation(angle, vector));
+	}
+	
 	public static Matrix rotation(double angle, Vector vector) {
 		return new Matrix().setIdentity().insert(Matrices.rotation(Math.toRadians(angle), vector.toArray()));
 	}
