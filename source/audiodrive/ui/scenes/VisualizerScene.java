@@ -6,9 +6,8 @@ import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.Display;
 
 import audiodrive.AudioDrive;
-import audiodrive.audio.AudioAnalyzer;
-import audiodrive.audio.AudioAnalyzer.Results;
-import audiodrive.audio.AudioFile;
+import audiodrive.audio.AudioAnalyzer.AnalyzedChannel;
+import audiodrive.audio.AudioAnalyzer.AnalyzedAudio;
 import audiodrive.audio.AudioPlayer;
 import audiodrive.model.geometry.Vector;
 import audiodrive.ui.components.Camera;
@@ -19,23 +18,22 @@ import audiodrive.utilities.Log;
 public class VisualizerScene extends Scene {
 	
 	private Text title;
-	private AudioAnalyzer analyzer;
+	private AnalyzedAudio audio;
 	private AudioPlayer player;
 	private double duration;
 	
-	public void enter(AudioAnalyzer analyzer) {
-		this.analyzer = analyzer;
+	public void enter(AnalyzedAudio audio) {
+		this.audio = audio;
 		player = new AudioPlayer();
 		super.enter();
 	}
 	
 	@Override
 	protected void entering() {
-		AudioFile file = analyzer.getResults().get(0).file;
-		title = new Text("Visualizing \"" + file.getName() + "\"...").setFont(AudioDrive.Font).setSize(48).setPosition(10, 10);
+		title = new Text("Visualizing \"" + audio.file.getName() + "\"...").setFont(AudioDrive.Font).setSize(48).setPosition(10, 10);
 		Log.info("visualizing audio...");
 		Camera.overlay(Display.getWidth(), Display.getHeight());
-		player.play(file);
+		player.play(audio.file);
 	}
 	
 	@Override
@@ -51,10 +49,10 @@ public class VisualizerScene extends Scene {
 		glDisable(GL_CULL_FACE);
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 		
-		Results left = analyzer.getResults(0);
-		Results right = analyzer.getResults(1);
+		AnalyzedChannel left = audio.channels.get(0);
+		AnalyzedChannel right = audio.channels.get(1);
 		
-		double spectraPerSecond = (double) analyzer.getSamples().getSampleRate() / analyzer.getSamples().getIteration();
+		double spectraPerSecond = (double) audio.samples.getSampleRate() / audio.samples.getIteration();
 		int spectaIndex = (int) Math.round(spectraPerSecond * duration);
 		if (spectaIndex >= left.spectra.size()) spectaIndex = 0;
 		

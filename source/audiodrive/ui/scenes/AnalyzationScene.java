@@ -34,7 +34,7 @@ public class AnalyzationScene extends Scene {
 	
 	@Override
 	public void update(double elapsed) {
-		if (analyzer.isDone()) Scene.get(MenuScene.class).enter(analyzer);
+		if (analyzer.isDone()) Scene.get(MenuScene.class).enter(analyzer.getResults());
 	}
 	
 	@Override

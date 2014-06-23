@@ -1,6 +1,7 @@
 package audiodrive.audio;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -16,8 +17,7 @@ public class AudioAnalyzer {
 	
 	private AudioFile file;
 	private Samples samples;
-	private List<Results> results;
-	private Results mixedResult;
+	private AnalyzedAudio results;
 	
 	/**
 	 * Sets the threshold window size. (default: 20)
@@ -25,6 +25,10 @@ public class AudioAnalyzer {
 	public AudioAnalyzer setThresholdWindowSize(int thresholdWindowSize) {
 		this.thresholdWindowSize = thresholdWindowSize;
 		return this;
+	}
+	
+	public int getThresholdWindowSize() {
+		return thresholdWindowSize;
 	}
 	
 	/**
@@ -35,33 +39,39 @@ public class AudioAnalyzer {
 		return this;
 	}
 	
+	public float getThresholdMultiplier() {
+		return thresholdMultiplier;
+	}
+	
 	public boolean isDone() {
 		return done.get();
 	}
 	
 	public AudioAnalyzer analyze(AudioFile file) {
 		done.set(false);
-		if (file.equals(this.file)) return this;
+		if (file.equals(this.file)) return null;
 		this.file = file;
 		samples = new AudioDecoder().samplify(file);
+		float duration = samples.getCount() / samples.getSampleRate();
 		int channels = samples.getBuffer().getChannelCount();
-		results = new ArrayList<>(channels);
+		List<AnalyzedChannel> resultList = new ArrayList<>(channels);
 		for (int i = 0; i < channels; i++) {
-			results.add(analyze(samples.channel(i)));
+			resultList.add(analyze(samples.channel(i)));
 		}
+		AnalyzedChannel mixedResults = analyze(samples.mixed());
+		results = new AnalyzedAudio(file, duration, samples, resultList, mixedResults);
 		done.set(true);
 		return this;
 	}
 	
-	private Results analyze(Channel channel) {
-		float duration = samples.getCount() / samples.getSampleRate();
+	private AnalyzedChannel analyze(Channel channel) {
 		List<float[]> spectra = calculateSpectra(channel);
 		List<Float> spectralSum = calculateSpectralSum(spectra, channel);
 		List<Float> spectralFlux = calculateSpectralFlux(spectra, channel);
 		List<Float> threshold = calculateThreshold(spectralFlux);
 		List<Float> prunnedSpectralFlux = calculatePrunnedSpectralFlux(spectralFlux, threshold);
 		List<Float> peaks = calculatePeaks(prunnedSpectralFlux);
-		return new Results(file, duration, spectra, spectralSum, spectralFlux, threshold, prunnedSpectralFlux, peaks);
+		return new AnalyzedChannel(channel, spectra, spectralSum, spectralFlux, threshold, prunnedSpectralFlux, peaks);
 	}
 	
 	private List<float[]> calculateSpectra(Channel channel) {
@@ -141,22 +151,31 @@ public class AudioAnalyzer {
 		return samples;
 	}
 	
-	public List<Results> getResults() {
+	public AnalyzedAudio getResults() {
 		return results;
 	}
 	
-	public Results getResults(int channel) {
-		return results.get(channel);
-	}
-	
-	public Results getResultsOfMixedChannels() {
-		if (mixedResult == null) mixedResult = analyze(samples.mixed());
-		return mixedResult;
-	}
-	
-	public static class Results {
+	public static class AnalyzedAudio {
+		
 		public final AudioFile file;
 		public final float duration;
+		public final Samples samples;
+		public final List<AnalyzedChannel> channels;
+		public final AnalyzedChannel mixed;
+		
+		private AnalyzedAudio(AudioFile file, float duration, Samples samples, List<AnalyzedChannel> channels, AnalyzedChannel mixed) {
+			this.file = file;
+			this.duration = duration;
+			this.samples = samples;
+			this.channels = Collections.unmodifiableList(channels);
+			this.mixed = mixed;
+		}
+		
+	}
+	
+	public static class AnalyzedChannel {
+		
+		public final Channel channel;
 		public final List<float[]> spectra;
 		public final List<Float> spectralSum;
 		public final List<Float> spectralFlux;
@@ -164,22 +183,20 @@ public class AudioAnalyzer {
 		public final List<Float> prunnedSpectralFlux;
 		public final List<Float> peaks;
 		
-		private Results(AudioFile file,
-						float duration,
-						List<float[]> spectra,
-						List<Float> spectralSum,
-						List<Float> spectralFlux,
-						List<Float> threshold,
-						List<Float> prunnedSpectralFlux,
-						List<Float> peaks) {
-			this.file = file;
-			this.duration = duration;
-			this.spectra = spectra;
-			this.spectralSum = spectralSum;
-			this.spectralFlux = spectralFlux;
-			this.threshold = threshold;
-			this.prunnedSpectralFlux = prunnedSpectralFlux;
-			this.peaks = peaks;
+		private AnalyzedChannel(	Channel channel,
+		                       	List<float[]> spectra,
+		                       	List<Float> spectralSum,
+		                       	List<Float> spectralFlux,
+		                       	List<Float> threshold,
+		                       	List<Float> prunnedSpectralFlux,
+		                       	List<Float> peaks) {
+			this.channel = channel;
+			this.spectra = Collections.unmodifiableList(spectra);
+			this.spectralSum = Collections.unmodifiableList(spectralSum);
+			this.spectralFlux = Collections.unmodifiableList(spectralFlux);
+			this.threshold = Collections.unmodifiableList(threshold);
+			this.prunnedSpectralFlux = Collections.unmodifiableList(prunnedSpectralFlux);
+			this.peaks = Collections.unmodifiableList(peaks);
 		}
 		
 	}

@@ -11,7 +11,7 @@ import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.Display;
 
 import audiodrive.audio.AudioAnalyzer;
-import audiodrive.audio.AudioAnalyzer.Results;
+import audiodrive.audio.AudioAnalyzer.AnalyzedChannel;
 import audiodrive.audio.AudioFile;
 import audiodrive.audio.AudioPlayer;
 import audiodrive.model.geometry.Vector;
@@ -74,8 +74,8 @@ public class Visualizer {
 	private static void render() {
 		if (startTime == 0) startTime = System.currentTimeMillis();
 		
-		Results left = analyzer.getResults(0);
-		Results right = analyzer.getResults(1);
+		AnalyzedChannel left = analyzer.getResults().channels.get(0);
+		AnalyzedChannel right = analyzer.getResults().channels.get(1);
 		
 		long time = System.currentTimeMillis();
 		double seconds = (time - startTime) / 1000.0;

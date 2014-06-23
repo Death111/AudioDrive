@@ -27,10 +27,20 @@ public class AudioDrive extends Application {
 		Log.info("AudioDrive");
 		AudioDrive.stage = stage;
 		
+		// FileChooser fileChooser = new FileChooser();
+		// fileChooser.setInitialDirectory(new File("music"));
+		// fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Audiodateien (*.mp3, *.ogg, *.wav)", "*.mp3", "*.ogg", "*.wav"));
+		// File selected = fileChooser.showOpenDialog(stage);
+		// if (selected == null) {
+		// Platform.exit();
+		// return;
+		// }
+		
 		Window.setBorderless(true);
 		Window.setFullscreen(true);
 		Window.open(Scene.get(TitleScene.class));
 		
+		// AudioFile file = new AudioFile(selected);
 		// TrackGenerator trackGenerator = new TrackGenerator();
 		// Track track = trackGenerator.generate(file, 25);
 		// AudioPlayer player = new AudioPlayer();

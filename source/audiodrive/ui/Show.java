@@ -61,10 +61,6 @@ public class Show {
 		throw new IllegalStateException("This class shall not be instantiated.");
 	}
 	
-	public static void demo() {
-		track(new Track(defaultVectorinates(), 0, 0, null));
-	}
-	
 	public static void track(Track track) {
 		Show.vectorinates = track.getVectors();
 		Show.points = vectorinates.size();

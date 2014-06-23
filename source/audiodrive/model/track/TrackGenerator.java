@@ -1,49 +1,30 @@
 package audiodrive.model.track;
 
-import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 
-import audiodrive.audio.AudioAnalyzer;
-import audiodrive.audio.AudioAnalyzer.Results;
-import audiodrive.audio.AudioFile;
-import audiodrive.audio.Samples;
+import audiodrive.audio.AudioAnalyzer.AnalyzedChannel;
+import audiodrive.audio.AudioAnalyzer.AnalyzedAudio;
 import audiodrive.model.Track;
 import audiodrive.model.geometry.Vector;
-import audiodrive.ui.Plot;
 import audiodrive.utilities.Log;
 
 public class TrackGenerator {
 	
-	private AudioAnalyzer analyzer = new AudioAnalyzer();
 	private int smoothing;
 	private boolean useAverage = false;
-	private Results mixed;
-	private Results left;
-	private Results right;
+	private AnalyzedChannel mixed;
+	private AnalyzedChannel left;
+	private AnalyzedChannel right;
 	
-	public Track generate(AudioFile file, int smoothing) {
+	public Track generate(AnalyzedAudio file, int smoothing) {
 		this.smoothing = smoothing;
-		Log.debug("analyzing " + file.getName() + " ...");
-		Log.debug("Samplerate: " + file.getAudioFormat().getSampleRate());
-		Log.debug("Framerate: " + file.getAudioFormat().getFrameRate());
-		analyzer.analyze(file);
-		Samples samples = analyzer.getSamples();
-		Log.debug(samples.getCount() + " samples");
-		double duration = samples.getCount() / samples.getSampleRate();
-		Log.debug(duration + " seconds");
-		
-		mixed = analyzer.getResultsOfMixedChannels();
-		left = analyzer.getResults(0);
-		right = analyzer.getResults(1);
-		Log.debug(mixed.spectralFlux.size() + " spectra");
-		
+		mixed = file.mixed;
+		left = file.channels.get(0);
+		right = file.channels.get(1);
 		List<Vector> vectorinates = useAverage ? calculateUsingAverage() : calculate();
-		
 		Log.debug(vectorinates.size() + " vectorinates");
-		// plot("Left", analyzer.getResults(0));
-		// plot("Right", analyzer.getResults(1));
-		return new Track(vectorinates, duration, smoothing, analyzer);
+		return new Track(file, vectorinates, file.duration, smoothing);
 	}
 	
 	private List<Vector> calculate() {
@@ -57,8 +38,7 @@ public class TrackGenerator {
 			if (index % smoothing == 0) {
 				vectorinates.add(new Vector(x, y, z));
 			}
-			// float difference = right.threshold.get(index) -
-			// left.threshold.get(index);
+			// float difference = right.threshold.get(index) - left.threshold.get(index);
 			float difference = right.spectralSum.get(index) - left.spectralSum.get(index);
 			int direction = Math.abs(difference) > 100 ? (int) Math.signum(difference) : 0;
 			x += 0.005;
@@ -96,19 +76,8 @@ public class TrackGenerator {
 		return vectorinates;
 	}
 	
-	public AudioAnalyzer getAnalyzer() {
-		return analyzer;
-	}
-	
 	public int getSmoothing() {
 		return smoothing;
-	}
-	
-	private static void plot(String title, Results results) {
-		Plot plot = new Plot(title, 1024, 512);
-		plot.plot(results.spectralFlux, 1, Color.red);
-		plot.plot(results.threshold, 1, Color.green);
-		plot.plot(results.peaks, 1, 0.7f, true, Color.blue);
 	}
 	
 }

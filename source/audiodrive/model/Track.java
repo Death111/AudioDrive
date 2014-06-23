@@ -2,21 +2,25 @@ package audiodrive.model;
 
 import java.util.List;
 
-import audiodrive.audio.AudioAnalyzer;
+import audiodrive.audio.AudioAnalyzer.AnalyzedAudio;
 import audiodrive.model.geometry.Vector;
 
 public class Track {
 	
+	private AnalyzedAudio file;
 	private List<Vector> vectors;
 	private double duration;
 	private int smoothing;
-	private AudioAnalyzer analyzer;
 	
-	public Track(List<Vector> vectors, double duration, int smoothing, AudioAnalyzer analyzation) {
+	public Track(AnalyzedAudio file, List<Vector> vectors, double duration, int smoothing) {
+		this.file = file;
 		this.vectors = vectors;
 		this.duration = duration;
 		this.smoothing = smoothing;
-		this.analyzer = analyzation;
+	}
+	
+	public AnalyzedAudio getFile() {
+		return file;
 	}
 	
 	public List<Vector> getVectors() {
@@ -29,10 +33,6 @@ public class Track {
 	
 	public int getSmoothing() {
 		return smoothing;
-	}
-	
-	public AudioAnalyzer getAnalyzer() {
-		return analyzer;
 	}
 	
 }

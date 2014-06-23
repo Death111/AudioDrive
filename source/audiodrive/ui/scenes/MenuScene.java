@@ -12,7 +12,7 @@ import javafx.beans.property.SimpleIntegerProperty;
 import org.lwjgl.input.Keyboard;
 
 import audiodrive.AudioDrive;
-import audiodrive.audio.AudioAnalyzer;
+import audiodrive.audio.AudioAnalyzer.AnalyzedAudio;
 import audiodrive.ui.components.Camera;
 import audiodrive.ui.components.Scene;
 import audiodrive.ui.components.Text;
@@ -23,10 +23,10 @@ public class MenuScene extends Scene {
 	private Text title;
 	private Text filename;
 	private List<Text> options;
-	private AudioAnalyzer analyzer;
+	private AnalyzedAudio audio;
 	
-	public void enter(AudioAnalyzer analyzer) {
-		this.analyzer = analyzer;
+	public void enter(AnalyzedAudio audio) {
+		this.audio = audio;
 		super.enter();
 	}
 	
@@ -34,7 +34,7 @@ public class MenuScene extends Scene {
 	public void entering() {
 		Log.info("menu");
 		title = new Text("Menu").setFont(AudioDrive.Font).setSize(48).setPosition(20, 20);
-		filename = new Text("Audiofile: " + analyzer.getResults(0).file.getName()).setFont(AudioDrive.Font).setSize(25).setPosition(50, 100);
+		filename = new Text("Audiofile: " + audio.file.getName()).setFont(AudioDrive.Font).setSize(25).setPosition(50, 100);
 		IntegerProperty y = new SimpleIntegerProperty(300);
 		options = Stream.of("Visualize (v)", "Play (p)", "Select Audio (a)", "Select Model (m)", "Exit (esc)").map(Text::new).peek(text -> {
 			text.setFont(AudioDrive.Font).setSize(25).setPosition(50, y.get());
@@ -63,7 +63,7 @@ public class MenuScene extends Scene {
 	public void keyReleased(int key, char character) {
 		switch (key) {
 		case Keyboard.KEY_V:
-			Scene.get(VisualizerScene.class).enter(analyzer);
+			Scene.get(VisualizerScene.class).enter(audio);
 			break;
 		case Keyboard.KEY_P:
 			Scene.get(GameScene.class).enter();
