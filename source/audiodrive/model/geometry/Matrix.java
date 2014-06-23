@@ -1,6 +1,9 @@
 package audiodrive.model.geometry;
 
+import java.nio.DoubleBuffer;
 import java.util.stream.Stream;
+
+import org.lwjgl.BufferUtils;
 
 import audiodrive.utilities.Matrices;
 
@@ -11,7 +14,7 @@ public class Matrix {
 	public static final Matrix Null = new Matrix();
 	public static final Matrix Identity = new Matrix().setIdentity();
 	
-	private final double[][] M = new double[Dimension][Dimension];
+	public final double[][] M = new double[Dimension][Dimension];
 	
 	public Matrix() {}
 	
@@ -42,6 +45,27 @@ public class Matrix {
 				M[x][y] = matrix[x][y];
 			}
 		}
+		return this;
+	}
+	
+	public Matrix insert0V(Vector vector) {
+		M[0][0] = vector.x();
+		M[0][1] = vector.y();
+		M[0][2] = vector.z();
+		return this;
+	}
+	
+	public Matrix insert1V(Vector vector) {
+		M[1][0] = vector.x();
+		M[1][1] = vector.y();
+		M[1][2] = vector.z();
+		return this;
+	}
+	
+	public Matrix insert2V(Vector vector) {
+		M[2][0] = vector.x();
+		M[2][1] = vector.y();
+		M[2][2] = vector.z();
 		return this;
 	}
 	
@@ -103,6 +127,17 @@ public class Matrix {
 			}
 		}
 		return matrix;
+	}
+	
+	public DoubleBuffer toDoubleBuffer() {
+		DoubleBuffer buffer = BufferUtils.createDoubleBuffer(Dimension * Dimension);
+		for (int x = 0; x < Dimension; x++) {
+			for (int y = 0; y < Dimension; y++) {
+				buffer.put(M[x][y]);
+			}
+		}
+		buffer.rewind();
+		return buffer;
 	}
 	
 	private void assertModifiable() {

@@ -9,8 +9,8 @@ import org.lwjgl.LWJGLException;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.Display;
 
-import audiodrive.audio.AudioAnalyzer.AnalyzedChannel;
 import audiodrive.audio.AudioAnalyzer.AnalyzedAudio;
+import audiodrive.audio.AudioAnalyzer.AnalyzedChannel;
 import audiodrive.model.Track;
 import audiodrive.model.geometry.Matrix;
 import audiodrive.model.geometry.Rotation;
@@ -44,7 +44,7 @@ public class Drive {
 	private static Vector translate = new Vector();
 	private static Vector look = new Vector();
 	private static Vector up = new Vector().y(1);
-	private static Vector camera = new Vector(0, 0, 2.5);
+	private static Vector camera = new Vector(0, 0, 0.01);
 	private static int cameraIndex = -1;
 	
 	private static boolean stableView = true;
@@ -59,7 +59,7 @@ public class Drive {
 	private static boolean showCoordinateSystem = false;
 	private static boolean adjustWidth = false;
 	
-	private static boolean pause = false;
+	private static boolean pause = true;
 	private static double sideSpeed;
 	private static double sideWidth;
 	private static double sidePosition;
@@ -118,6 +118,8 @@ public class Drive {
 			Display.create();
 			model = ModelLoader.loadSingleModel("models/xwing/xwing");
 			Input.addObserver(observer);
+			cameraIndex = 0;
+			updatePosition();
 			while (!Display.isCloseRequested()) {
 				Drive.tick();
 				Drive.render();
@@ -129,20 +131,6 @@ public class Drive {
 		} catch (LWJGLException exception) {
 			throw new RuntimeException(exception);
 		}
-	}
-	
-	private static List<Vector> defaultVectorinates() {
-		List<Vector> vectorinates = new ArrayList<>();
-		vectorinates.add(new Vector(-1, 0, 0));
-		vectorinates.add(new Vector(-0.75, 0.1, 0));
-		vectorinates.add(new Vector(-0.5, 0.2, 0.5));
-		vectorinates.add(new Vector(-0.25, 0.1, 0));
-		vectorinates.add(new Vector(0, -0.2, 0));
-		vectorinates.add(new Vector(0.25, 0.2, 0));
-		vectorinates.add(new Vector(0.5, 0.3, -0.2));
-		vectorinates.add(new Vector(0.75, 0.1, 0));
-		vectorinates.add(new Vector(1, 0, 0));
-		return vectorinates;
 	}
 	
 	private static void render() {
@@ -273,51 +261,18 @@ public class Drive {
 			Vector front = centerSpline.get(cameraIndex + playerOffset + 1).plus(frontSide.multiplied(sidePosition)).plus(up.multiplied(flightHeight));
 			Vector back = centerSpline.get(cameraIndex + playerOffset).plus(backSide.multiplied(sidePosition)).plus(up.multiplied(flightHeight));
 			backSide.length(0.0001);
-			
 			Vector direction = front.minus(back);
-			Matrix matrix = rotationMatrixToAlign(Vector.Z, direction);
-			Vector rotatedX = matrix.multiplied(Vector.X);
-			// deviation angle
-			double angle = rotatedX.degrees(backSide);
-			Vector positiv = matrix.rotated(angle, Vector.Z).multiplied(Vector.X);
-			Vector negativ = matrix.rotated(-angle, Vector.Z).multiplied(Vector.X);
-			boolean negate = negativ.degrees(backSide) < positiv.degrees(backSide);
-			if (negate) angle = -angle;
-			Vector alignedX = matrix.rotated(angle, Vector.Z).multiplied(Vector.X);
-			
-			if (showCoordinateSystem) {
-				// draw triangle
-				if (!fill) glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-				glBegin(GL_TRIANGLES);
-				front.gl();
-				back.plus(backSide).gl();
-				back.plus(backSide.negated()).gl();
-				glEnd();
-				if (!fill) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-				// draw side
-				glColor4d(1, 1, 0, 1);
-				glBegin(GL_LINES);
-				back.gl();
-				back.plus(backSide.normalized()).gl();
-				glEnd();
-				// draw rotated x axis
-				glColor4d(1, 0, 1, 1);
-				glBegin(GL_LINES);
-				back.gl();
-				back.plus(rotatedX.normalized()).gl();
-				glEnd();
-				// draw hopefully aligned x axis
-				glColor4d(0, 1, 1, 1);
-				glBegin(GL_LINES);
-				back.gl();
-				back.plus(alignedX.normalized()).gl();
-				glEnd();
-			}
-			
 			glPushMatrix();
 			glTranslated(back.x(), back.y(), back.z());
-			glRotateToAlign(Vector.Z, direction);
-			glRotated(angle, 0, 0, 1);
+			Vector z = direction.normalized();
+			Vector x = backSide.normalized();
+			Vector y = z.cross(x).normalize();
+			x = z.cross(y).normalize();
+			Matrix m = new Matrix().setIdentity();
+			m.insert0V(x);
+			m.insert1V(y);
+			m.insert2V(z);
+			glMultMatrix(m.toDoubleBuffer());
 			if (showCoordinateSystem) drawCoordinateSystem();
 			double scaleFactor = .0001;
 			glScaled(scaleFactor, scaleFactor, scaleFactor);
@@ -325,24 +280,7 @@ public class Drive {
 			model.render();
 			glDisable(GL_LIGHTING);
 			glPopMatrix();
-			
 		}
-	}
-	
-	private static void glRotateToAlign(Vector from, Vector to) {
-		from = from.normalized();
-		to = to.normalized();
-		Vector vector = from.cross(to).normalize();
-		double angle = Math.toDegrees(Math.acos(from.dot(to)));
-		glRotated(angle, vector.x(), vector.y(), vector.z());
-	}
-	
-	private static Matrix rotationMatrixToAlign(Vector from, Vector to) {
-		from = from.normalized();
-		to = to.normalized();
-		Vector vector = from.cross(to).normalize();
-		double angle = Math.toDegrees(Math.acos(from.dot(to)));
-		return Matrix.rotation(angle, vector);
 	}
 	
 	private static void drawCoordinateSystem() {
@@ -745,7 +683,7 @@ public class Drive {
 				calculateSplines();
 				break;
 			case Keyboard.KEY_HOME:
-				camera.set(0, 0, 2.5);
+				camera.set(0, 0, 0.01);
 				look.set(Vector.Null);
 				up.set(0, 1, 0);
 				cameraIndex = -1;
