@@ -59,7 +59,7 @@ public class Drive {
 	private static boolean showCoordinateSystem = false;
 	private static boolean adjustWidth = false;
 	
-	private static boolean pause = true;
+	private static boolean pause = false;
 	private static double sideSpeed;
 	private static double sideWidth;
 	private static double sidePosition;
@@ -114,7 +114,7 @@ public class Drive {
 			if (Fullscreen) Window.setBorderless(true);
 			else Window.setSize(1000, 1000);
 			Display.setTitle(Title);
-			// Display.setVSyncEnabled(true);
+			Display.setVSyncEnabled(true);
 			Display.create();
 			model = ModelLoader.loadSingleModel("models/xwing/xwing");
 			Input.addObserver(observer);
@@ -273,6 +273,8 @@ public class Drive {
 			m.insert1V(y);
 			m.insert2V(z);
 			glMultMatrix(m.toDoubleBuffer());
+			glRotated(roll, 0, 0, 1);
+			roll = 0;
 			if (showCoordinateSystem) drawCoordinateSystem();
 			double scaleFactor = .0001;
 			glScaled(scaleFactor, scaleFactor, scaleFactor);
@@ -594,9 +596,11 @@ public class Drive {
 				if (pause) moveBackward();
 				break;
 			case Keyboard.KEY_LEFT:
+				roll = 20;
 				moveLeft();
 				break;
 			case Keyboard.KEY_RIGHT:
+				roll = -20;
 				moveRight();
 				break;
 			case Keyboard.KEY_PRIOR:

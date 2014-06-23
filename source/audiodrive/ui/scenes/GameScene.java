@@ -4,10 +4,18 @@ import static org.lwjgl.opengl.GL11.*;
 
 import org.lwjgl.input.Keyboard;
 
+import audiodrive.model.Track;
 import audiodrive.ui.components.Scene;
 import audiodrive.utilities.Log;
 
 public class GameScene extends Scene {
+	
+	private Track track;
+	
+	public void enter(Track track) {
+		this.track = track;
+		
+	}
 	
 	@Override
 	protected void entering() {
