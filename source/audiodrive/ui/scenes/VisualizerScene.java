@@ -88,6 +88,7 @@ public class VisualizerScene extends Scene {
 	@Override
 	protected void exiting() {
 		player.stop();
+		duration = 0;
 	}
 	
 	@Override
