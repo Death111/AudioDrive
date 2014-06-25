@@ -64,6 +64,10 @@ public class Samples {
 		return iteration;
 	}
 	
+	public List<Channel> getChannels() {
+		return channels;
+	}
+	
 	public class Channel {
 		
 		private int channel;
