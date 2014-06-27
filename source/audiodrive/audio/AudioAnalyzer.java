@@ -177,6 +177,27 @@ public class AudioAnalyzer {
 			this.mixed = mixed;
 		}
 		
+		/**
+		 * Indicates the number of iterations / spectra per second.
+		 */
+		public double getIterationRate() {
+			return samples.getIterationRate();
+		}
+		
+		/**
+		 * Indicates the frequency of a specific frequency band.
+		 */
+		public double getFrequencyOfBand(int band) {
+			return (double) band / samples.getIteration() * samples.getSampleRate();
+		}
+		
+		/**
+		 * Indicates the number of frequency bands. The number depends on the
+		 */
+		public int getNumberOfBands() {
+			return mixed.spectra.get(0).length;
+		}
+		
 	}
 	
 	public static class AnalyzedChannel {
@@ -190,12 +211,12 @@ public class AudioAnalyzer {
 		public final List<Float> peaks;
 		
 		private AnalyzedChannel(Channel channel,
-		                        List<float[]> spectra,
-		                        List<Float> spectralSum,
-		                        List<Float> spectralFlux,
-		                        List<Float> threshold,
-		                        List<Float> prunnedSpectralFlux,
-		                        List<Float> peaks) {
+								List<float[]> spectra,
+								List<Float> spectralSum,
+								List<Float> spectralFlux,
+								List<Float> threshold,
+								List<Float> prunnedSpectralFlux,
+								List<Float> peaks) {
 			this.channel = channel;
 			this.spectra = Collections.unmodifiableList(spectra);
 			this.spectralSum = Collections.unmodifiableList(spectralSum);

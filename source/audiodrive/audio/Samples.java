@@ -48,6 +48,13 @@ public class Samples {
 	}
 	
 	/**
+	 * Indicates the number of iterations per second.
+	 */
+	public double getIterationRate() {
+		return (double) getSampleRate() / getIteration();
+	}
+	
+	/**
 	 * Specifies the number of samples that are processed on each iteration.
 	 */
 	public Samples setIteration(int samples) {

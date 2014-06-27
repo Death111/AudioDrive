@@ -5,9 +5,10 @@ import java.awt.Font;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;
-import audiodrive.ui.ShaderViewer;
+import audiodrive.ui.components.Scene;
 import audiodrive.ui.components.Text;
 import audiodrive.ui.components.Window;
+import audiodrive.ui.scenes.TitleScene;
 import audiodrive.utilities.Log;
 
 public class AudioDrive extends Application {
@@ -26,11 +27,10 @@ public class AudioDrive extends Application {
 		Log.info("AudioDrive");
 		AudioDrive.stage = stage;
 		
-		ShaderViewer.show("shaders/default.vs", "shaders/beam.fs");
-		
-		// Window.setBorderless(true);
-		// Window.setFullscreen(true);
-		// Window.open(Scene.get(TitleScene.class));
+		Window.setBorderless(true);
+		Window.setFullscreen(true);
+		Window.setVSyncEnabled(true);
+		Window.open(Scene.get(TitleScene.class));
 		
 		// FileChooser fileChooser = new FileChooser();
 		// fileChooser.setInitialDirectory(new File("music"));
