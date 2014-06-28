@@ -14,15 +14,12 @@ public class AudioDecoder {
 	
 	private AudioFormat.Encoding encoding = AudioFormat.Encoding.PCM_SIGNED;
 	
-	public AudioInputStream decode(AudioFile file) {
+	public AudioInputStream stream(AudioFile file) {
 		return AudioSystem.getAudioInputStream(getDecodingFormat(file), file.open());
 	}
 	
-	public Samples samplify(AudioFile file) {
-		return samplify(decode(file));
-	}
-	
-	public Samples samplify(AudioInputStream stream) {
+	public DecodedAudio decode(AudioFile file) {
+		AudioInputStream stream = stream(file);
 		AudioFormat format = stream.getFormat();
 		if (!format.getEncoding().equals(encoding)) throw new IllegalArgumentException("Encoding of the audio input stream differs from the decoder's encoding.");
 		List<byte[]> list = new LinkedList<>();
@@ -46,7 +43,7 @@ public class AudioDecoder {
 			samples.setSamplesFromBytes(bytes, 0, format, offset, sampleCount);
 			offset += sampleCount;
 		}
-		return new Samples(samples);
+		return new DecodedAudio(file, samples);
 	}
 	
 	private AudioFormat getDecodingFormat(AudioFile file) {

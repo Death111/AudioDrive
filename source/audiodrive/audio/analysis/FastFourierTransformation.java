@@ -18,13 +18,13 @@ package audiodrive.audio.analysis;
  * that when you want to analyze the spectrum of an audio buffer you will almost always use this class. One restriction of this class is that the audio buffers you want to analyze
  * must have a length that is a power of two. If you try to construct an FFT with a <code>timeSize</code> that is not a power of two, an IllegalArgumentException will be thrown.
  * 
- * @see FourierTransform
+ * @see FourierTransformation
  * @see <a href="http://www.dspguide.com/ch12.htm">The Fast Fourier Transform</a>
  * 
  * @author Damien Di Fede
  * 
  */
-public class FFT extends FourierTransform {
+public class FastFourierTransformation extends FourierTransformation {
 	/**
 	 * Constructs an FFT that will accept sample buffers that are <code>timeSize</code> long and have been recorded with a sample rate of <code>sampleRate</code>.
 	 * <code>timeSize</code> <em>must</em> be a power of two. This will throw an exception if it is not.
@@ -32,7 +32,7 @@ public class FFT extends FourierTransform {
 	 * @param timeSize the length of the sample buffers you will be analyzing
 	 * @param sampleRate the sample rate of the audio you will be analyzing
 	 */
-	public FFT(int timeSize, float sampleRate) {
+	public FastFourierTransformation(int timeSize, float sampleRate) {
 		super(timeSize, sampleRate);
 		if ((timeSize & (timeSize - 1)) != 0) throw new IllegalArgumentException("FFT: timeSize must be a power of two.");
 		buildReverseTable();

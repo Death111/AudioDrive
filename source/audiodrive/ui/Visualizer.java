@@ -10,8 +10,8 @@ import org.lwjgl.LWJGLException;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.Display;
 
+import audiodrive.audio.AnalyzedChannel;
 import audiodrive.audio.AudioAnalyzer;
-import audiodrive.audio.AudioAnalyzer.AnalyzedChannel;
 import audiodrive.audio.AudioFile;
 import audiodrive.audio.AudioPlayer;
 import audiodrive.model.geometry.Vector;
@@ -74,17 +74,17 @@ public class Visualizer {
 	private static void render() {
 		if (startTime == 0) startTime = System.currentTimeMillis();
 		
-		AnalyzedChannel left = analyzer.getResults().channels.get(0);
-		AnalyzedChannel right = analyzer.getResults().channels.get(1);
+		AnalyzedChannel left = analyzer.getResults().getChannel(0);
+		AnalyzedChannel right = analyzer.getResults().getChannel(1);
 		
 		long time = System.currentTimeMillis();
 		double seconds = (time - startTime) / 1000.0;
 		double spectraPerSecond = (double) analyzer.getSamples().getSampleRate() / analyzer.getSamples().getIteration();
 		int spectaIndex = (int) Math.round(spectraPerSecond * seconds);
-		if (spectaIndex >= left.spectra.size()) spectaIndex = 0;
+		if (spectaIndex >= left.getSpectra().size()) spectaIndex = 0;
 		
-		float[] leftSpectrum = left.spectra.get(spectaIndex);
-		float[] rightSpectrum = right.spectra.get(spectaIndex);
+		float[] leftSpectrum = left.getSpectra().get(spectaIndex);
+		float[] rightSpectrum = right.getSpectra().get(spectaIndex);
 		
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glDisable(GL_CULL_FACE);

@@ -20,12 +20,12 @@ package audiodrive.audio.analysis;
  * 
  * @author Damien Di Fede
  * 
- * @see FourierTransform
- * @see FFT
+ * @see FourierTransformation
+ * @see FastFourierTransformation
  * @see <a href="http://www.dspguide.com/ch8.htm">The Discrete Fourier Transform</a>
  * 
  */
-public class DFT extends FourierTransform {
+public class DiscreteFourierTransformation extends FourierTransformation {
 	/**
 	 * Constructs a DFT that expects audio buffers of length <code>timeSize</code> that have been recorded with a sample rate of <code>sampleRate</code>. Will throw an
 	 * IllegalArgumentException if <code>timeSize</code> is not even.
@@ -33,7 +33,7 @@ public class DFT extends FourierTransform {
 	 * @param timeSize the length of the audio buffers you plan to analyze
 	 * @param sampleRate the sample rate of the audio samples you plan to analyze
 	 */
-	public DFT(int timeSize, float sampleRate) {
+	public DiscreteFourierTransformation(int timeSize, float sampleRate) {
 		super(timeSize, sampleRate);
 		if (timeSize % 2 != 0) throw new IllegalArgumentException("DFT: timeSize must be even.");
 		buildTrigTables();

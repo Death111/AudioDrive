@@ -15,7 +15,7 @@ public class AudioPlayer {
 		stop = false;
 		new Thread(() -> {
 			try {
-				AudioInputStream stream = new AudioDecoder().decode(file);
+				AudioInputStream stream = new AudioDecoder().stream(file);
 				rawplay(stream);
 				stream.close();
 			} catch (IOException | LineUnavailableException exception) {

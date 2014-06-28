@@ -6,11 +6,10 @@ import static org.lwjgl.opengl.GL15.*;
 import java.nio.DoubleBuffer;
 
 import org.lwjgl.input.Keyboard;
-import org.lwjgl.opengl.Display;
 
 import audiodrive.AudioDrive;
-import audiodrive.audio.AudioAnalyzer.AnalyzedAudio;
-import audiodrive.audio.AudioAnalyzer.AnalyzedChannel;
+import audiodrive.audio.AnalyzedAudio;
+import audiodrive.audio.AnalyzedChannel;
 import audiodrive.audio.AudioPlayer;
 import audiodrive.model.geometry.Vector;
 import audiodrive.ui.components.Camera;
@@ -29,7 +28,6 @@ public class VisualizerScene extends Scene {
 	
 	private ShaderProgram shader;
 	private int screenVertexBuffer;
-	private double iterationRate;
 	private AnalyzedChannel leftChannel;
 	private AnalyzedChannel rightChannel;
 	private int bands;
@@ -41,7 +39,7 @@ public class VisualizerScene extends Scene {
 	
 	@Override
 	protected void entering() {
-		title = new Text("Visualizing \"" + audio.file.getName() + "\"...").setFont(AudioDrive.Font).setSize(48).setPosition(10, 10);
+		title = new Text("Visualizing \"" + audio.getFile().getName() + "\"...").setFont(AudioDrive.Font).setSize(48).setPosition(10, 10);
 		Log.info("visualizing audio...");
 		Camera.overlay(getWidth(), getHeight());
 		
@@ -52,12 +50,11 @@ public class VisualizerScene extends Scene {
 		glBindBuffer(GL_ARRAY_BUFFER, screenVertexBuffer);
 		glBufferData(GL_ARRAY_BUFFER, vertices, GL_STATIC_DRAW);
 		
-		iterationRate = audio.getIterationRate();
-		bands = Math.min(audio.getNumberOfBands(), 100);
-		leftChannel = audio.channels.get(0);
-		rightChannel = audio.channels.get(1);
+		bands = Math.min(audio.getBandCount(), 100);
+		leftChannel = audio.getChannel(0);
+		rightChannel = audio.getChannel(1);
 		player = new AudioPlayer();
-		player.play(audio.file);
+		player.play(audio.getFile());
 	}
 	
 	@Override
@@ -70,12 +67,12 @@ public class VisualizerScene extends Scene {
 		glClear(GL_COLOR_BUFFER_BIT);
 		title.render();
 		
-		int spectaIndex = (int) Math.round(iterationRate * duration);
-		if (spectaIndex >= leftChannel.spectra.size()) spectaIndex = 0;
+		int spectaIndex = (int) (audio.getIterationRate() * duration);
+		if (spectaIndex >= audio.getSpectraCount()) spectaIndex = 0;
 		
-		float[] spectrum = audio.mixed.spectra.get(spectaIndex);
-		float[] leftSpectrum = leftChannel.spectra.get(spectaIndex);
-		float[] rightSpectrum = rightChannel.spectra.get(spectaIndex);
+		float[] spectrum = audio.getMix().getSpectrum(spectaIndex);
+		float[] leftSpectrum = leftChannel.getSpectrum(spectaIndex);
+		float[] rightSpectrum = rightChannel.getSpectrum(spectaIndex);
 		
 		if (shader != null) {
 			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -102,7 +99,7 @@ public class VisualizerScene extends Scene {
 		glBegin(GL_QUADS);
 		double x = 0;
 		double y = getHeight() * 0.5;
-		double width = (double) Display.getWidth() / leftSpectrum.length;
+		double width = (double) getWidth() / audio.getBandCount();
 		for (int band = 0; band < rightSpectrum.length; band++) {
 			float amplitude = rightSpectrum[band];
 			new Vector().x(x).y(y).gl();

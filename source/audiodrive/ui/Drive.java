@@ -9,8 +9,8 @@ import org.lwjgl.LWJGLException;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.Display;
 
-import audiodrive.audio.AudioAnalyzer.AnalyzedAudio;
-import audiodrive.audio.AudioAnalyzer.AnalyzedChannel;
+import audiodrive.audio.AnalyzedAudio;
+import audiodrive.audio.AnalyzedChannel;
 import audiodrive.model.Track;
 import audiodrive.model.geometry.Matrix;
 import audiodrive.model.geometry.Rotation;
@@ -177,22 +177,22 @@ public class Drive {
 	private static long startTime;
 	
 	private static void drawAudio() {
-		AnalyzedAudio file = track.getFile();
-		if (file == null) return;
+		AnalyzedAudio audio = track.getAudio();
+		if (audio == null) return;
 		
 		if (startTime == 0) startTime = System.currentTimeMillis();
 		
-		AnalyzedChannel left = file.channels.get(0);
-		AnalyzedChannel right = file.channels.get(1);
+		AnalyzedChannel left = audio.getChannel(0);
+		AnalyzedChannel right = audio.getChannel(1);
 		
 		long time = System.currentTimeMillis();
 		double seconds = (time - startTime) / 1000.0;
-		double spectraPerSecond = (double) file.samples.getSampleRate() / file.samples.getIteration();
+		double spectraPerSecond = audio.getSampleRate() / audio.getIteration();
 		int spectaIndex = (int) Math.round(spectraPerSecond * seconds);
-		if (spectaIndex >= left.spectra.size()) spectaIndex = 0;
+		if (spectaIndex >= left.getSpectra().size()) spectaIndex = 0;
 		
-		float[] leftSpectrum = left.spectra.get(spectaIndex);
-		float[] rightSpectrum = right.spectra.get(spectaIndex);
+		float[] leftSpectrum = left.getSpectrum(spectaIndex);
+		float[] rightSpectrum = right.getSpectrum(spectaIndex);
 		
 		Camera.overlay(Display.getWidth(), Display.getHeight());
 		

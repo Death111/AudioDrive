@@ -1,13 +1,11 @@
 package audiodrive.audio;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
-import audiodrive.audio.Samples.Channel;
-import audiodrive.audio.analysis.FFT;
+import audiodrive.audio.analysis.FastFourierTransformation;
 import audiodrive.utilities.Log;
 import audiodrive.utilities.Stopwatch;
 
@@ -20,7 +18,7 @@ public class AudioAnalyzer {
 	private Stopwatch stopwatch = new Stopwatch();
 	
 	private AudioFile file;
-	private Samples samples;
+	private DecodedAudio samples;
 	private AnalyzedAudio results;
 	
 	/**
@@ -57,15 +55,36 @@ public class AudioAnalyzer {
 		done.set(false);
 		Log.debug("analyzing \"%s\"...", file.getName());
 		stopwatch.start();
-		samples = new AudioDecoder().samplify(file);
+		samples = new AudioDecoder().decode(file);
 		Log.trace("decoding took %.3f seconds", stopwatch.getSeconds());
-		float duration = samples.getSampleCount() / samples.getSampleRate();
-		List<Channel> channels = samples.getChannels();
-		channels.add(samples.mixed());
+		double duration = samples.getSampleCount() / samples.getSampleRate();
+		ArrayList<Channel> channels = new ArrayList<>(samples.getChannels());
+		channels.add(samples.getMix());
 		List<AnalyzedChannel> analyzedChannels = channels.stream().parallel().map(this::analyze).collect(Collectors.toList());
 		AnalyzedChannel analyzedMix = analyzedChannels.remove(analyzedChannels.size() - 1);
-		results = new AnalyzedAudio(file, duration, samples, analyzedChannels, analyzedMix);
+		results = new AnalyzedAudio(samples, duration, analyzedChannels, analyzedMix);
 		Log.debug("analyzation took %.3f seconds total", stopwatch.stop());
+		int min = (int) (results.getDuration() / 60);
+		int sec = (int) (results.getDuration() - min * 60);
+		Log.debug(
+			"analyzation results:"
+				+ "%n%s min %s sec duration"
+				+ "%n%s channels"
+				+ "%n%s samples per second"
+				+ "%n%s samples"
+				+ "%n%s spectra"
+				+ "%n%s bands"
+				+ "%n%s samples per iteration"
+				+ "%n%.3f iterations per second",
+			min,
+			sec,
+			results.getChannelCount(),
+			results.getSampleRate(),
+			results.getSampleCount(),
+			results.getSpectraCount(),
+			results.getBandCount(),
+			results.getIteration(),
+			results.getIterationRate());
 		done.set(true);
 		return this;
 	}
@@ -89,8 +108,8 @@ public class AudioAnalyzer {
 	
 	private List<float[]> calculateSpectra(Channel channel) {
 		return channel.stream().parallel().map(samples -> {
-			FFT fft = new FFT(channel.getIteration(), channel.getSampleRate());
-			fft.window(FFT.HAMMING);
+			FastFourierTransformation fft = new FastFourierTransformation(channel.getIteration(), channel.getSampleRate());
+			fft.window(FastFourierTransformation.HAMMING);
 			fft.forward(samples);
 			return fft.getSpectrum();
 		}).collect(Collectors.toList());
@@ -157,79 +176,12 @@ public class AudioAnalyzer {
 		return peaks;
 	}
 	
-	public Samples getSamples() {
+	public Audio getSamples() {
 		return samples;
 	}
 	
 	public AnalyzedAudio getResults() {
 		return results;
-	}
-	
-	public static class AnalyzedAudio {
-		
-		public final AudioFile file;
-		public final float duration;
-		public final Samples samples;
-		public final List<AnalyzedChannel> channels;
-		public final AnalyzedChannel mixed;
-		
-		private AnalyzedAudio(AudioFile file, float duration, Samples samples, List<AnalyzedChannel> channels, AnalyzedChannel mixed) {
-			this.file = file;
-			this.duration = duration;
-			this.samples = samples;
-			this.channels = Collections.unmodifiableList(channels);
-			this.mixed = mixed;
-		}
-		
-		/**
-		 * Indicates the number of iterations / spectra per second.
-		 */
-		public double getIterationRate() {
-			return samples.getIterationRate();
-		}
-		
-		/**
-		 * Indicates the frequency of a specific frequency band.
-		 */
-		public double getFrequencyOfBand(int band) {
-			return (double) band / samples.getIteration() * samples.getSampleRate();
-		}
-		
-		/**
-		 * Indicates the number of frequency bands. The number depends on the
-		 */
-		public int getNumberOfBands() {
-			return mixed.spectra.get(0).length;
-		}
-		
-	}
-	
-	public static class AnalyzedChannel {
-		
-		public final Channel channel;
-		public final List<float[]> spectra;
-		public final List<Float> spectralSum;
-		public final List<Float> spectralFlux;
-		public final List<Float> threshold;
-		public final List<Float> prunnedSpectralFlux;
-		public final List<Float> peaks;
-		
-		private AnalyzedChannel(Channel channel,
-								List<float[]> spectra,
-								List<Float> spectralSum,
-								List<Float> spectralFlux,
-								List<Float> threshold,
-								List<Float> prunnedSpectralFlux,
-								List<Float> peaks) {
-			this.channel = channel;
-			this.spectra = Collections.unmodifiableList(spectra);
-			this.spectralSum = Collections.unmodifiableList(spectralSum);
-			this.spectralFlux = Collections.unmodifiableList(spectralFlux);
-			this.threshold = Collections.unmodifiableList(threshold);
-			this.prunnedSpectralFlux = Collections.unmodifiableList(prunnedSpectralFlux);
-			this.peaks = Collections.unmodifiableList(peaks);
-		}
-		
 	}
 	
 }

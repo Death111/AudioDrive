@@ -12,7 +12,7 @@ import javafx.beans.property.SimpleIntegerProperty;
 import org.lwjgl.input.Keyboard;
 
 import audiodrive.AudioDrive;
-import audiodrive.audio.AudioAnalyzer.AnalyzedAudio;
+import audiodrive.audio.AnalyzedAudio;
 import audiodrive.ui.components.Camera;
 import audiodrive.ui.components.Scene;
 import audiodrive.ui.components.Text;
@@ -34,7 +34,7 @@ public class MenuScene extends Scene {
 	public void entering() {
 		Log.info("menu");
 		title = new Text("Menu").setFont(AudioDrive.Font).setSize(48).setPosition(20, 20);
-		filename = new Text("Audiofile: " + audio.file.getName()).setFont(AudioDrive.Font).setSize(25).setPosition(50, 100);
+		filename = new Text("Audiofile: " + audio.getFile().getName()).setFont(AudioDrive.Font).setSize(25).setPosition(50, 100);
 		IntegerProperty y = new SimpleIntegerProperty(300);
 		options = Stream.of("Visualize (v)", "Play (p)", "Select Audio (a)", "Select Model (m)", "Exit (esc)").map(Text::new).peek(text -> {
 			text.setFont(AudioDrive.Font).setSize(25).setPosition(50, y.get());

@@ -79,7 +79,7 @@ package audiodrive.audio.analysis;
  * @author Damien Di Fede
  * @see <a href="http://www.dspguide.com/ch8.htm">The Discrete Fourier Transform</a>
  */
-public abstract class FourierTransform {
+public abstract class FourierTransformation {
 	/** A constant indicating no window should be used on sample buffers. */
 	public static final int NONE = 0;
 	/** A constant indicating a Hamming window should be used on sample buffers. */
@@ -106,7 +106,7 @@ public abstract class FourierTransform {
 	 * @param ts the length of the buffers that will be analyzed
 	 * @param sr the sample rate of the samples that will be analyzed
 	 */
-	FourierTransform(int ts, float sr) {
+	FourierTransformation(int ts, float sr) {
 		timeSize = ts;
 		sampleRate = (int) sr;
 		bandWidth = (2f / timeSize) * ((float) sampleRate / 2f);
@@ -471,8 +471,11 @@ public abstract class FourierTransform {
 	 */
 	public void forward(float[] buffer, int startAt) {
 		if (buffer.length - startAt < timeSize) {
-			throw new IllegalArgumentException("FourierTransform.forward: not enough samples in the buffer between " + startAt + " and " + buffer.length
-					+ " to perform a transform.");
+			throw new IllegalArgumentException("FourierTransform.forward: not enough samples in the buffer between "
+				+ startAt
+				+ " and "
+				+ buffer.length
+				+ " to perform a transform.");
 		}
 		
 		// copy the section of samples we want to analyze
