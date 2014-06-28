@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import audiodrive.audio.Samples.Channel;
 import audiodrive.audio.analysis.FFT;
 import audiodrive.utilities.Log;
+import audiodrive.utilities.Stopwatch;
 
 public class AudioAnalyzer {
 	
@@ -16,6 +17,7 @@ public class AudioAnalyzer {
 	private float thresholdMultiplier = 1.8f;
 	
 	private AtomicBoolean done = new AtomicBoolean();
+	private Stopwatch stopwatch = new Stopwatch();
 	
 	private AudioFile file;
 	private Samples samples;
@@ -49,47 +51,49 @@ public class AudioAnalyzer {
 		return done.get();
 	}
 	
-	private long timestamp;
-	
 	public AudioAnalyzer analyze(AudioFile file) {
-		done.set(false);
-		Log.debug("analyzing \"%s\"...", file.getName());
-		timestamp = System.nanoTime();
 		if (file.equals(this.file)) return null;
 		this.file = file;
+		done.set(false);
+		Log.debug("analyzing \"%s\"...", file.getName());
+		stopwatch.start();
 		samples = new AudioDecoder().samplify(file);
-		float duration = samples.getCount() / samples.getSampleRate();
+		Log.trace("decoding took %.3f seconds", stopwatch.getSeconds());
+		float duration = samples.getSampleCount() / samples.getSampleRate();
 		List<Channel> channels = samples.getChannels();
 		channels.add(samples.mixed());
 		List<AnalyzedChannel> analyzedChannels = channels.stream().parallel().map(this::analyze).collect(Collectors.toList());
 		AnalyzedChannel analyzedMix = analyzedChannels.remove(analyzedChannels.size() - 1);
 		results = new AnalyzedAudio(file, duration, samples, analyzedChannels, analyzedMix);
-		Long time = System.nanoTime();
-		Log.debug("analyzation took %.3f seconds", (time - timestamp) / 1000000000.0);
+		Log.debug("analyzation took %.3f seconds total", stopwatch.stop());
 		done.set(true);
 		return this;
 	}
 	
 	private AnalyzedChannel analyze(Channel channel) {
+		Stopwatch stopwatch = new Stopwatch().start();
 		List<float[]> spectra = calculateSpectra(channel);
+		Log.trace("spectra calculation of %s took %.3f seconds", channel, stopwatch.getSeconds());
 		List<Float> spectralSum = calculateSpectralSum(spectra, channel);
+		Log.trace("spectralSum calculation of %s took %.3f seconds", channel, stopwatch.getSeconds());
 		List<Float> spectralFlux = calculateSpectralFlux(spectra, channel);
+		Log.trace("spectralFlux calculation of %s took %.3f seconds", channel, stopwatch.getSeconds());
 		List<Float> threshold = calculateThreshold(spectralFlux);
+		Log.trace("threshold calculation of %s took %.3f seconds", channel, stopwatch.getSeconds());
 		List<Float> prunnedSpectralFlux = calculatePrunnedSpectralFlux(spectralFlux, threshold);
+		Log.trace("prunnedSpectralFlux of %s calculation took %.3f seconds", channel, stopwatch.getSeconds());
 		List<Float> peaks = calculatePeaks(prunnedSpectralFlux);
+		Log.trace("peaks calculation of %s took %.3f seconds", channel, stopwatch.getSeconds());
 		return new AnalyzedChannel(channel, spectra, spectralSum, spectralFlux, threshold, prunnedSpectralFlux, peaks);
 	}
 	
 	private List<float[]> calculateSpectra(Channel channel) {
-		List<float[]> spectra = new ArrayList<float[]>();
-		while (channel.hasMoreSamples()) {
-			float[] samples = channel.nextSamples();
+		return channel.stream().parallel().map(samples -> {
 			FFT fft = new FFT(channel.getIteration(), channel.getSampleRate());
 			fft.window(FFT.HAMMING);
 			fft.forward(samples);
-			spectra.add(fft.getSpectrum());
-		}
-		return spectra;
+			return fft.getSpectrum();
+		}).collect(Collectors.toList());
 	}
 	
 	private List<Float> calculateSpectralSum(List<float[]> spectra, Channel channel) {
