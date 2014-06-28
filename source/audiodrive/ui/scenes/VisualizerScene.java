@@ -53,7 +53,7 @@ public class VisualizerScene extends Scene {
 		glBufferData(GL_ARRAY_BUFFER, vertices, GL_STATIC_DRAW);
 		
 		iterationRate = audio.getIterationRate();
-		bands = Math.min(audio.getNumberOfBands(), 25);
+		bands = Math.min(audio.getNumberOfBands(), 100);
 		leftChannel = audio.channels.get(0);
 		rightChannel = audio.channels.get(1);
 		player = new AudioPlayer();

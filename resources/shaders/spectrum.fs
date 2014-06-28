@@ -25,7 +25,8 @@ void limit() {
 
 float band(Band band, vec2 pos) {
 	float wave = scale * band.amplitude * sin(2.0 * PI * band.frequency * pos.x) / 2.05;
-	return clamp(intensity * band.amplitude * band.frequency * 0.002, 0.001 + 0.001 / scale, 5.0) * scale / abs(wave - pos.y);
+	float light = clamp(intensity * band.amplitude * band.frequency * 0.002, 0.001 + 0.001 / scale, 5.0) * scale / abs(wave - pos.y);
+	return light * light;
 }
 
 void main( void ) {
