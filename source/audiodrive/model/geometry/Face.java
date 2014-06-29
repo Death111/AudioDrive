@@ -10,10 +10,10 @@ import java.util.List;
  *
  */
 public class Face {
-	public List<VertexObject> vertexes;
+	public List<Vertex> vertexes;
 	
-	public Face(VertexObject vo1, VertexObject vo2, VertexObject vo3) {
-		vertexes = new ArrayList<VertexObject>(3);
+	public Face(Vertex vo1, Vertex vo2, Vertex vo3) {
+		vertexes = new ArrayList<Vertex>(3);
 		vertexes.add(vo1);
 		vertexes.add(vo2);
 		vertexes.add(vo3);

@@ -1,9 +1,6 @@
 package audiodrive.ui.scenes;
 
 import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.opengl.GL15.*;
-
-import java.nio.DoubleBuffer;
 
 import org.lwjgl.input.Keyboard;
 
@@ -11,6 +8,7 @@ import audiodrive.AudioDrive;
 import audiodrive.audio.AnalyzedAudio;
 import audiodrive.audio.AnalyzedChannel;
 import audiodrive.audio.AudioPlayer;
+import audiodrive.model.buffer.VertexBuffer;
 import audiodrive.model.geometry.Vector;
 import audiodrive.ui.components.Camera;
 import audiodrive.ui.components.Scene;
@@ -26,8 +24,8 @@ public class VisualizerScene extends Scene {
 	private AudioPlayer player;
 	private double duration;
 	
+	private VertexBuffer canvas;
 	private ShaderProgram shader;
-	private int screenVertexBuffer;
 	private AnalyzedChannel leftChannel;
 	private AnalyzedChannel rightChannel;
 	private int bands;
@@ -39,16 +37,11 @@ public class VisualizerScene extends Scene {
 	
 	@Override
 	protected void entering() {
-		title = new Text("Visualizing \"" + audio.getFile().getName() + "\"...").setFont(AudioDrive.Font).setSize(48).setPosition(10, 10);
 		Log.info("visualizing audio...");
-		Camera.overlay(getWidth(), getHeight());
-		
+		title = new Text("Visualizing \"" + audio.getFile().getName() + "\"...").setFont(AudioDrive.Font).setSize(48).setPosition(10, 10);
+		canvas = new VertexBuffer(Buffers.create(0, 0, 0, getHeight(), getWidth(), getHeight(), getWidth(), 0)).step(2).mode(GL_QUADS);
 		shader = new ShaderProgram("shaders/default.vs", "shaders/spectrum.fs");
-		
-		screenVertexBuffer = glGenBuffers();
-		DoubleBuffer vertices = Buffers.create(new Vector(0, getHeight(), 0), new Vector(getWidth(), getHeight(), 0), new Vector(getWidth(), 0, 0), new Vector());
-		glBindBuffer(GL_ARRAY_BUFFER, screenVertexBuffer);
-		glBufferData(GL_ARRAY_BUFFER, vertices, GL_STATIC_DRAW);
+		Camera.overlay(getWidth(), getHeight());
 		
 		bands = Math.min(audio.getBandCount(), 100);
 		leftChannel = audio.getChannel(0);
@@ -87,10 +80,7 @@ public class VisualizerScene extends Scene {
 				shader.uniform("bands[" + i + "].amplitude").set(spectrum[i]);
 				shader.uniform("bands[" + i + "].frequency").set(audio.getFrequencyOfBand(i) * 0.01);
 			}
-			glEnableClientState(GL_VERTEX_ARRAY);
-			glBindBuffer(GL_ARRAY_BUFFER, screenVertexBuffer);
-			glVertexPointer(3, GL_DOUBLE, 0, 0);
-			glDrawArrays(GL_QUADS, 0, 4);
+			canvas.draw();
 			shader.unbind();
 		}
 		
@@ -122,6 +112,7 @@ public class VisualizerScene extends Scene {
 	
 	@Override
 	protected void exiting() {
+		canvas.delete();
 		player.stop();
 		shader.delete();
 		shader = null;

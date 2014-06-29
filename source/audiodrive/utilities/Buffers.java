@@ -8,6 +8,7 @@ import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.nio.LongBuffer;
 import java.nio.ShortBuffer;
+import java.util.List;
 
 import org.lwjgl.PointerBuffer;
 
@@ -23,15 +24,32 @@ public class Buffers {
 		throw new IllegalStateException("This class shall not be instantiated.");
 	}
 	
-	public static DoubleBuffer create(Vector... vectors) {
-		double[] values = new double[vectors.length * 3];
-		int index = 0;
+	/**
+	 * Construct a direct native-ordered FloatBuffer with the specified vertices.
+	 * 
+	 * @param vectors the buffer elements
+	 * @return a FloatBuffer
+	 */
+	public static FloatBuffer create(List<Vector> vectors) {
+		FloatBuffer buffer = createFloatBuffer(vectors.size() * 3);
+		vectors.stream().map(Vector::toFloats).forEach(buffer::put);
+		buffer.flip();
+		return buffer;
+	}
+	
+	/**
+	 * Construct a direct native-ordered FloatBuffer with the specified vertices.
+	 * 
+	 * @param vectors the buffer elements
+	 * @return a FloatBuffer
+	 */
+	public static FloatBuffer create(Vector... vectors) {
+		FloatBuffer buffer = createFloatBuffer(vectors.length * 3);
 		for (Vector vector : vectors) {
-			values[index++] = vector.x();
-			values[index++] = vector.y();
-			values[index++] = vector.z();
+			buffer.put(vector.toFloats());
 		}
-		return create(values);
+		buffer.flip();
+		return buffer;
 	}
 	
 	/**

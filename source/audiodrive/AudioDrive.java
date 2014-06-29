@@ -32,25 +32,6 @@ public class AudioDrive extends Application {
 		Window.setVSyncEnabled(true);
 		Window.open(Scene.get(TitleScene.class));
 		
-		// FileChooser fileChooser = new FileChooser();
-		// fileChooser.setInitialDirectory(new File("music"));
-		// fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Audiodateien (*.mp3, *.ogg, *.wav)", "*.mp3", "*.ogg", "*.wav"));
-		// File selected = fileChooser.showOpenDialog(stage);
-		// if (selected == null) {
-		// Platform.exit();
-		// return;
-		// }
-		// AudioFile file = new AudioFile(selected);
-		// AudioAnalyzer analyzer = new AudioAnalyzer();
-		// analyzer.analyze(file);
-		// TrackGenerator trackGenerator = new TrackGenerator();
-		// Track track = trackGenerator.generate(analyzer.getResults(), 25);
-		// AudioPlayer player = new AudioPlayer();
-		// Show.track(track);
-		// player.play(file);
-		// Drive.track(track);
-		// player.stop();
-		
 		Platform.exit();
 	}
 	

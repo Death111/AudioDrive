@@ -5,7 +5,6 @@ import java.util.List;
 
 import audiodrive.audio.AnalyzedAudio;
 import audiodrive.audio.AnalyzedChannel;
-import audiodrive.model.Track;
 import audiodrive.model.geometry.Vector;
 import audiodrive.utilities.Log;
 

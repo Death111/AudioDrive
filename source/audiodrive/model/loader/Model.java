@@ -6,7 +6,7 @@ import org.lwjgl.opengl.GL11;
 import org.newdawn.slick.opengl.Texture;
 
 import audiodrive.model.geometry.Face;
-import audiodrive.model.geometry.VertexObject;
+import audiodrive.model.geometry.Vertex;
 
 public class Model {
 	
@@ -32,9 +32,9 @@ public class Model {
 		}
 		
 		for (Face face : faces) {
-			List<VertexObject> vertexes = face.vertexes;
+			List<Vertex> vertexes = face.vertexes;
 			GL11.glBegin(GL11.GL_TRIANGLES);
-			for (VertexObject vertexObject : vertexes) {
+			for (Vertex vertexObject : vertexes) {
 				vertexObject.gl();
 			}
 			GL11.glEnd();

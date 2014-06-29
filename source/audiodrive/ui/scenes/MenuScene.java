@@ -13,6 +13,8 @@ import org.lwjgl.input.Keyboard;
 
 import audiodrive.AudioDrive;
 import audiodrive.audio.AnalyzedAudio;
+import audiodrive.model.track.Track;
+import audiodrive.model.track.TrackGenerator;
 import audiodrive.ui.components.Camera;
 import audiodrive.ui.components.Scene;
 import audiodrive.ui.components.Text;
@@ -66,7 +68,9 @@ public class MenuScene extends Scene {
 			Scene.get(VisualizerScene.class).enter(audio);
 			break;
 		case Keyboard.KEY_P:
-			Scene.get(GameScene.class).enter();
+			TrackGenerator trackGenerator = new TrackGenerator();
+			Track track = trackGenerator.generate(audio, 25);
+			Scene.get(GameScene.class).enter(track);
 			break;
 		case Keyboard.KEY_A:
 			Scene.get(AudioSelectionScene.class).enter();

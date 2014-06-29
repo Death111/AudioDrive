@@ -16,7 +16,7 @@ import org.newdawn.slick.opengl.TextureLoader;
 import audiodrive.model.geometry.Face;
 import audiodrive.model.geometry.TextureCoordinate;
 import audiodrive.model.geometry.Vector;
-import audiodrive.model.geometry.VertexObject;
+import audiodrive.model.geometry.Vertex;
 import audiodrive.utilities.Log;
 
 /**
@@ -146,9 +146,9 @@ public class ModelLoader {
 					String[] vertex2 = splitted[2].split("/");
 					String[] vertex3 = splitted[3].split("/");
 					
-					VertexObject vertexObject1 = getVertexObject(vectors, normals, textureCoordinates, vertex1);
-					VertexObject vertexObject2 = getVertexObject(vectors, normals, textureCoordinates, vertex2);
-					VertexObject vertexObject3 = getVertexObject(vectors, normals, textureCoordinates, vertex3);
+					Vertex vertexObject1 = getVertexObject(vectors, normals, textureCoordinates, vertex1);
+					Vertex vertexObject2 = getVertexObject(vectors, normals, textureCoordinates, vertex2);
+					Vertex vertexObject3 = getVertexObject(vectors, normals, textureCoordinates, vertex3);
 					
 					Face face = new Face(vertexObject1, vertexObject2, vertexObject3);
 					faces.add(face);
@@ -214,9 +214,9 @@ public class ModelLoader {
 		return texture;
 	}
 	
-	private static VertexObject getVertexObject(final List<Vector> vectors, final List<Vector> normals, final List<TextureCoordinate> textureCoordinates, String[] vertex1) {
+	private static Vertex getVertexObject(final List<Vector> vectors, final List<Vector> normals, final List<TextureCoordinate> textureCoordinates, String[] vertex1) {
 		
-		VertexObject v1 = new VertexObject();
+		Vertex v1 = new Vertex();
 		
 		// Parse Vertex
 		try {

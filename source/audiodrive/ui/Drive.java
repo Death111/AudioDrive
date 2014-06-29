@@ -2,8 +2,14 @@ package audiodrive.ui;
 
 import static org.lwjgl.opengl.GL11.*;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+
+import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 
 import org.lwjgl.LWJGLException;
 import org.lwjgl.input.Keyboard;
@@ -11,19 +17,55 @@ import org.lwjgl.opengl.Display;
 
 import audiodrive.audio.AnalyzedAudio;
 import audiodrive.audio.AnalyzedChannel;
-import audiodrive.model.Track;
+import audiodrive.audio.AudioAnalyzer;
+import audiodrive.audio.AudioFile;
+import audiodrive.audio.AudioPlayer;
 import audiodrive.model.geometry.Matrix;
 import audiodrive.model.geometry.Rotation;
 import audiodrive.model.geometry.Vector;
 import audiodrive.model.loader.Model;
 import audiodrive.model.loader.ModelLoader;
+import audiodrive.model.track.Track;
+import audiodrive.model.track.TrackGenerator;
 import audiodrive.model.track.interpolation.CatmullRom;
 import audiodrive.ui.components.Camera;
 import audiodrive.ui.components.Window;
 import audiodrive.ui.control.Input;
 import audiodrive.utilities.Buffers;
+import audiodrive.utilities.Log;
 
-public class Drive {
+public class Drive extends Application {
+	
+	public static void main(String[] args) {
+		launch(args);
+	}
+	
+	@Override
+	public void start(Stage stage) throws Exception {
+		Log.info("AudioDrive - Test");
+		
+		FileChooser fileChooser = new FileChooser();
+		fileChooser.setInitialDirectory(new File("music"));
+		fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Audiodateien (*.mp3, *.ogg, *.wav)", "*.mp3", "*.ogg", "*.wav"));
+		File selected = fileChooser.showOpenDialog(stage);
+		if (selected == null) {
+			Platform.exit();
+			return;
+		}
+		
+		AudioFile file = new AudioFile(selected);
+		AudioAnalyzer analyzer = new AudioAnalyzer();
+		analyzer.analyze(file);
+		TrackGenerator trackGenerator = new TrackGenerator();
+		Track track = trackGenerator.generate(analyzer.getResults(), 25);
+		AudioPlayer player = new AudioPlayer();
+		Show.track(track);
+		player.play(file);
+		Drive.track(track);
+		player.stop();
+		
+		Platform.exit();
+	}
 	
 	/** Application title. */
 	public static final String Title = "Spline";
@@ -94,11 +136,6 @@ public class Drive {
 		sightDistance = 0.005;
 		sightHeight = 0.001;
 		flightHeight = 0.001;
-	}
-	
-	/** Private constructor to prevent instantiation. */
-	private Drive() {
-		throw new IllegalStateException("This class shall not be instantiated.");
 	}
 	
 	public static void track(Track track) {

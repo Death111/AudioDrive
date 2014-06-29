@@ -1,12 +1,8 @@
 package audiodrive.ui.scenes;
 
 import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.opengl.GL15.*;
-
-import java.nio.DoubleBuffer;
-
 import audiodrive.AudioDrive;
-import audiodrive.model.geometry.Vector;
+import audiodrive.model.buffer.VertexBuffer;
 import audiodrive.ui.components.Camera;
 import audiodrive.ui.components.Scene;
 import audiodrive.ui.components.Text;
@@ -17,18 +13,16 @@ public class TitleScene extends Scene {
 	
 	private Text title;
 	private double duration;
+	private VertexBuffer canvas;
 	private ShaderProgram shader;
-	private int vertexBuffer;
 	
 	@Override
 	public void entering() {
 		title = new Text(AudioDrive.Title).setFont(AudioDrive.Font).setSize(48).setCentered(getWidth() / 2, getHeight() / 2);
+		canvas = new VertexBuffer(Buffers.create(0, 0, 0, getHeight(), getWidth(), getHeight(), getWidth(), 0)).step(2).mode(GL_QUADS);
 		shader = new ShaderProgram("shaders/default.vs", "shaders/title.fs");
-		vertexBuffer = glGenBuffers();
-		DoubleBuffer vertices = Buffers.create(new Vector(0, getHeight(), 0), new Vector(getWidth(), getHeight(), 0), new Vector(getWidth(), 0, 0), new Vector());
-		glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
-		glBufferData(GL_ARRAY_BUFFER, vertices, GL_STATIC_DRAW);
 		Camera.overlay(getWidth(), getHeight());
+		glEnableClientState(GL_VERTEX_ARRAY);
 	}
 	
 	@Override
@@ -43,16 +37,14 @@ public class TitleScene extends Scene {
 		shader.bind();
 		shader.uniform("time").set(duration);
 		shader.uniform("resolution").set((float) getWidth(), (float) getHeight());
-		glEnableClientState(GL_VERTEX_ARRAY);
-		glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
-		glVertexPointer(3, GL_DOUBLE, 0, 0);
-		glDrawArrays(GL_QUADS, 0, 4);
+		canvas.draw();
 		shader.unbind();
 		title.render();
 	}
 	
 	@Override
 	public void exiting() {
+		canvas.delete();
 		shader.delete();
 		shader = null;
 		title = null;

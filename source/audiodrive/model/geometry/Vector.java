@@ -256,6 +256,10 @@ public class Vector implements Cloneable {
 		return new double[]{x, y, z, 1};
 	}
 	
+	public float[] toFloats() {
+		return new float[]{(float) x, (float) y, (float) z};
+	}
+	
 	public void gl() {
 		glVertex3d(x(), y(), z());
 	}
