@@ -24,22 +24,25 @@ public class AudioDecoder {
 		if (!format.getEncoding().equals(encoding)) throw new IllegalArgumentException("Encoding of the audio input stream differs from the decoder's encoding.");
 		List<byte[]> list = new LinkedList<>();
 		int bufferSize = 1024 * format.getFrameSize();
+		int byteCount = 0;
 		try {
 			while (true) {
 				byte[] bytes = new byte[bufferSize];
 				int n = stream.read(bytes, 0, bytes.length);
 				if (n == -1) break;
 				list.add(bytes);
+				byteCount += n;
 			}
 			stream.close();
 		} catch (IOException exception) {
 			exception.printStackTrace();
 		}
-		int totalSampleCount = list.size() * bufferSize / format.getFrameSize();
+		int totalSampleCount = byteCount / format.getFrameSize();
 		FloatSampleBuffer samples = new FloatSampleBuffer(format.getChannels(), totalSampleCount, format.getSampleRate());
 		int offset = 0;
 		for (byte[] bytes : list) {
-			int sampleCount = bytes.length / format.getFrameSize();
+			int remaining = totalSampleCount - offset;
+			int sampleCount = Math.min(bytes.length / format.getFrameSize(), remaining);
 			samples.setSamplesFromBytes(bytes, 0, format, offset, sampleCount);
 			offset += sampleCount;
 		}

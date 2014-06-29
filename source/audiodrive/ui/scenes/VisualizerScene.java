@@ -68,7 +68,7 @@ public class VisualizerScene extends Scene {
 		title.render();
 		
 		int spectaIndex = (int) (audio.getIterationRate() * duration);
-		if (spectaIndex >= audio.getSpectraCount()) spectaIndex = 0;
+		if (spectaIndex >= audio.getSpectraCount()) spectaIndex = audio.getSpectraCount() - 1;
 		
 		float[] spectrum = audio.getMix().getSpectrum(spectaIndex);
 		float[] leftSpectrum = leftChannel.getSpectrum(spectaIndex);

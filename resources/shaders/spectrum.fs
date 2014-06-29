@@ -35,7 +35,7 @@ void main( void ) {
 	pos.y += - 0.5 - position;
 	float spectrum = 0.0;
 	for (int n = 0; n < numberOfBands; n++) {
-		spectrum += band(bands[n], pos);
+        if(bands[n].amplitude != 0.0) spectrum += band(bands[n], pos);
 	}
 	if(numberOfBands == 0) spectrum += band(Band(1.0, 1.0), pos);
 	gl_FragColor = vec4(color * spectrum, spectrum);

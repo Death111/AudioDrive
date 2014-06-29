@@ -64,11 +64,11 @@ public class AudioAnalyzer {
 		AnalyzedChannel analyzedMix = analyzedChannels.remove(analyzedChannels.size() - 1);
 		results = new AnalyzedAudio(samples, duration, analyzedChannels, analyzedMix);
 		Log.debug("analyzation took %.3f seconds total", stopwatch.stop());
-		int min = (int) (results.getDuration() / 60);
-		int sec = (int) (results.getDuration() - min * 60);
+		int minutes = (int) (results.getDuration() / 60);
+		int seconds = (int) Math.round(results.getDuration() - minutes * 60);
 		Log.debug(
 			"analyzation results:"
-				+ "%n%s min %s sec duration"
+				+ "%n%s minutes %s seconds duration"
 				+ "%n%s channels"
 				+ "%n%s samples per second"
 				+ "%n%s samples"
@@ -76,8 +76,8 @@ public class AudioAnalyzer {
 				+ "%n%s bands"
 				+ "%n%s samples per iteration"
 				+ "%n%.3f iterations per second",
-			min,
-			sec,
+			minutes,
+			seconds,
 			results.getChannelCount(),
 			results.getSampleRate(),
 			results.getSampleCount(),
