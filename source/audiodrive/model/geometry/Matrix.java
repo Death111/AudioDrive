@@ -105,6 +105,17 @@ public class Matrix {
 		return new Matrix().setIdentity().insert(Matrices.rotation(Math.toRadians(angle), vector.toArray()));
 	}
 	
+	public Matrix align(Vector direction, Vector up) {
+		Vector z = direction.normalized();
+		Vector y = up;
+		Vector x = z.cross(y).normalize();
+		y = z.cross(x).normalize();
+		insert0V(x);
+		insert1V(y);
+		insert2V(z);
+		return this;
+	}
+	
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();

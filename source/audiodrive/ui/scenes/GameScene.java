@@ -4,16 +4,21 @@ import static org.lwjgl.opengl.GL11.*;
 
 import org.lwjgl.input.Keyboard;
 
+import audiodrive.model.Player;
 import audiodrive.model.geometry.Rotation;
 import audiodrive.model.geometry.Vector;
+import audiodrive.model.loader.ModelLoader;
 import audiodrive.model.track.Track;
 import audiodrive.ui.components.Camera;
 import audiodrive.ui.components.Scene;
+import audiodrive.utilities.Buffers;
 import audiodrive.utilities.Log;
 
 public class GameScene extends Scene {
 	
 	private Track track;
+	private Player player;
+	
 	private Rotation rotation = new Rotation();
 	private Vector translate = new Vector();
 	
@@ -28,7 +33,18 @@ public class GameScene extends Scene {
 	@Override
 	protected void entering() {
 		Log.info("starting game...");
-		track.update();
+		player = new Player().model(ModelLoader.loadSingleModel("models/xwing/xwing"));
+		Vector current = track.spline().get(0);
+		Vector next = track.spline().get(1);
+		Vector position = current.plus(0, 0.001, 0);
+		Vector direction = next.minus(current);
+		Vector up = Vector.Y;
+		player.model().scale(0.0001).position(position).align(direction, up);
+	}
+	
+	@Override
+	protected void update(double elapsed) {
+		super.update(elapsed);
 	}
 	
 	@Override
@@ -38,6 +54,11 @@ public class GameScene extends Scene {
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		
+		glEnable(GL_NORMALIZE);
+		glEnable(GL_LIGHT0);
+		glLight(GL_LIGHT0, GL_AMBIENT, Buffers.create(1f, 1f, 1f, 1f));
+		glShadeModel(GL_SMOOTH);
 		
 		Camera.perspective(45, getWidth(), getHeight(), 0.001, 100);
 		Camera.position(camera);
@@ -49,7 +70,12 @@ public class GameScene extends Scene {
 		glRotated(rotation.z(), 0, 0, 1);
 		
 		track.render();
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		player.render();
 	}
+	
+	@Override
+	protected void exiting() {}
 	
 	@Override
 	public void keyPressed(int key, char character) {

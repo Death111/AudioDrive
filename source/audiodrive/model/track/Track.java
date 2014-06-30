@@ -28,43 +28,20 @@ public class Track {
 		this.audio = audio;
 		this.vectors = vectors;
 		this.duration = duration;
-		this.smoothing = smoothing;
-	}
-	
-	public void update() {
-		calculateSplineStripped();
+		calculateSpline();
 		pointBuffer = new VertexBuffer(vectors);
 		splineBuffer = new VertexBuffer(spline).mode(GL_LINE_STRIP);
 		splineAreaBuffer = new VertexBuffer(splineArea).mode(GL_QUAD_STRIP);
 	}
 	
-	private void calculateSpline() {
-		spline = CatmullRom.interpolate(vectors, 15, CatmullRom.Type.Centripetal);
-		splineArea = new ArrayList<>();
-		if (spline == null || spline.isEmpty()) return;
-		Vector sideOne = null;
-		for (int i = 0; i < spline.size() - 1; i++) {
-			Vector one = spline.get(i);
-			Vector two = spline.get(i + 1);
-			Vector sideTwo;
-			if (sideOne == null) sideOne = two.minus(one).cross(Vector.Y).length(width);
-			if (i < spline.size() - 2) {
-				Vector three = spline.get(i + 2);
-				Vector n1 = two.minus(one).cross(Vector.Y).normalize();
-				Vector n2 = three.minus(two).cross(Vector.Y).normalize();
-				sideTwo = n1.plus(n2).length(width / Math.cos(n1.angle(n2) * 0.5));
-			} else {
-				sideTwo = two.minus(one).cross(Vector.Y).length(width);
-			}
-			splineArea.add(one.plus(sideOne.negated()));
-			splineArea.add(one.plus(sideOne));
-			splineArea.add(two.plus(sideTwo));
-			splineArea.add(two.plus(sideTwo.negated()));
-			sideOne = sideTwo;
-		}
-	}
+	@Override
+	protected void finalize() throws Throwable {
+		if (pointBuffer != null) pointBuffer.delete();
+		if (splineBuffer != null) splineBuffer.delete();
+		if (splineAreaBuffer != null) splineAreaBuffer.delete();
+	};
 	
-	private void calculateSplineStripped() {
+	private void calculateSpline() {
 		spline = CatmullRom.interpolate(vectors, 15, CatmullRom.Type.Centripetal);
 		splineArea = new ArrayList<>();
 		if (spline == null || spline.isEmpty()) return;
@@ -121,6 +98,10 @@ public class Track {
 	
 	public int getSmoothing() {
 		return smoothing;
+	}
+	
+	public List<Vector> spline() {
+		return spline;
 	}
 	
 }
