@@ -10,6 +10,7 @@ import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.nio.ShortBuffer;
 import java.util.List;
+import java.util.Objects;
 
 import org.lwjgl.opengl.GL15;
 
@@ -115,6 +116,9 @@ public class VertexBuffer {
 		return indexBuffer;
 	}
 	
+	/**
+	 * Binds the buffer to the GL context and sets the vertex pointer.
+	 */
 	public void bind() {
 		glBindBuffer(target, id);
 		glVertexPointer(step, type, 0, 0);
@@ -138,6 +142,20 @@ public class VertexBuffer {
 		return this;
 	}
 	
+	/**
+	 * Draws the buffer content using glDrawElements with the indices of the given index buffer.
+	 */
+	public void draw(IndexBuffer indices) {
+		Objects.requireNonNull(indices);
+		if (!bound) bind();
+		indices.bind();
+		glDrawElements(mode, indices.size(), GL_UNSIGNED_INT, offset);
+		bound = false;
+	}
+	
+	/**
+	 * Draws the buffer content using glDrawArrays or glDrawElements, if indices were specified using {@link #indices(int...)} or {@link #indices(IndexBuffer)}.
+	 */
 	public void draw() {
 		if (!bound) bind();
 		if (indexBuffer == null) glDrawArrays(mode, offset, size / step);

@@ -36,7 +36,7 @@ public class GameScene extends Scene {
 		player = new Player().model(ModelLoader.loadSingleModel("models/xwing/xwing"));
 		Vector current = track.spline().get(0);
 		Vector next = track.spline().get(1);
-		Vector position = current.plus(0, 0.001, 0);
+		Vector position = current.plus(0, 0.0005, 0);
 		Vector direction = next.minus(current);
 		Vector up = Vector.Y;
 		player.model().scale(0.0001).position(position).align(direction, up);
