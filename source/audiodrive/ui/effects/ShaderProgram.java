@@ -60,6 +60,11 @@ public class ShaderProgram {
 		validate();
 	}
 	
+	@Override
+	protected void finalize() throws Throwable {
+		glDeleteProgram(program);
+	}
+	
 	private void parseName(String string) {
 		int start = string.indexOf('/');
 		int end = string.indexOf('.');
@@ -99,11 +104,6 @@ public class ShaderProgram {
 	
 	public void unbind() {
 		glUseProgram(0);
-	}
-	
-	public void delete() {
-		shaders.forEach(Shader::delete);
-		glDeleteProgram(program);
 	}
 	
 	public int getId() {
@@ -258,6 +258,11 @@ public class ShaderProgram {
 			this.type = type;
 			source = load(filepath);
 			compile(source, type);
+		}
+		
+		@Override
+		protected void finalize() throws Throwable {
+			glDeleteShader(id);
 		}
 		
 		private String load(String filepath) {

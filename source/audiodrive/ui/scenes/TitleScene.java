@@ -44,8 +44,6 @@ public class TitleScene extends Scene {
 	
 	@Override
 	public void exiting() {
-		canvas.delete();
-		shader.delete();
 		shader = null;
 		title = null;
 	}

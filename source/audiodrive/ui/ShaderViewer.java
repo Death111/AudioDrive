@@ -50,7 +50,6 @@ public class ShaderViewer {
 			Display.sync(60);
 		}
 		
-		shader.delete();
 		Display.destroy();
 	}
 	

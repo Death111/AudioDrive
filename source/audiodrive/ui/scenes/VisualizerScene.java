@@ -113,9 +113,7 @@ public class VisualizerScene extends Scene {
 	
 	@Override
 	protected void exiting() {
-		canvas.delete();
 		player.stop();
-		shader.delete();
 		shader = null;
 		title = null;
 		duration = 0;

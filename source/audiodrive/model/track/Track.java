@@ -34,13 +34,6 @@ public class Track {
 		splineAreaBuffer = new VertexBuffer(splineArea).mode(GL_QUAD_STRIP);
 	}
 	
-	@Override
-	protected void finalize() throws Throwable {
-		if (pointBuffer != null) pointBuffer.delete();
-		if (splineBuffer != null) splineBuffer.delete();
-		if (splineAreaBuffer != null) splineAreaBuffer.delete();
-	};
-	
 	private void calculateSpline() {
 		spline = CatmullRom.interpolate(vectors, 15, CatmullRom.Type.Centripetal);
 		splineArea = new ArrayList<>();

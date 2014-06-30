@@ -60,6 +60,11 @@ public class VertexBuffer {
 		}
 	}
 	
+	@Override
+	protected void finalize() throws Throwable {
+		glDeleteBuffers(id);
+	};
+	
 	/**
 	 * Creates a vertex buffer object with target {@linkplain GL15#GL_ARRAY_BUFFER} and usage {@linkplain GL15#GL_STATIC_DRAW}.
 	 */
@@ -180,11 +185,6 @@ public class VertexBuffer {
 	 */
 	public int size() {
 		return size;
-	}
-	
-	public void delete() {
-		bound = false;
-		glDeleteBuffers(id);
 	}
 	
 }

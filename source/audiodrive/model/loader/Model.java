@@ -26,6 +26,11 @@ public class Model {
 		this.faces = faces;
 	}
 	
+	@Override
+	protected void finalize() throws Throwable {
+		if (texture != null) texture.release();
+	}
+	
 	public void render() {
 		boolean translate = !position.equals(Vector.Null);
 		boolean rotate = !rotation.equals(Matrix.Identity);
