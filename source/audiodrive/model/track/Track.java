@@ -6,8 +6,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import audiodrive.audio.AnalyzedAudio;
-import audiodrive.model.buffer.IndexBuffer;
 import audiodrive.model.buffer.VertexBuffer;
+import audiodrive.model.geometry.CuboidStripRenderer;
 import audiodrive.model.geometry.Vector;
 import audiodrive.model.track.interpolation.CatmullRom;
 
@@ -28,12 +28,7 @@ public class Track {
 	private VertexBuffer splineAreaBuffer;
 	private VertexBuffer rightBorderBuffer;
 	private VertexBuffer leftBorderBuffer;
-	private IndexBuffer borderTopIndices;
-	private IndexBuffer borderLeftIndices;
-	private IndexBuffer borderRightIndices;
-	private IndexBuffer borderBottomIndices;
-	private IndexBuffer borderFrontIndices;
-	private IndexBuffer borderBackIndices;
+	private CuboidStripRenderer cuboidStripRenderer;
 	
 	public Track(AnalyzedAudio audio, List<Vector> vectors, double duration, int smoothing) {
 		this.audio = audio;
@@ -91,15 +86,9 @@ public class Track {
 			leftBorder.add(upper.minus(width));
 			leftBorder.add(lower.minus(width));
 		}
+		cuboidStripRenderer = new CuboidStripRenderer(spline.size());
 		rightBorderBuffer = new VertexBuffer(rightBorder).mode(GL_QUAD_STRIP);
 		leftBorderBuffer = new VertexBuffer(leftBorder).mode(GL_QUAD_STRIP);
-		borderTopIndices = IndexBuffer.quadStripIndices(spline.size(), 0, +2);
-		borderLeftIndices = IndexBuffer.quadStripIndices(spline.size(), 1, -1);
-		borderRightIndices = IndexBuffer.quadStripIndices(spline.size(), 2, +1);
-		borderBottomIndices = IndexBuffer.quadStripIndices(spline.size(), 3, -2);
-		int n = borderTopIndices.size();
-		borderFrontIndices = new IndexBuffer(0, 1, 2, 3);
-		borderBackIndices = new IndexBuffer(n - 2, n - 1, n - 4, n - 3);
 	}
 	
 	public void render() {
@@ -115,20 +104,8 @@ public class Track {
 		if (splineAreaBuffer != null) {
 			splineAreaBuffer.draw();
 		}
-		if (rightBorderBuffer != null) {
-			rightBorderBuffer.draw(borderFrontIndices);
-			rightBorderBuffer.draw(borderTopIndices);
-			rightBorderBuffer.draw(borderLeftIndices);
-			rightBorderBuffer.draw(borderRightIndices);
-			rightBorderBuffer.draw(borderBottomIndices);
-			rightBorderBuffer.draw(borderBackIndices);
-		}
-		if (leftBorderBuffer != null) {
-			leftBorderBuffer.draw(borderTopIndices);
-			leftBorderBuffer.draw(borderLeftIndices);
-			leftBorderBuffer.draw(borderRightIndices);
-			leftBorderBuffer.draw(borderBottomIndices);
-		}
+		cuboidStripRenderer.render(rightBorderBuffer);
+		cuboidStripRenderer.render(leftBorderBuffer);
 	}
 	
 	public AnalyzedAudio getAudio() {

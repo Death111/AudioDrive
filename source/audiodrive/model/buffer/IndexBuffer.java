@@ -45,6 +45,9 @@ public class IndexBuffer {
 		return entries;
 	}
 	
+	/**
+	 * Creates quad strip indices for a given number of quads.
+	 */
 	public static IndexBuffer quadStripIndices(int numberOfQuads, int startIndex, int followOffset) {
 		int numberOfIndices = numberOfIndices(numberOfQuads);
 		IntBuffer indices = Buffers.createIntBuffer(numberOfIndices);
