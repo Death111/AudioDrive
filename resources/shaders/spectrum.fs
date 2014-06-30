@@ -7,21 +7,14 @@ struct Band {
 	float frequency;
 };
 
-uniform vec3 color;
-uniform vec2 resolution;
-uniform float time;
-uniform float position;
-uniform float intensity;
-uniform float scale;
-uniform int numberOfBands;
+uniform vec3 color; // default: vec3(0.5, 0.5, 1.0)
+uniform vec2 resolution; // canvas resolution
+uniform float time; // time since start in seconds
+uniform float position; // default: 0.0
+uniform float intensity; // default: 1.0
+uniform float scale; // default: 1.0
+uniform int numberOfBands; // range: 1 - 100
 uniform Band bands[MAX_BANDS];
-
-void limit() {
-	scale = (scale <= 0.0)? 1.0 : scale;
-	intensity = (intensity <= 0.0)? 1.0 : intensity;
-	color = (color == vec3(0.0))? vec3(0.5, 0.5, 1.0) : color;
-	numberOfBands = min(numberOfBands, MAX_BANDS);
-}
 
 float band(Band band, vec2 pos) {
 	float wave = scale * band.amplitude * sin(2.0 * PI * band.frequency * pos.x) / 2.05;
@@ -30,7 +23,6 @@ float band(Band band, vec2 pos) {
 }
 
 void main( void ) {
-	limit();
 	vec2 pos = (gl_FragCoord.xy / resolution.xy);
 	pos.y += - 0.5 - position;
 	float spectrum = 0.0;

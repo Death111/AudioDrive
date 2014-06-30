@@ -70,8 +70,9 @@ public class VisualizerScene extends Scene {
 		if (shader != null) {
 			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 			shader.bind();
-			shader.uniform("time").set(duration);
+			shader.uniform("color").set(0.5, 0.5, 1.0);
 			shader.uniform("resolution").set((float) getWidth(), (float) getHeight());
+			shader.uniform("time").set(duration);
 			shader.uniform("position").set(-0.5);
 			shader.uniform("intensity").set(1.0);
 			shader.uniform("scale").set(0.01);
