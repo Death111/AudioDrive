@@ -25,28 +25,28 @@ public class Buffers {
 	}
 	
 	/**
-	 * Construct a direct native-ordered FloatBuffer with the specified vertices.
+	 * Construct a direct native-ordered DoubleBuffer with the specified vertices.
 	 * 
 	 * @param vectors the buffer elements
-	 * @return a FloatBuffer
+	 * @return a DoubleBuffer
 	 */
-	public static FloatBuffer create(List<Vector> vectors) {
-		FloatBuffer buffer = createFloatBuffer(vectors.size() * 3);
-		vectors.stream().map(Vector::toFloats).forEach(buffer::put);
+	public static DoubleBuffer create(List<Vector> vectors) {
+		DoubleBuffer buffer = createDoubleBuffer(vectors.size() * 3);
+		vectors.stream().map(Vector::toArray).forEach(buffer::put);
 		buffer.flip();
 		return buffer;
 	}
 	
 	/**
-	 * Construct a direct native-ordered FloatBuffer with the specified vertices.
+	 * Construct a direct native-ordered DoubleBuffer with the specified vertices.
 	 * 
 	 * @param vectors the buffer elements
-	 * @return a FloatBuffer
+	 * @return a DoubleBuffer
 	 */
-	public static FloatBuffer create(Vector... vectors) {
-		FloatBuffer buffer = createFloatBuffer(vectors.length * 3);
+	public static DoubleBuffer create(Vector... vectors) {
+		DoubleBuffer buffer = createDoubleBuffer(vectors.length * 3);
 		for (Vector vector : vectors) {
-			buffer.put(vector.toFloats());
+			buffer.put(vector.toArray());
 		}
 		buffer.flip();
 		return buffer;
