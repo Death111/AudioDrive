@@ -135,7 +135,7 @@ public class VertexBuffer {
 	
 	public void draw() {
 		if (!bound) bind();
-		if (indexBuffer == null) glDrawArrays(mode, offset, size);
+		if (indexBuffer == null) glDrawArrays(mode, offset, size / step);
 		else glDrawElements(mode, indexBuffer.size(), GL_UNSIGNED_INT, offset);
 		bound = false;
 	}
