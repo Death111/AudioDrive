@@ -8,6 +8,7 @@ import java.util.List;
 import audiodrive.audio.AnalyzedAudio;
 import audiodrive.model.buffer.VertexBuffer;
 import audiodrive.model.geometry.CuboidStripRenderer;
+import audiodrive.model.geometry.Placement;
 import audiodrive.model.geometry.Vector;
 import audiodrive.model.track.interpolation.CatmullRom;
 
@@ -22,6 +23,7 @@ public class Track {
 	private double width = 0.003;
 	private double borderHeight = 0.0005;
 	private double borderWidth = 0.0003;
+	private double flightHeight = 0.001;
 	
 	private VertexBuffer pointBuffer;
 	private VertexBuffer splineBuffer;
@@ -34,6 +36,10 @@ public class Track {
 		this.audio = audio;
 		this.vectors = vectors;
 		this.duration = duration;
+		this.smoothing = smoothing;
+	}
+	
+	public void prepare() {
 		calculateSpline();
 		pointBuffer = new VertexBuffer(vectors);
 		splineBuffer = new VertexBuffer(spline).mode(GL_LINE_STRIP);
@@ -51,8 +57,8 @@ public class Track {
 			Vector next;
 			if (last == null) {
 				last = two.minus(one).cross(Vector.Y).length(width);
-				splineArea.add(one.plus(last));
 				splineArea.add(one.plus(last.negated()));
+				splineArea.add(one.plus(last));
 			}
 			if (i < spline.size() - 2) {
 				Vector three = spline.get(i + 2);
@@ -62,8 +68,8 @@ public class Track {
 			} else {
 				next = two.minus(one).cross(Vector.Y).length(width);
 			}
-			splineArea.add(two.plus(next));
 			splineArea.add(two.plus(next.negated()));
+			splineArea.add(two.plus(next));
 			last = next;
 		}
 		List<Vector> rightBorder = new ArrayList<>();
@@ -101,11 +107,26 @@ public class Track {
 			splineBuffer.draw();
 		}
 		glColor4d(0.0, 0.5, 0.5, 0.5);
-		if (splineAreaBuffer != null) {
-			splineAreaBuffer.draw();
-		}
+		glDisable(GL_CULL_FACE);
+		splineAreaBuffer.draw();
+		glEnable(GL_CULL_FACE);
 		cuboidStripRenderer.render(rightBorderBuffer);
 		cuboidStripRenderer.render(leftBorderBuffer);
+	}
+	
+	public Placement calculatePlayerPlacement(double time) {
+		double calculatedIndex = time * spline.size() / duration;
+		if (calculatedIndex >= spline.size() - 1) calculatedIndex = spline.size() - 2;
+		int index = (int) calculatedIndex;
+		double fraction = calculatedIndex - index;
+		Vector current = spline.get(index);
+		Vector next = spline.get(index + 1);
+		Vector direction = next.minus(current);
+		Vector normal = Vector.Y;
+		// TODO interpolating the position causes bucking
+		// Vector position = current.plus(direction.multiplied(fraction)).plus(normal.multiplied(flightHeight));
+		Vector position = current.plus(normal.multiplied(flightHeight));
+		return new Placement().position(position).direction(direction).normal(normal);
 	}
 	
 	public AnalyzedAudio getAudio() {

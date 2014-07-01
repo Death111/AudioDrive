@@ -4,7 +4,9 @@ import static org.lwjgl.opengl.GL11.*;
 
 import org.lwjgl.input.Keyboard;
 
+import audiodrive.audio.AudioPlayer;
 import audiodrive.model.Player;
+import audiodrive.model.geometry.Placement;
 import audiodrive.model.geometry.Rotation;
 import audiodrive.model.geometry.Vector;
 import audiodrive.model.loader.ModelLoader;
@@ -25,8 +27,13 @@ public class GameScene extends Scene {
 	private Vector look = new Vector();
 	private Vector camera = new Vector(0, 0, 0.01);
 	
+	private double time;
+	
+	private AudioPlayer audio;
+	
 	public void enter(Track track) {
 		this.track = track;
+		track.prepare();
 		super.enter();
 	}
 	
@@ -40,17 +47,21 @@ public class GameScene extends Scene {
 		Vector direction = next.minus(current);
 		Vector up = Vector.Y;
 		player.model().scale(0.0001).position(position).align(direction, up);
+		audio = new AudioPlayer();
+		audio.play(track.getAudio().getFile());
 	}
 	
 	@Override
 	protected void update(double elapsed) {
-		super.update(elapsed);
+		if (audio.isPaused()) return;
+		time += elapsed;
+		Placement placement = track.calculatePlayerPlacement(time);
+		player.model().placement(placement);
 	}
 	
 	@Override
 	protected void render() {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glDisable(GL_CULL_FACE);
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -61,51 +72,59 @@ public class GameScene extends Scene {
 		glShadeModel(GL_SMOOTH);
 		
 		Camera.perspective(45, getWidth(), getHeight(), 0.001, 100);
-		Camera.position(camera);
-		Camera.lookAt(look);
+		// Camera.position(camera);
+		// Camera.lookAt(look);
+		player.camera();
 		
-		glTranslated(translate.x(), translate.y(), translate.z());
-		glRotated(rotation.x(), 1, 0, 0);
-		glRotated(rotation.y(), 0, 1, 0);
-		glRotated(rotation.z(), 0, 0, 1);
+		// rotation.apply();
+		// glTranslated(translate.x(), translate.y(), translate.z());
 		
-		track.render();
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		track.render();
 		player.render();
 	}
 	
 	@Override
-	protected void exiting() {}
+	protected void exiting() {
+		audio.stop();
+		time = 0;
+	}
 	
 	@Override
 	public void keyPressed(int key, char character) {
+		Vector translation = new Vector();
 		switch (key) {
 		case Keyboard.KEY_NUMPAD0:
-			translate.add(0, 0, -0.01);
+			translation.add(0, 0, -0.001);
 			break;
 		case Keyboard.KEY_NUMPAD2:
-			translate.add(0, 0.01, 0);
+			translation.add(0, 0.001, 0);
 			break;
 		case Keyboard.KEY_NUMPAD4:
-			translate.add(0.01, 0, 0);
+			translation.add(0.001, 0, 0);
 			break;
 		case Keyboard.KEY_NUMPAD5:
-			translate.add(0, 0, 0.01);
+			translation.add(0, 0, 0.001);
 			break;
 		case Keyboard.KEY_NUMPAD6:
-			translate.add(-0.01, 0, 0);
+			translation.add(-0.001, 0, 0);
 			break;
 		case Keyboard.KEY_NUMPAD8:
-			translate.add(0, -0.01, 0);
+			translation.add(0, -0.001, 0);
 			break;
 		default:
 			break;
 		}
+		translate.add(rotation.rotate(translation));
 	}
 	
 	@Override
 	public void keyReleased(int key, char character) {
 		switch (key) {
+		case Keyboard.KEY_PAUSE:
+			if (audio.isPaused()) audio.play();
+			else audio.pause();
+			break;
 		case Keyboard.KEY_ESCAPE:
 			back();
 			break;
@@ -116,17 +135,17 @@ public class GameScene extends Scene {
 	
 	@Override
 	public void mouseDragged(int button, int mouseX, int mouseY, int dx, int dy) {
-		double horizontal = dx * 0.1;
-		double vertical = dy * -0.1;
+		double horizontal = dx * -0.1;
+		double vertical = dy * 0.1;
 		switch (button) {
 		case 0:
-			rotation.add(vertical, horizontal, 0);
+			rotation.xAdd(vertical).yAdd(horizontal);
 			break;
 		case 1:
-			rotation.add(vertical, 0, horizontal);
+			rotation.xAdd(vertical).zAdd(horizontal);
 			break;
 		case 2:
-			rotation.add(0, vertical, horizontal);
+			rotation.yAdd(vertical).zAdd(horizontal);
 			break;
 		default:
 			break;

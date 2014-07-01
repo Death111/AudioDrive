@@ -305,10 +305,10 @@ public class Drive extends Application {
 			Vector x = backSide.normalized();
 			Vector y = z.cross(x).normalize();
 			x = z.cross(y).normalize();
-			Matrix m = new Matrix().setIdentity();
-			m.insert0V(x);
-			m.insert1V(y);
-			m.insert2V(z);
+			Matrix m = new Matrix().identity();
+			m.insertInColumn0(x);
+			m.insertInColumn1(y);
+			m.insertInColumn2(z);
 			glMultMatrix(m.toDoubleBuffer());
 			glRotated(roll, 0, 0, 1);
 			roll = 0;
@@ -556,7 +556,7 @@ public class Drive extends Application {
 	
 	public static void updatePosition() {
 		if (cameraIndex < 0 || cameraIndex >= centerSpline.size() - 2) return;
-		rotation.set(Vector.Null);
+		rotation.set(Rotation.Null);
 		translate.set(Vector.Null);
 		if (stableView) {
 			Vector frontSide = sides[cameraIndex + playerOffset + 1];
@@ -730,7 +730,7 @@ public class Drive extends Application {
 				cameraIndex = -1;
 				break;
 			case Keyboard.KEY_ESCAPE:
-				rotation.set(Vector.Null);
+				rotation.reset();
 				translate.set(Vector.Null);
 				reset();
 				break;
@@ -745,13 +745,13 @@ public class Drive extends Application {
 			double vertical = dy * -0.1;
 			switch (button) {
 			case 0:
-				rotation.add(vertical, horizontal, 0);
+				rotation.xAdd(vertical).yAdd(horizontal);
 				break;
 			case 1:
-				rotation.add(vertical, 0, horizontal);
+				rotation.xAdd(vertical).zAdd(horizontal);
 				break;
 			case 2:
-				rotation.add(0, vertical, horizontal);
+				rotation.yAdd(vertical).zAdd(horizontal);
 				break;
 			default:
 				break;

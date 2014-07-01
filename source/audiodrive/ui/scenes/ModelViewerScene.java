@@ -41,9 +41,7 @@ public class ModelViewerScene extends Scene {
 		Camera.lookAt(look);
 		
 		glTranslated(translate.x(), translate.y(), translate.z());
-		glRotated(rotation.x(), 1, 0, 0);
-		glRotated(rotation.y(), 0, 1, 0);
-		glRotated(rotation.z(), 0, 0, 1);
+		rotation.apply();
 		
 		drawCoordinateSystem(3);
 		
@@ -111,7 +109,7 @@ public class ModelViewerScene extends Scene {
 	public void keyReleased(int key, char character) {
 		switch (key) {
 		case Keyboard.KEY_HOME:
-			rotation.set(Vector.Null);
+			rotation.reset();
 			translate.set(Vector.Null);
 			break;
 		case Keyboard.KEY_ESCAPE:
@@ -127,17 +125,14 @@ public class ModelViewerScene extends Scene {
 	
 	@Override
 	public void mouseDragged(int button, int mouseX, int mouseY, int dx, int dy) {
-		double horizontal = dx * 0.1;
-		double vertical = dy * -0.1;
+		double horizontal = dx * -0.1;
+		double vertical = dy * 0.1;
 		switch (button) {
 		case 0:
-			rotation.add(vertical, horizontal, 0);
+			rotation.xAdd(vertical).yAdd(horizontal);
 			break;
 		case 1:
-			rotation.add(vertical, 0, horizontal);
-			break;
-		case 2:
-			rotation.add(0, vertical, horizontal);
+			rotation.zAdd(horizontal);
 			break;
 		default:
 			break;
