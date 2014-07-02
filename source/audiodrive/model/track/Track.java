@@ -28,8 +28,8 @@ public class Track {
 	private VertexBuffer pointBuffer;
 	private VertexBuffer splineBuffer;
 	private VertexBuffer splineAreaBuffer;
-	private VertexBuffer rightBorderBuffer;
 	private VertexBuffer leftBorderBuffer;
+	private VertexBuffer rightBorderBuffer;
 	private CuboidStripRenderer cuboidStripRenderer;
 	
 	public Track(AnalyzedAudio audio, List<Vector> vectors, double duration, int smoothing) {
@@ -72,29 +72,29 @@ public class Track {
 			splineArea.add(two.plus(next));
 			last = next;
 		}
-		List<Vector> rightBorder = new ArrayList<>();
 		List<Vector> leftBorder = new ArrayList<>();
+		List<Vector> rightBorder = new ArrayList<>();
 		Vector height = new Vector().y(borderHeight);
-		for (int i = 0; i < splineArea.size() - 2; i += 2) {
+		for (int i = 0; i < splineArea.size(); i += 2) {
 			Vector right = splineArea.get(i);
 			Vector left = splineArea.get(i + 1);
 			Vector width = right.minus(left).length(borderWidth);
 			Vector upper = right.plus(height);
 			Vector lower = right.minus(height);
-			rightBorder.add(upper);
-			rightBorder.add(lower);
-			rightBorder.add(upper.plus(width));
-			rightBorder.add(lower.plus(width));
-			upper = left.plus(height);
-			lower = left.minus(height);
+			leftBorder.add(upper.plus(width));
+			leftBorder.add(lower.plus(width));
 			leftBorder.add(upper);
 			leftBorder.add(lower);
-			leftBorder.add(upper.minus(width));
-			leftBorder.add(lower.minus(width));
+			upper = left.plus(height);
+			lower = left.minus(height);
+			rightBorder.add(upper);
+			rightBorder.add(lower);
+			rightBorder.add(upper.minus(width));
+			rightBorder.add(lower.minus(width));
 		}
-		cuboidStripRenderer = new CuboidStripRenderer(spline.size());
-		rightBorderBuffer = new VertexBuffer(rightBorder).mode(GL_QUAD_STRIP);
+		cuboidStripRenderer = new CuboidStripRenderer(spline.size() - 1);
 		leftBorderBuffer = new VertexBuffer(leftBorder).mode(GL_QUAD_STRIP);
+		rightBorderBuffer = new VertexBuffer(rightBorder).mode(GL_QUAD_STRIP);
 	}
 	
 	public void render() {
@@ -110,8 +110,8 @@ public class Track {
 		glDisable(GL_CULL_FACE);
 		splineAreaBuffer.draw();
 		glEnable(GL_CULL_FACE);
-		cuboidStripRenderer.render(rightBorderBuffer);
 		cuboidStripRenderer.render(leftBorderBuffer);
+		cuboidStripRenderer.render(rightBorderBuffer);
 	}
 	
 	public Placement calculatePlayerPlacement(double time) {

@@ -49,12 +49,15 @@ public class GameScene extends Scene {
 		player.model().scale(0.0001).position(position).align(direction, up);
 		audio = new AudioPlayer();
 		audio.play(track.getAudio().getFile());
+		rotation.reset();
+		translate.set(Vector.Null);
 	}
 	
 	@Override
 	protected void update(double elapsed) {
 		if (audio.isPaused()) return;
 		time += elapsed;
+		// time = track.getDuration() - 0.11;
 		Placement placement = track.calculatePlayerPlacement(time);
 		player.model().placement(placement);
 	}
@@ -79,7 +82,7 @@ public class GameScene extends Scene {
 		// rotation.apply();
 		// glTranslated(translate.x(), translate.y(), translate.z());
 		
-		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		// glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 		track.render();
 		player.render();
 	}
@@ -95,22 +98,22 @@ public class GameScene extends Scene {
 		Vector translation = new Vector();
 		switch (key) {
 		case Keyboard.KEY_NUMPAD0:
-			translation.add(0, 0, -0.001);
+			translation.add(0, 0, -0.0001);
 			break;
 		case Keyboard.KEY_NUMPAD2:
-			translation.add(0, 0.001, 0);
+			translation.add(0, 0.0001, 0);
 			break;
 		case Keyboard.KEY_NUMPAD4:
-			translation.add(0.001, 0, 0);
+			translation.add(0.0001, 0, 0);
 			break;
 		case Keyboard.KEY_NUMPAD5:
-			translation.add(0, 0, 0.001);
+			translation.add(0, 0, 0.0001);
 			break;
 		case Keyboard.KEY_NUMPAD6:
-			translation.add(-0.001, 0, 0);
+			translation.add(-0.0001, 0, 0);
 			break;
 		case Keyboard.KEY_NUMPAD8:
-			translation.add(0, -0.001, 0);
+			translation.add(0, -0.0001, 0);
 			break;
 		default:
 			break;
