@@ -86,8 +86,10 @@ public class Matrix {
 	 * Sets all matrix entries to zero.
 	 */
 	public Matrix empty() {
-		for (int i = 0; i < Dimension; i++) {
-			M[i][i] = 0.0;
+		for (int x = 0; x < Dimension; x++) {
+			for (int y = 0; y < Dimension; y++) {
+				M[x][y] = 0.0;
+			}
 		}
 		return this;
 	}
@@ -96,6 +98,7 @@ public class Matrix {
 	 * Sets the matrix to identity.
 	 */
 	public Matrix identity() {
+		empty();
 		for (int i = 0; i < Dimension; i++) {
 			M[i][i] = 1.0;
 		}
@@ -160,7 +163,7 @@ public class Matrix {
 		Vector z = direction.normalized();
 		Vector y = normal;
 		Vector x = z.cross(y).normalize();
-		y = z.cross(x).normalize();
+		y = x.cross(z).normalize();
 		insertInColumn0(x);
 		insertInColumn1(y);
 		insertInColumn2(z);

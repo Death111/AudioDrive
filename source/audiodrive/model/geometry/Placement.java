@@ -52,8 +52,8 @@ public class Placement {
 	private void update() {
 		direction.normalize();
 		normal.normalize();
-		Vector side = normal.cross(direction).normalize();
-		normal.set(direction.cross(side).normalize());
+		Vector side = direction.cross(normal).normalize();
+		normal.set(side.cross(direction).normalize());
 	}
 	
 	public Placement reset() {

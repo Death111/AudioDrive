@@ -41,7 +41,7 @@ public class Track {
 	
 	public void prepare() {
 		calculateSpline();
-		pointBuffer = new VertexBuffer(vectors);
+		// pointBuffer = new VertexBuffer(vectors);
 		splineBuffer = new VertexBuffer(spline).mode(GL_LINE_STRIP);
 		splineAreaBuffer = new VertexBuffer(splineArea).mode(GL_QUAD_STRIP);
 	}

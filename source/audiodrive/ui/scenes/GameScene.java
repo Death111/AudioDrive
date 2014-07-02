@@ -49,6 +49,7 @@ public class GameScene extends Scene {
 		player.model().scale(0.0001).position(position).align(direction, up);
 		audio = new AudioPlayer();
 		audio.play(track.getAudio().getFile());
+		audio.pause();
 		rotation.reset();
 		translate.set(Vector.Null);
 	}
@@ -84,6 +85,8 @@ public class GameScene extends Scene {
 		
 		// glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 		track.render();
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		glDisable(GL_CULL_FACE); // FIXME model face culling
 		player.render();
 	}
 	
