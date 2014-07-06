@@ -16,12 +16,16 @@ public abstract class Item {
 	Text text;
 
 	protected List<ItemListener> itemListeners = new ArrayList<ItemListener>();
+	private int width;
+	private int height;
 
 	public Item(String itemText, int width, int height) {
 		this.posX = 0;
 		this.posY = 0;
+		this.width = width;
+		this.height = height;
 
-		// TODO center text
+		// TODO calculate size by width and height
 		int size = 30;
 		text = new Text(itemText).setFont(AudioDrive.Font).setPosition(posX, posY).setSize(size);
 
@@ -44,13 +48,48 @@ public abstract class Item {
 		return selected;
 	}
 
+	/**
+	 * @return the posX
+	 */
+	public final int getPosX() {
+		return posX;
+	}
+
+	/**
+	 * @return the posY
+	 */
+	public final int getPosY() {
+		return posY;
+	}
+
+	/**
+	 * @return the width
+	 */
+	public final int getWidth() {
+		return this.width;
+	}
+
+	/**
+	 * @return the height
+	 */
+	public final int getHeight() {
+		return this.height;
+	}
+
+	public void setPosY(int y) {
+		this.posY = y;
+	}
+
+	public void setPosX(int posX) {
+		this.posX = posX;
+	}
+
 	public void setHover(boolean hover) {
 		itemListeners.forEach(itemListener -> itemListener.onHover(this, hover));
 		this.hover = hover;
 	}
 
 	public void setSelected(boolean selected) {
-		Log.info(this.text.getText());
 		itemListeners.forEach(itemListener -> itemListener.onSelect(this, selected));
 		this.selected = selected;
 	}

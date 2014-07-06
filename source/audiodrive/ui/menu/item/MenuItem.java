@@ -2,8 +2,6 @@ package audiodrive.ui.menu.item;
 
 import org.lwjgl.opengl.GL11;
 
-import audiodrive.ui.components.Text;
-
 public class MenuItem extends Item {
 
 	private float[] color = { 1, 0, 0, .5f };
@@ -63,48 +61,5 @@ public class MenuItem extends Item {
 		GL11.glEnd();
 
 		text.setPosition(posX, posY).render();
-	}
-
-	/**
-	 * @return the posX
-	 */
-	public final int getPosX() {
-		return posX;
-	}
-
-	/**
-	 * @return the posY
-	 */
-	public final int getPosY() {
-		return posY;
-	}
-
-	/**
-	 * @return the textText
-	 */
-	public final Text getTextText() {
-		return text;
-	}
-
-	/**
-	 * @return the width
-	 */
-	public final float getWidth() {
-		return MENU_ITEM_WIDTH;
-	}
-
-	/**
-	 * @return the height
-	 */
-	public final float getHeight() {
-		return MENU_ITEM_HEIGHT;
-	}
-
-	public void setPosY(int y) {
-		this.posY = y;
-	}
-
-	public void setPosX(int posX) {
-		this.posX = posX;
 	}
 }

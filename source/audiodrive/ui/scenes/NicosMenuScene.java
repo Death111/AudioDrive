@@ -51,15 +51,15 @@ public class NicosMenuScene extends Scene implements ItemListener {
 
 		this.menu = new Menu(100, 200, 25);
 		visualizeMenuItem = new MenuItem("Visualize", this);
-		menu.addMenuItem(visualizeMenuItem);
+		menu.addItem(visualizeMenuItem);
 		playMenuItem = new MenuItem("Play", this);
-		menu.addMenuItem(playMenuItem);
+		menu.addItem(playMenuItem);
 		selectAudioMenuItem = new MenuItem("Select Audio", this);
-		menu.addMenuItem(selectAudioMenuItem);
+		menu.addItem(selectAudioMenuItem);
 		selectModelMenuItem = new MenuItem("Select Model", this);
-		menu.addMenuItem(selectModelMenuItem);
+		menu.addItem(selectModelMenuItem);
 		exitMenuItem = new MenuItem("Exit", this);
-		menu.addMenuItem(exitMenuItem);
+		menu.addItem(exitMenuItem);
 
 		final String hoverPath = "/sounds/" + "hover" + ".wav";
 		final String selectPath = "/sounds/" + "select" + ".wav";
