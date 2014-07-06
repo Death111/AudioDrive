@@ -14,6 +14,7 @@ import java.util.Set;
 import javax.swing.filechooser.FileSystemView;
 
 import org.lwjgl.input.Keyboard;
+import org.lwjgl.opengl.GL11;
 
 import audiodrive.AudioDrive;
 import audiodrive.audio.AudioFile;
@@ -143,12 +144,39 @@ public class AudioSelectionScene extends Scene implements ItemListener {
 			checkItemExplorer(this.rootMap);
 		}
 		this.item = null;
+		renderBackground();
 		this.itemMenu.render();
 		this.rootMenu.render();
 		this.currentFolderText.render();
 		this.selectedFileText.render();
 		this.titleText.render();
 		this.continueText.render();
+	}
+
+	/**
+	 * renders some nice background
+	 */
+	private void renderBackground() {
+		final int height = getHeight();
+		final int width = getWidth();
+
+		final int quadCount = 15;
+		final int sizeX = width / quadCount;
+		final int sizeY = height / quadCount;
+
+		for (int x = 0; x < width; x += sizeX) {
+			for (int y = 0; y < height; y += sizeY) {
+				GL11.glColor4d(0, 0, 1, Math.random());
+				GL11.glBegin(GL11.GL_LINE_STRIP);
+
+				GL11.glVertex2i(x, y + sizeY);
+				GL11.glVertex2i(x + sizeX, y + sizeY);
+				GL11.glVertex2i(x + sizeX, y);
+				GL11.glVertex2i(x, y);
+				GL11.glEnd();
+			}
+		}
+
 	}
 
 	private void checkItemExplorer(Map<FileChooserItem, File> map) {

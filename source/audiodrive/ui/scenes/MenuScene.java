@@ -50,7 +50,7 @@ public class MenuScene extends Scene implements ItemListener {
 
 	@Override
 	public void entering() {
-		Log.trace("Entering NicosMenueScene");
+		Log.trace("Entering MenueScene");
 		// Change to Ortho
 		Camera.overlay(getWidth(), getHeight());
 
@@ -92,7 +92,6 @@ public class MenuScene extends Scene implements ItemListener {
 	@Override
 	public void render() {
 		glClear(GL_COLOR_BUFFER_BIT);
-		GL11.glDisable(GL11.GL_CULL_FACE);
 		GL11.glLoadIdentity();
 
 		renderBackground();
@@ -109,20 +108,18 @@ public class MenuScene extends Scene implements ItemListener {
 		final int quadCount = 15;
 		final int sizeX = width / quadCount;
 		final int sizeY = height / quadCount;
-		GL11.glBegin(GL11.GL_QUADS);
-
 		for (int x = 0; x < width; x += sizeX) {
 			for (int y = 0; y < height; y += sizeY) {
 				GL11.glColor4d(0, 0, 1, Math.random());
+				GL11.glBegin(GL11.GL_LINE_STRIP);
 
-				GL11.glVertex2i(x, y);
-				GL11.glVertex2i(x + sizeX, y);
-				GL11.glVertex2i(x + sizeX, y + sizeY);
 				GL11.glVertex2i(x, y + sizeY);
+				GL11.glVertex2i(x + sizeX, y + sizeY);
+				GL11.glVertex2i(x + sizeX, y);
+				GL11.glVertex2i(x, y);
+				GL11.glEnd();
 			}
 		}
-
-		GL11.glEnd();
 	}
 
 	@Override
