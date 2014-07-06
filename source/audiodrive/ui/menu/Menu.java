@@ -36,6 +36,10 @@ public class Menu {
 		this.items.add(item);
 	}
 
+	public void removeAllItems() {
+		this.items = new ArrayList<Item>();
+	}
+
 	public void mouseMoved(int x, int y) {
 		// Loop through all MenuItems to check onHover
 		for (Item item : this.items) {

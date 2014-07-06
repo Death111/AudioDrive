@@ -27,6 +27,11 @@ public abstract class Item {
 
 		// TODO calculate size by width and height
 		int size = 30;
+		if (width > height) {
+			size = (int) (height / 1.5);
+		} else {
+			size = width / 10;
+		}
 		text = new Text(itemText).setFont(AudioDrive.Font).setPosition(posX, posY).setSize(size);
 
 		if (text.getHeight() > height && text.getWidth() > width) {
@@ -74,6 +79,10 @@ public abstract class Item {
 	 */
 	public final int getHeight() {
 		return this.height;
+	}
+
+	public final String getText() {
+		return this.text.getText();
 	}
 
 	public void setPosY(int y) {
