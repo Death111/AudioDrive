@@ -138,9 +138,6 @@ public class NicosMenuScene extends Scene implements ItemListener {
 		}
 	}
 
-	int lastX = 0;
-	int lastY = 0;
-
 	@Override
 	public void mouseMoved(int x, int y, int dx, int dy) {
 		// yCoordinates start in left bottom corner, instead left top
