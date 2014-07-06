@@ -1,6 +1,11 @@
 package audiodrive.ui.scenes;
 
-import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL11.GL_COLOR_BUFFER_BIT;
+import static org.lwjgl.opengl.GL11.GL_FILL;
+import static org.lwjgl.opengl.GL11.GL_FRONT_AND_BACK;
+import static org.lwjgl.opengl.GL11.GL_QUADS;
+import static org.lwjgl.opengl.GL11.glClear;
+import static org.lwjgl.opengl.GL11.glPolygonMode;
 import audiodrive.AudioDrive;
 import audiodrive.audio.AudioAnalyzer;
 import audiodrive.audio.AudioFile;
@@ -13,19 +18,19 @@ import audiodrive.utilities.Buffers;
 import audiodrive.utilities.Log;
 
 public class AnalyzationScene extends Scene {
-	
+
 	private Text title;
 	private AudioFile file;
 	private AudioAnalyzer analyzer;
 	private VertexBuffer canvas;
 	private ShaderProgram shader;
 	private double duration;
-	
+
 	public void enter(AudioFile file) {
 		this.file = file;
 		super.enter();
 	}
-	
+
 	@Override
 	public void entering() {
 		title = new Text("Analyzing audio...").setFont(AudioDrive.Font).setSize(48).setPosition(20, 20);
@@ -39,13 +44,14 @@ public class AnalyzationScene extends Scene {
 			Log.info("analyzation complete");
 		}).start();
 	}
-	
+
 	@Override
 	public void update(double elapsed) {
 		duration += elapsed;
-		if (analyzer.isDone()) Scene.get(MenuScene.class).enter(analyzer.getResults());
+		if (analyzer.isDone())
+			Scene.get(NicosMenuScene.class).enter(analyzer.getResults());
 	}
-	
+
 	@Override
 	public void render() {
 		glClear(GL_COLOR_BUFFER_BIT);
@@ -57,11 +63,11 @@ public class AnalyzationScene extends Scene {
 		shader.unbind();
 		title.render();
 	}
-	
+
 	@Override
 	public void exiting() {
 		shader = null;
 		title = null;
 	}
-	
+
 }
