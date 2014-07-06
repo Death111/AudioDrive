@@ -30,9 +30,25 @@ public class Menu {
 		}
 	}
 
+	/**
+	 * Adds an item to the menu
+	 * 
+	 * @param item
+	 *            item to add
+	 */
 	public void addItem(Item item) {
-		item.setPosX(posX);
-		item.setPosY(posY + (this.items.size() * item.getHeight()) + this.items.size() * this.spacing);
+		// TODO add pagination if area is out of bounds
+
+		int listSize = this.items.size();
+		final int COLUMN_SIZE = 20;
+		final int column = listSize / COLUMN_SIZE;
+
+		item.setPosX(posX + column * item.getWidth() + column * (this.spacing * 2));
+		listSize -= COLUMN_SIZE * column;
+		final int itemHeight = listSize * item.getHeight();
+		final int spacingHeight = listSize * this.spacing;
+		item.setPosY(posY + itemHeight + spacingHeight);
+
 		this.items.add(item);
 	}
 

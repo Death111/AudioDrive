@@ -34,8 +34,20 @@ public abstract class Item {
 		}
 		text = new Text(itemText).setFont(AudioDrive.Font).setPosition(posX, posY).setSize(size);
 
-		if (text.getHeight() > height && text.getWidth() > width) {
-			Log.warning("Text '" + itemText + "' is bigger than menuItem");
+		// Check if text is to big
+		if (text.getHeight() > height || text.getWidth() > width) {
+			Log.warning("Text '" + itemText + "' is bigger than menuItem. Trimming it");
+			boolean trimmed = false;
+			while (text.getWidth() > width) {
+				String trimmedText = text.getText();
+				trimmed = true;
+				text.setText(trimmedText.substring(0, trimmedText.length() - 1));
+			}
+			// Add dots for trimmed items
+			if (trimmed) {
+				String trimmedText = text.getText();
+				text.setText(trimmedText.substring(0, trimmedText.length() - 3) + "...");
+			}
 		}
 	}
 
