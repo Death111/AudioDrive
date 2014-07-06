@@ -4,6 +4,9 @@ import static org.lwjgl.opengl.GL11.GL_COLOR_BUFFER_BIT;
 import static org.lwjgl.opengl.GL11.glClear;
 
 import java.io.File;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -12,8 +15,12 @@ import javax.swing.filechooser.FileSystemView;
 
 import org.lwjgl.input.Keyboard;
 
+import audiodrive.AudioDrive;
+import audiodrive.audio.AudioFile;
+import audiodrive.audio.AudioPlayer;
 import audiodrive.ui.components.Camera;
 import audiodrive.ui.components.Scene;
+import audiodrive.ui.components.Text;
 import audiodrive.ui.menu.Menu;
 import audiodrive.ui.menu.item.FileChooserItem;
 import audiodrive.ui.menu.item.Item;
@@ -21,6 +28,8 @@ import audiodrive.ui.menu.item.ItemListener;
 import audiodrive.utilities.Log;
 
 public class NicosAudioSelectionScene extends Scene implements ItemListener {
+
+	// TODO Add button to confirm selection
 
 	private static final String PARENT_FILENAME = "..";
 	private Menu itemMenu;
@@ -30,17 +39,31 @@ public class NicosAudioSelectionScene extends Scene implements ItemListener {
 	private Map<FileChooserItem, File> rootMap = new HashMap<FileChooserItem, File>();
 	FileSystemView fsv = FileSystemView.getFileSystemView();
 
+	private File selectedFile = null;
+	private Text currentFolderText;
+	private Text selectedFileText;
+	private Text titleText;
+	private AudioPlayer ap;
+	private AudioFile hoverAudio;
+	private AudioFile selectAudio;
+
 	@Override
 	public void entering() {
 		Camera.overlay(getWidth(), getHeight());
-		this.rootMenu = new Menu(100, 100, 1);
-		this.itemMenu = new Menu(500, 100, 1);
+
+		titleText = new Text("Choose an AudioFile").setFont(AudioDrive.Font).setSize(48).setPosition(20, 20);
+
+		this.rootMenu = new Menu(20, 200, 1);
+		this.itemMenu = new Menu(40 + FileChooserItem.FILECHOOSER_ITEM_WIDTH, 200, 1);
 		File rootFile = new File("./music/");
+		currentFolderText = new Text().setFont(AudioDrive.Font).setPosition(20, 150).setSize(30);
+		selectedFileText = new Text().setFont(AudioDrive.Font).setPosition(20, 800).setSize(30);
 		updateItemExplorer(rootFile);
 
 		for (File file : File.listRoots()) {
 			final boolean directory = file.isDirectory();
 			if (!directory) {
+				// Root directory is empty (e.g. not used usb)
 				continue;
 			}
 			String fileName = file.toString();
@@ -48,17 +71,32 @@ public class NicosAudioSelectionScene extends Scene implements ItemListener {
 			this.rootMenu.addItem(fci);
 			rootMap.put(fci, file);
 		}
+		final String hoverPath = "/sounds/" + "hover" + ".wav";
+		final String selectPath = "/sounds/" + "select" + ".wav";
+		hoverAudio = loadAudioFile(hoverPath);
+		selectAudio = loadAudioFile(selectPath);
+		ap = new AudioPlayer();
+		super.enter();
+	}
 
+	private AudioFile loadAudioFile(String audioPath) {
+		URL resource = this.getClass().getResource(audioPath);
+		try {
+			final URI uri = resource.toURI();
+			return new AudioFile(new File(uri));
+		} catch (URISyntaxException e) {
+			throw new RuntimeException("Could not load file '" + audioPath + "'. " + e.getMessage(), e);
+		}
 	}
 
 	/**
-	 * Updates the exlporer with the given file as root node
+	 * Updates the explorer with the given file as root node
 	 * 
 	 * @param rootFile
 	 *            The root file of the tree to be displayed
 	 */
 	private void updateItemExplorer(File rootFile) {
-
+		currentFolderText.setText("Current folder: " + rootFile.getAbsolutePath());
 		final File[] listFiles = rootFile.listFiles();
 		this.itemMap.clear();
 		this.itemMenu.removeAllItems();
@@ -72,6 +110,7 @@ public class NicosAudioSelectionScene extends Scene implements ItemListener {
 			itemMap.put(parentFileChooser, parentFile);
 		}
 
+		// TODO filter for supported filetypes
 		for (File file : listFiles) {
 			final boolean directory = file.isDirectory();
 			String fileName = file.getName();
@@ -97,6 +136,9 @@ public class NicosAudioSelectionScene extends Scene implements ItemListener {
 		this.item = null;
 		this.itemMenu.render();
 		this.rootMenu.render();
+		this.currentFolderText.render();
+		this.selectedFileText.render();
+		this.titleText.render();
 	}
 
 	private void checkItemExplorer(Map<FileChooserItem, File> map) {
@@ -111,6 +153,9 @@ public class NicosAudioSelectionScene extends Scene implements ItemListener {
 				update = true;
 				rootFile = file;
 				if (!rootFile.isDirectory()) {
+					Log.debug("An item was selected: '" + rootFile.getName() + "'.");
+					this.selectedFile = rootFile;
+					this.selectedFileText.setText("File selected: '" + this.selectedFile.getName() + "'");
 					update = false;
 				}
 			}
@@ -158,8 +203,9 @@ public class NicosAudioSelectionScene extends Scene implements ItemListener {
 
 	@Override
 	public void onHover(Item item, boolean hover) {
-		// TODO Auto-generated method stub
-
+		if (hover) {
+			ap.play(hoverAudio);
+		}
 	}
 
 	Item item = null;
@@ -169,6 +215,7 @@ public class NicosAudioSelectionScene extends Scene implements ItemListener {
 		if (!select) {
 			return;
 		}
+		ap.play(selectAudio);
 		this.item = item;
 	}
 }
