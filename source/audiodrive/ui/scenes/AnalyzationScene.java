@@ -49,7 +49,7 @@ public class AnalyzationScene extends Scene {
 	public void update(double elapsed) {
 		duration += elapsed;
 		if (analyzer.isDone())
-			Scene.get(NicosMenuScene.class).enter(analyzer.getResults());
+			Scene.get(MenuScene.class).enter(analyzer.getResults());
 	}
 
 	@Override
