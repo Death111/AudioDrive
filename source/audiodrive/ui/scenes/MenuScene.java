@@ -2,11 +2,6 @@ package audiodrive.ui.scenes;
 
 import static org.lwjgl.opengl.GL11.*;
 
-import java.io.File;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 
@@ -63,21 +58,9 @@ public class MenuScene extends Scene implements ItemListener {
 		exitMenuItem = new MenuItem("Exit", this);
 		menu.addItem(exitMenuItem);
 		
-		final String hoverPath = "/sounds/" + "hover" + ".wav";
-		final String selectPath = "/sounds/" + "select" + ".wav";
-		hoverAudio = loadAudioFile(hoverPath);
-		selectAudio = loadAudioFile(selectPath);
+		hoverAudio = new AudioFile("sounds/hover.wav");
+		selectAudio = new AudioFile("sounds/select.wav");
 		super.enter();
-	}
-	
-	private AudioFile loadAudioFile(String audioPath) {
-		URL resource = this.getClass().getResource(audioPath);
-		try {
-			final URI uri = resource.toURI();
-			return new AudioFile(new File(uri));
-		} catch (URISyntaxException e) {
-			throw new RuntimeException("Could not load file '" + audioPath + "'. " + e.getMessage(), e);
-		}
 	}
 	
 	@Override
