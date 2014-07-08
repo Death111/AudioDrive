@@ -9,12 +9,14 @@ import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.UnsupportedAudioFileException;
 
+import audiodrive.Resources;
+
 public class AudioFile extends File {
 	
 	private AudioInputStream inputStream;
 	
 	public AudioFile(String name) {
-		super(name);
+		this(Resources.getFile(name));
 	}
 	
 	public AudioFile(File file) {
