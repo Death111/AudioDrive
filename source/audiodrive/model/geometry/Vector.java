@@ -69,6 +69,42 @@ public class Vector implements Cloneable {
 		return this;
 	}
 	
+	public Vector xAdd(double x) {
+		assertModifiable();
+		this.x += x;
+		return this;
+	}
+	
+	public Vector yAdd(double y) {
+		assertModifiable();
+		this.y += y;
+		return this;
+	}
+	
+	public Vector zAdd(double z) {
+		assertModifiable();
+		this.z += z;
+		return this;
+	}
+	
+	public Vector xSubtract(double x) {
+		assertModifiable();
+		this.x -= x;
+		return this;
+	}
+	
+	public Vector ySubtract(double y) {
+		assertModifiable();
+		this.y -= y;
+		return this;
+	}
+	
+	public Vector zSubtract(double z) {
+		assertModifiable();
+		this.z -= z;
+		return this;
+	}
+	
 	public Vector multiply(double factor) {
 		assertModifiable();
 		x *= factor;
@@ -146,6 +182,14 @@ public class Vector implements Cloneable {
 		return Math.acos(n);
 	}
 	
+	/**
+	 * Sets all vector entries to zero.
+	 */
+	public Vector empty() {
+		set(0, 0, 0);
+		return this;
+	}
+	
 	public Vector normalize() {
 		divide(length());
 		return this;
@@ -215,6 +259,10 @@ public class Vector implements Cloneable {
 	
 	public Vector multiplied(Matrix matrix) {
 		return new Vector().set(Matrices.multiply(toHomogeneous(), matrix.toArray()));
+	}
+	
+	public boolean isNull() {
+		return equals(Null);
 	}
 	
 	@Override

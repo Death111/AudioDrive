@@ -1,5 +1,8 @@
 package audiodrive.utilities;
 
+/**
+ * Utility class for matrix operations.
+ */
 public class Matrices {
 	
 	/** Private constructor to prevent instantiation. */
@@ -115,6 +118,18 @@ public class Matrices {
 	}
 	
 	/**
+	 * determines the rotation around x-axis of a given matrix
+	 * 
+	 * @param matrix rotation matrix
+	 * @return rotation angle, in radians
+	 */
+	public static double rotationAroundXAxis(double[][] matrix) {
+		double x = Math.atan2(matrix[2][1], matrix[2][2]);
+		if (x == -0.0) return 0.0;
+		return x;
+	}
+	
+	/**
 	 * rotation around y-axis
 	 * 
 	 * @param angle rotation angle, in radians
@@ -133,6 +148,20 @@ public class Matrices {
 	}
 	
 	/**
+	 * determines the rotation around y-axis of a given matrix
+	 * 
+	 * @param matrix rotation matrix
+	 * @return rotation angle, in radians
+	 */
+	public static double rotationAroundYAxis(double[][] matrix) {
+		double m21 = matrix[2][1];
+		double m22 = matrix[2][2];
+		double y = Math.atan2(-matrix[2][0], Math.sqrt(m21 * m21 + m22 * m22));
+		if (y == -0.0) return 0.0;
+		return y;
+	}
+	
+	/**
 	 * rotation around z-axis
 	 * 
 	 * @param angle rotation angle, in radians
@@ -148,6 +177,18 @@ public class Matrices {
 		matrix[1][1] = cos;
 		matrix[2][2] = 1;
 		return matrix;
+	}
+	
+	/**
+	 * determines the rotation around z-axis of a given matrix
+	 * 
+	 * @param matrix rotation matrix
+	 * @return rotation angle, in radians
+	 */
+	public static double rotationAroundZAxis(double[][] matrix) {
+		double z = Math.atan2(matrix[1][0], matrix[0][0]);
+		if (z == -0.0) return 0.0;
+		return z;
 	}
 	
 	/**
@@ -176,6 +217,63 @@ public class Matrices {
 		matrix[1][2] = sub * y * z - sin * x;
 		matrix[2][2] = sub * z * z + cos;
 		return matrix;
+	}
+	
+	/**
+	 * rotation around x-, y-, and z-axis
+	 * 
+	 * @param aroundX rotation angle around x-axis, in radians
+	 * @param aroundY rotation angle around y-axis, in radians
+	 * @param aroundZ rotation angle around z-axis, in radians
+	 * @return the rotation matrix, 3x3
+	 */
+	public static double[][] rotation(double aroundX, double aroundY, double aroundZ) {
+		double[][] matrix = new double[3][3];
+		double sinGamma = Math.sin(aroundX);
+		double cosGamma = Math.cos(aroundX);
+		double sinBeta = Math.sin(aroundY);
+		double cosBeta = Math.cos(aroundY);
+		double sinAlpha = Math.sin(aroundZ);
+		double cosAlpha = Math.cos(aroundZ);
+		matrix[0][0] = cosAlpha * cosBeta;
+		matrix[1][0] = cosAlpha * sinBeta * sinGamma - sinAlpha * cosGamma;
+		matrix[2][0] = cosAlpha * sinBeta * cosGamma + sinAlpha * sinGamma;
+		matrix[0][1] = sinAlpha * cosBeta;
+		matrix[1][1] = sinAlpha * sinBeta * sinGamma + cosAlpha * cosGamma;
+		matrix[2][1] = sinAlpha * sinBeta * cosGamma - cosAlpha * sinGamma;
+		matrix[0][2] = -sinBeta;
+		matrix[1][2] = cosBeta * sinGamma;
+		matrix[2][2] = cosBeta * cosGamma;
+		return matrix;
+	}
+	
+	/**
+	 * true if matrixA is equal to matrixB, false otherwise
+	 */
+	public static boolean equals(double[][] matrixA, double[][] matrixB) {
+		int M = matrixA.length;
+		int N = matrixA[0].length;
+		if (matrixB.length != M || matrixB[0].length != N) return false;
+		for (int m = 0; m < M; m++)
+			for (int n = 0; n < N; n++)
+				if (matrixA[m][n] != matrixB[m][n]) return false;
+		return true;
+	}
+	
+	public static String string(double[][] matrix) {
+		StringBuilder builder = new StringBuilder();
+		int M = matrix.length;
+		int N = matrix[0].length;
+		for (int m = 0; m < M; m++) {
+			if (m > 0) builder.append(System.lineSeparator());
+			builder.append("[");
+			for (int n = 0; n < N; n++) {
+				if (n > 0) builder.append(" ");
+				builder.append(String.format("% .5f", matrix[m][n]));
+			}
+			builder.append("]");
+		}
+		return builder.toString();
 	}
 	
 }

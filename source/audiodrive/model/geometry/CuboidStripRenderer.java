@@ -1,5 +1,6 @@
 package audiodrive.model.geometry;
 
+import static org.lwjgl.opengl.GL11.*;
 import audiodrive.model.buffer.IndexBuffer;
 import audiodrive.model.buffer.VertexBuffer;
 
@@ -22,6 +23,7 @@ public class CuboidStripRenderer {
 	}
 	
 	public void render(VertexBuffer vertexBuffer) {
+		vertexBuffer.mode(GL_QUAD_STRIP);
 		vertexBuffer.draw(frontIndices);
 		vertexBuffer.draw(topIndices);
 		vertexBuffer.draw(leftIndices);
@@ -51,7 +53,8 @@ public class CuboidStripRenderer {
 	}
 	
 	public static IndexBuffer backQuadStripIndices(int length) {
-		return new IndexBuffer(length - 2, length - 1, length - 4, length - 3);
+		int indices = IndexBuffer.numberOfIndices(length);
+		return new IndexBuffer(indices - 2, indices - 1, indices - 4, indices - 3);
 	}
 	
 }

@@ -325,7 +325,7 @@ public class Show {
 		Vector two = centerSpline.get(cameraIndex + 1);
 		camera = one.plus(up.multiplied(flightHeight));
 		look = two.plus(up.multiplied(flightHeight));
-		rotation.set(Vector.Null);
+		rotation.reset();
 		translate.set(Vector.Null);
 	}
 	
@@ -337,7 +337,7 @@ public class Show {
 		Vector two = centerSpline.get(cameraIndex + 1);
 		camera = one.plus(up.multiplied(flightHeight));
 		look = two.plus(up.multiplied(flightHeight));
-		rotation.set(Vector.Null);
+		rotation.reset();
 		translate.set(Vector.Null);
 	}
 	
@@ -438,7 +438,7 @@ public class Show {
 				up.set(0, 1, 0);
 				cameraIndex = -1;
 			case Keyboard.KEY_ESCAPE:
-				rotation.set(Vector.Null);
+				rotation.reset();
 				translate.set(Vector.Null);
 				break;
 			default:
@@ -452,14 +452,13 @@ public class Show {
 			double vertical = dy * -0.1;
 			switch (button) {
 			case 0:
-				rotation.add(vertical, horizontal, 0);
+				rotation.xAdd(vertical).yAdd(horizontal);
 				break;
 			case 1:
-				rotation.add(vertical, 0, horizontal);
+				rotation.xAdd(vertical).zAdd(horizontal);
 				break;
 			case 2:
-				rotation.add(0, vertical, horizontal);
-				break;
+				rotation.yAdd(vertical).zAdd(horizontal);
 			default:
 				break;
 			}

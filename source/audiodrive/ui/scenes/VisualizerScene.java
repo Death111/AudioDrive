@@ -7,7 +7,7 @@ import org.lwjgl.input.Keyboard;
 import audiodrive.AudioDrive;
 import audiodrive.audio.AnalyzedAudio;
 import audiodrive.audio.AnalyzedChannel;
-import audiodrive.audio.AudioPlayer;
+import audiodrive.audio.Playback;
 import audiodrive.model.buffer.VertexBuffer;
 import audiodrive.model.geometry.Vector;
 import audiodrive.ui.components.Camera;
@@ -21,13 +21,13 @@ public class VisualizerScene extends Scene {
 	
 	private Text title;
 	private AnalyzedAudio audio;
-	private AudioPlayer player;
 	private double duration;
 	
 	private VertexBuffer canvas;
 	private ShaderProgram shader;
 	private AnalyzedChannel leftChannel;
 	private AnalyzedChannel rightChannel;
+	private Playback playback;
 	private int bands;
 	
 	public void enter(AnalyzedAudio audio) {
@@ -46,8 +46,7 @@ public class VisualizerScene extends Scene {
 		bands = Math.min(audio.getBandCount(), 100);
 		leftChannel = audio.getChannel(0);
 		rightChannel = audio.getChannel(1);
-		player = new AudioPlayer();
-		player.play(audio.getFile());
+		playback = new Playback(audio.getFile()).start();
 	}
 	
 	@Override
@@ -113,7 +112,7 @@ public class VisualizerScene extends Scene {
 	
 	@Override
 	protected void exiting() {
-		player.stop();
+		playback.stop();
 		shader = null;
 		title = null;
 		duration = 0;

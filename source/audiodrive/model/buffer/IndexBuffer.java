@@ -1,6 +1,6 @@
 package audiodrive.model.buffer;
 
-import static org.lwjgl.opengl.GL11.GL_INT;
+import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL15.*;
 
 import java.nio.IntBuffer;
@@ -49,23 +49,24 @@ public class IndexBuffer {
 	 * Creates quad strip indices for a given number of quads.
 	 */
 	public static IndexBuffer quadStripIndices(int numberOfQuads, int startIndex, int followOffset) {
-		int numberOfIndices = numberOfIndices(numberOfQuads);
-		IntBuffer indices = Buffers.createIntBuffer(numberOfIndices);
-		for (int i = startIndex; i < numberOfQuads; i += 4) {
-			indices.put(i);
-			indices.put(i + followOffset);
+		IntBuffer indices = Buffers.createIntBuffer(numberOfIndices(numberOfQuads));
+		int index = startIndex;
+		for (int i = 0; i <= numberOfQuads; i++) {
+			indices.put(index);
+			indices.put(index + followOffset);
+			index += 4;
 		}
 		indices.flip();
 		return new IndexBuffer(indices);
 	}
 	
 	public static int numberOfQuads(int numberOfIndices) {
-		if (numberOfIndices % 4 != 2) throw new IllegalArgumentException("For quad strips the number of indices has to be 2 * quads + 2.");
+		if (numberOfIndices % 4 != 2) throw new IllegalArgumentException("For quad strips the number of indices has to be a power of 2. (indices = 2 * quads + 2)");
 		return (numberOfIndices - 2) / 2;
 	}
 	
 	public static int numberOfIndices(int numberOfQuads) {
-		return numberOfQuads * 2 - 2;
+		return numberOfQuads * 2 + 2;
 	}
 	
 }

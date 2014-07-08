@@ -193,7 +193,7 @@ public class ShowModel {
 		public void keyReleased(int key, char character) {
 			switch (key) {
 			case Keyboard.KEY_ESCAPE:
-				rotation.set(Vector.Null);
+				rotation.reset();
 				translate.set(Vector.Null);
 				break;
 			default:
@@ -207,13 +207,13 @@ public class ShowModel {
 			double vertical = dy * -0.1;
 			switch (button) {
 			case 0:
-				rotation.add(vertical, horizontal, 0);
+				rotation.xAdd(vertical).yAdd(horizontal);
 				break;
 			case 1:
-				rotation.add(vertical, 0, horizontal);
+				rotation.xAdd(vertical).zAdd(horizontal);
 				break;
 			case 2:
-				rotation.add(0, vertical, horizontal);
+				rotation.yAdd(vertical).zAdd(horizontal);
 				break;
 			default:
 				break;

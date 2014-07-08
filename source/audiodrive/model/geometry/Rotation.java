@@ -1,20 +1,132 @@
 package audiodrive.model.geometry;
 
-public class Rotation extends Vector {
+import static org.lwjgl.opengl.GL11.glMultMatrix;
+
+public class Rotation {
 	
-	@Override
-	public Rotation x(double x) {
-		return (Rotation) super.x(unify180(x));
+	/**
+	 * No rotation. I. e. the rotation matrix is equal to identity.
+	 */
+	public static final Rotation Null = new Rotation();
+	
+	private final Matrix matrix = new Matrix().identity();
+	
+	public Rotation x(double angle) {
+		xAdd(angle - x());
+		return this;
+	}
+	
+	public Rotation y(double angle) {
+		yAdd(angle - y());
+		return this;
+	}
+	
+	public Rotation z(double angle) {
+		zAdd(angle - z());
+		return this;
+	}
+	
+	public Rotation xAdd(double angle) {
+		add(angle, Vector.X);
+		return this;
+	}
+	
+	public Rotation yAdd(double angle) {
+		add(angle, Vector.Y);
+		return this;
+	}
+	
+	public Rotation zAdd(double angle) {
+		add(angle, Vector.Z);
+		return this;
+	}
+	
+	public double x() {
+		return matrix.getRotationAroundXAxis();
+	}
+	
+	public double y() {
+		return matrix.getRotationAroundYAxis();
+	}
+	
+	public double z() {
+		return matrix.getRotationAroundZAxis();
+	}
+	
+	public Rotation add(double angle, Vector axis) {
+		assertModifiable();
+		matrix.rotate(unify180(angle), axis);
+		return this;
+	}
+	
+	public Rotation set(Rotation rotation) {
+		assertModifiable();
+		matrix.set(rotation.matrix);
+		return this;
+	}
+	
+	public Rotation set(double aroundX, double aroundY, double aroundZ) {
+		assertModifiable();
+		matrix.rotation(aroundX, aroundY, aroundZ);
+		return this;
+	}
+	
+	public Rotation align(Vector direction, Vector normal) {
+		matrix.align(direction, normal);
+		return this;
+	}
+	
+	/**
+	 * Resets the rotation to {@linkplain #Null}. I. e. sets the rotation matrix to identity.
+	 */
+	public Rotation reset() {
+		assertModifiable();
+		matrix.identity();
+		return this;
+	}
+	
+	public void apply() {
+		glMultMatrix(matrix.toDoubleBuffer());
+	}
+	
+	/**
+	 * Returns a rotated version of the given vector.
+	 */
+	public Vector rotate(Vector vector) {
+		return matrix.multiplied(vector);
+	}
+	
+	/**
+	 * Returns a rotated version of the given matrix.
+	 */
+	public Matrix rotate(Matrix matrix) {
+		return matrix.multiplied(this.matrix);
+	}
+	
+	public boolean isNull() {
+		return equals(Null);
+	}
+	
+	private void assertModifiable() {
+		if (this == Null) throw new UnsupportedOperationException("Can't modify the constant rotation 'Null'.");
 	}
 	
 	@Override
-	public Rotation y(double y) {
-		return (Rotation) super.y(unify180(y));
+	public int hashCode() {
+		return 31 + matrix.hashCode();
 	}
 	
 	@Override
-	public Rotation z(double z) {
-		return (Rotation) super.z(unify180(z));
+	public boolean equals(Object obj) {
+		if (this == obj) return true;
+		if (obj == null) return false;
+		if (getClass() != obj.getClass()) return false;
+		return matrix.equals(((Rotation) obj).matrix);
+	}
+	
+	@Override
+	public String toString() {
+		return "Rotation " + matrix.toString();
 	}
 	
 	/**
