@@ -7,14 +7,17 @@ import org.lwjgl.opengl.GL11;
 
 import audiodrive.audio.AnalyzedAudio;
 import audiodrive.audio.AudioFile;
+import audiodrive.model.buffer.VertexBuffer;
 import audiodrive.model.track.Track;
 import audiodrive.model.track.TrackGenerator;
 import audiodrive.ui.components.Camera;
 import audiodrive.ui.components.Scene;
+import audiodrive.ui.effects.ShaderProgram;
 import audiodrive.ui.menu.Menu;
 import audiodrive.ui.menu.item.Item;
 import audiodrive.ui.menu.item.ItemListener;
 import audiodrive.ui.menu.item.MenuItem;
+import audiodrive.utilities.Buffers;
 import audiodrive.utilities.Log;
 
 /**
@@ -35,6 +38,10 @@ public class MenuScene extends Scene implements ItemListener {
 	private AudioFile hoverAudio;
 	private AudioFile selectAudio;
 	
+	private VertexBuffer canvas;
+	private ShaderProgram shader;
+	private double duration;
+	
 	public void enter(AnalyzedAudio audio) {
 		this.audio = audio;
 		super.enter();
@@ -45,6 +52,8 @@ public class MenuScene extends Scene implements ItemListener {
 		Log.trace("Entering MenueScene");
 		// Change to Ortho
 		Camera.overlay(getWidth(), getHeight());
+		canvas = new VertexBuffer(Buffers.create(0, 0, 0, getHeight(), getWidth(), getHeight(), getWidth(), 0)).step(2).mode(GL_QUADS);
+		shader = new ShaderProgram("shaders/default.vs", "shaders/title.fs");
 		
 		menu = new Menu(100, 200, 25);
 		visualizeMenuItem = new MenuItem("Visualize", this);
@@ -64,14 +73,17 @@ public class MenuScene extends Scene implements ItemListener {
 	
 	@Override
 	public void update(double elapsed) {
-		
+		duration += elapsed;
 	}
 	
 	@Override
 	public void render() {
 		glClear(GL_COLOR_BUFFER_BIT);
-		GL11.glLoadIdentity();
-		
+		shader.bind();
+		shader.uniform("time").set(duration);
+		shader.uniform("resolution").set((float) getWidth(), (float) getHeight());
+		canvas.draw();
+		shader.unbind();
 		renderBackground();
 		menu.render();
 	}
@@ -103,6 +115,8 @@ public class MenuScene extends Scene implements ItemListener {
 	@Override
 	public void exiting() {
 		Log.info("exiting");
+		canvas = null;
+		shader = null;
 	}
 	
 	@Override

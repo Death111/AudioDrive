@@ -14,13 +14,16 @@ import org.lwjgl.opengl.GL11;
 
 import audiodrive.AudioDrive;
 import audiodrive.audio.AudioFile;
+import audiodrive.model.buffer.VertexBuffer;
 import audiodrive.ui.components.Camera;
 import audiodrive.ui.components.Scene;
 import audiodrive.ui.components.Text;
+import audiodrive.ui.effects.ShaderProgram;
 import audiodrive.ui.menu.Menu;
 import audiodrive.ui.menu.item.FileChooserItem;
 import audiodrive.ui.menu.item.Item;
 import audiodrive.ui.menu.item.ItemListener;
+import audiodrive.utilities.Buffers;
 import audiodrive.utilities.Log;
 
 /**
@@ -47,10 +50,20 @@ public class AudioSelectionScene extends Scene implements ItemListener {
 	private Text continueText;
 	private AudioFile hoverAudio;
 	private AudioFile selectAudio;
+	private VertexBuffer canvas;
+	private ShaderProgram shader;
+	private double duration;
+	
+	public void enter(double duration) {
+		this.duration = duration;
+		super.enter();
+	}
 	
 	@Override
 	public void entering() {
 		Camera.overlay(getWidth(), getHeight());
+		canvas = new VertexBuffer(Buffers.create(0, 0, 0, getHeight(), getWidth(), getHeight(), getWidth(), 0)).step(2).mode(GL_QUADS);
+		shader = new ShaderProgram("shaders/default.vs", "shaders/title.fs");
 		
 		titleText = new Text("Choose an AudioFile").setFont(AudioDrive.Font).setSize(48).setPosition(20, 20);
 		
@@ -112,12 +125,18 @@ public class AudioSelectionScene extends Scene implements ItemListener {
 	
 	@Override
 	public void update(double elapsed) {
-		
+		duration += elapsed;
 	}
 	
 	@Override
 	public void render() {
 		glClear(GL_COLOR_BUFFER_BIT);
+		shader.bind();
+		shader.uniform("time").set(duration);
+		shader.uniform("resolution").set((float) getWidth(), (float) getHeight());
+		canvas.draw();
+		shader.unbind();
+		
 		if (item != null) {
 			checkItemExplorer(itemMap);
 			checkItemExplorer(rootMap);
@@ -185,6 +204,8 @@ public class AudioSelectionScene extends Scene implements ItemListener {
 	
 	@Override
 	public void exiting() {
+		canvas = null;
+		shader = null;
 		selectedFile = null;
 	}
 	

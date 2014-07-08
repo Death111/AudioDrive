@@ -1,10 +1,6 @@
 package audiodrive.ui.scenes;
 
-import static org.lwjgl.opengl.GL11.GL_COLOR_BUFFER_BIT;
-import static org.lwjgl.opengl.GL11.GL_QUADS;
-import static org.lwjgl.opengl.GL11.GL_VERTEX_ARRAY;
-import static org.lwjgl.opengl.GL11.glClear;
-import static org.lwjgl.opengl.GL11.glEnableClientState;
+import static org.lwjgl.opengl.GL11.*;
 import audiodrive.AudioDrive;
 import audiodrive.model.buffer.VertexBuffer;
 import audiodrive.ui.components.Camera;
@@ -14,12 +10,12 @@ import audiodrive.ui.effects.ShaderProgram;
 import audiodrive.utilities.Buffers;
 
 public class TitleScene extends Scene {
-
+	
 	private Text title;
 	private double duration;
 	private VertexBuffer canvas;
 	private ShaderProgram shader;
-
+	
 	@Override
 	public void entering() {
 		title = new Text(AudioDrive.Title).setFont(AudioDrive.Font).setSize(48).setCentered(getWidth() / 2, getHeight() / 2);
@@ -28,14 +24,13 @@ public class TitleScene extends Scene {
 		Camera.overlay(getWidth(), getHeight());
 		glEnableClientState(GL_VERTEX_ARRAY);
 	}
-
+	
 	@Override
 	public void update(double elapsed) {
 		duration += elapsed;
-		if (duration >= 2.0)
-			Scene.get(AudioSelectionScene.class).enter();
+		if (duration >= 2.0) Scene.get(AudioSelectionScene.class).enter(duration);
 	}
-
+	
 	@Override
 	public void render() {
 		glClear(GL_COLOR_BUFFER_BIT);
@@ -46,11 +41,12 @@ public class TitleScene extends Scene {
 		shader.unbind();
 		title.render();
 	}
-
+	
 	@Override
 	public void exiting() {
+		canvas = null;
 		shader = null;
 		title = null;
 	}
-
+	
 }
