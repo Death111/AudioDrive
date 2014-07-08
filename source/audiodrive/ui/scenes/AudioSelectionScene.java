@@ -77,7 +77,6 @@ public class AudioSelectionScene extends Scene implements ItemListener {
 		}
 		hoverAudio = new AudioFile("sounds/hover.wav");
 		selectAudio = new AudioFile("sounds/select.wav");
-		super.enter();
 	}
 	
 	/**
