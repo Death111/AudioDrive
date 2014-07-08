@@ -139,10 +139,20 @@ public class Playback {
 		return control.getValue();
 	}
 	
+	public AudioFile getFile() {
+		return file;
+	}
+	
 	private boolean initialized() {
 		return thread != null;
 	}
 	
+	/**
+	 * Creates a new thread to play the audio file. <br>
+	 * <br>
+	 * The thread opens the resources using {@link #open()}, plays the audio using {@link #play()} and finally closes the resources using {@link #close()}. If the playback is
+	 * paused, the thread stops the audio line and waits until the playback resumes.
+	 */
 	private void initialize() {
 		if (initialized()) return;
 		thread = new Thread() {
@@ -190,9 +200,7 @@ public class Playback {
 	}
 	
 	/**
-	 * Plays a single audio frame.
-	 * 
-	 * @return true if there are more frames to play, false otherwise.
+	 * Reads data from the audio input stream and writes them onto the audio line where it is consumed by the Java Sound API.
 	 */
 	private boolean play() {
 		int n;
