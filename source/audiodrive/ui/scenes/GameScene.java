@@ -4,7 +4,7 @@ import static org.lwjgl.opengl.GL11.*;
 
 import org.lwjgl.input.Keyboard;
 
-import audiodrive.audio.AudioPlayer;
+import audiodrive.audio.Playback;
 import audiodrive.model.Player;
 import audiodrive.model.geometry.Placement;
 import audiodrive.model.geometry.Rotation;
@@ -29,7 +29,7 @@ public class GameScene extends Scene {
 	
 	private double time;
 	
-	private AudioPlayer audio;
+	private Playback playback;
 	
 	public void enter(Track track) {
 		this.track = track;
@@ -47,16 +47,14 @@ public class GameScene extends Scene {
 		Vector direction = next.minus(current);
 		Vector up = Vector.Y;
 		player.model().scale(0.0001).position(position).align(direction, up);
-		audio = new AudioPlayer();
-		audio.play(track.getAudio().getFile());
-		audio.pause();
+		playback = new Playback(track.getAudio().getFile());
 		rotation.reset();
 		translate.set(Vector.Null);
 	}
 	
 	@Override
 	protected void update(double elapsed) {
-		if (audio.isPaused()) return;
+		if (!playback.isRunning()) return;
 		time += elapsed;
 		// time = track.getDuration() - 0.11;
 		Placement placement = track.calculatePlayerPlacement(time);
@@ -92,7 +90,7 @@ public class GameScene extends Scene {
 	
 	@Override
 	protected void exiting() {
-		audio.stop();
+		playback.stop();
 		time = 0;
 	}
 	
@@ -128,8 +126,7 @@ public class GameScene extends Scene {
 	public void keyReleased(int key, char character) {
 		switch (key) {
 		case Keyboard.KEY_PAUSE:
-			if (audio.isPaused()) audio.play();
-			else audio.pause();
+			playback.toggle();
 			break;
 		case Keyboard.KEY_ESCAPE:
 			back();

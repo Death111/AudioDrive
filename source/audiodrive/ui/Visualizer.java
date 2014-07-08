@@ -13,7 +13,7 @@ import org.lwjgl.opengl.Display;
 import audiodrive.audio.AnalyzedChannel;
 import audiodrive.audio.AudioAnalyzer;
 import audiodrive.audio.AudioFile;
-import audiodrive.audio.AudioPlayer;
+import audiodrive.audio.Playback;
 import audiodrive.model.geometry.Vector;
 import audiodrive.ui.components.Camera;
 import audiodrive.ui.components.Window;
@@ -43,7 +43,6 @@ public class Visualizer {
 	public static void visualize(AudioFile file) {
 		Log.info("analyzing...");
 		analyzer = new AudioAnalyzer().analyze(file);
-		AudioPlayer player = new AudioPlayer();
 		try {
 			if (Fullscreen) Window.setBorderless(true);
 			else {
@@ -54,7 +53,8 @@ public class Visualizer {
 			Display.setTitle(Title);
 			Display.create();
 			Input.addObserver(observer);
-			player.play(file);
+			Playback playback = new Playback(file);
+			playback.start();
 			while (!Display.isCloseRequested()) {
 				Visualizer.tick();
 				Visualizer.render();
@@ -62,7 +62,7 @@ public class Visualizer {
 				Display.sync(Framerate);
 				Input.update();
 			}
-			player.stop();
+			playback.stop();
 			Display.destroy();
 		} catch (LWJGLException exception) {
 			throw new RuntimeException(exception);
@@ -79,7 +79,7 @@ public class Visualizer {
 		
 		long time = System.currentTimeMillis();
 		double seconds = (time - startTime) / 1000.0;
-		double spectraPerSecond = (double) analyzer.getSamples().getSampleRate() / analyzer.getSamples().getIteration();
+		double spectraPerSecond = analyzer.getSamples().getSampleRate() / analyzer.getSamples().getIteration();
 		int spectaIndex = (int) Math.round(spectraPerSecond * seconds);
 		if (spectaIndex >= left.getSpectra().size()) spectaIndex = 0;
 		

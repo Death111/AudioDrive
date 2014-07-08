@@ -60,4 +60,8 @@ public class AudioFile extends File {
 		}
 	}
 	
+	public Playback play() {
+		return new Playback(this).start();
+	}
+	
 }

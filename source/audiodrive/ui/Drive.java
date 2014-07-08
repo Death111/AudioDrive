@@ -19,7 +19,7 @@ import audiodrive.audio.AnalyzedAudio;
 import audiodrive.audio.AnalyzedChannel;
 import audiodrive.audio.AudioAnalyzer;
 import audiodrive.audio.AudioFile;
-import audiodrive.audio.AudioPlayer;
+import audiodrive.audio.Playback;
 import audiodrive.model.geometry.Matrix;
 import audiodrive.model.geometry.Rotation;
 import audiodrive.model.geometry.Vector;
@@ -58,11 +58,11 @@ public class Drive extends Application {
 		analyzer.analyze(file);
 		TrackGenerator trackGenerator = new TrackGenerator();
 		Track track = trackGenerator.generate(analyzer.getResults(), 25);
-		AudioPlayer player = new AudioPlayer();
+		Playback playback = new Playback(file);
 		Show.track(track);
-		player.play(file);
+		playback.start();
 		Drive.track(track);
-		player.stop();
+		playback.stop();
 		
 		Platform.exit();
 	}
