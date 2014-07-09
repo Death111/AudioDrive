@@ -5,7 +5,9 @@ import static org.lwjgl.opengl.GL11.GL_QUADS;
 import static org.lwjgl.opengl.GL11.glClear;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -54,6 +56,9 @@ public class AudioSelectionScene extends Scene implements ItemListener {
 	private VertexBuffer canvas;
 	private ShaderProgram shader;
 	private double duration;
+	private List<String> supportedFileExtensionList = Arrays.asList("mp3", "wav");
+	// Item which was selected
+	private Item item = null;
 
 	public void enter(double duration) {
 		this.duration = duration;
@@ -104,7 +109,6 @@ public class AudioSelectionScene extends Scene implements ItemListener {
 		final File[] listFiles = rootFile.listFiles();
 		itemMap.clear();
 		itemMenu.removeAllItems();
-
 		// Add parent
 		File parentFile = fsv.getParentDirectory(rootFile);
 		if (parentFile != null && !fsv.isFileSystemRoot(rootFile)) {
@@ -113,14 +117,22 @@ public class AudioSelectionScene extends Scene implements ItemListener {
 
 			itemMap.put(parentFileChooser, parentFile);
 		}
+		// Check if there are files available
+		if (listFiles == null) {
+			return;
+		}
 
-		// TODO filter for supported filetypes
 		for (File file : listFiles) {
 			final boolean directory = file.isDirectory();
+
 			String fileName = file.getName();
-			FileChooserItem fci = new FileChooserItem(fileName, directory, this);
-			itemMenu.addItem(fci);
-			itemMap.put(fci, file);
+			String extension = getFileExtension(fileName);
+			// Check if file is supported
+			if (directory || supportedFileExtensionList.contains(extension)) {
+				FileChooserItem fci = new FileChooserItem(fileName, directory, this);
+				itemMenu.addItem(fci);
+				itemMap.put(fci, file);
+			}
 		}
 
 	}
@@ -230,8 +242,6 @@ public class AudioSelectionScene extends Scene implements ItemListener {
 		}
 	}
 
-	Item item = null;
-
 	@Override
 	public void onSelect(Item item, boolean select) {
 		if (!select) {
@@ -239,5 +249,23 @@ public class AudioSelectionScene extends Scene implements ItemListener {
 		}
 		selectAudio.play();
 		this.item = item;
+	}
+
+	/**
+	 * Returns the file extension of the given filename
+	 * 
+	 * @param fileName
+	 *            fileName do get extension from
+	 * @return file extension
+	 */
+	private String getFileExtension(String fileName) {
+		String extension = "";
+
+		int i = fileName.lastIndexOf('.');
+		if (i > 0) {
+			extension = fileName.substring(i + 1);
+		}
+
+		return extension;
 	}
 }
