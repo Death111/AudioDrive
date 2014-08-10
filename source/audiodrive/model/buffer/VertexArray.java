@@ -27,7 +27,7 @@ public class VertexArray {
 		buffers.forEach(buffer -> {
 			buffer.bind();
 			glEnableVertexAttribArray(index);
-			glVertexAttribPointer(index++, buffer.step(), buffer.type(), buffer.normalize(), 0, 0);
+			glVertexAttribPointer(index++, buffer.vertexSize(), buffer.type(), buffer.normalize(), 0, 0);
 		});
 	}
 	

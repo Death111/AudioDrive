@@ -4,9 +4,10 @@ import static org.lwjgl.opengl.GL11.glVertex3d;
 
 import java.util.stream.Stream;
 
+import audiodrive.model.buffer.FloatData;
 import audiodrive.utilities.Matrices;
 
-public class Vector implements Cloneable {
+public class Vector implements Cloneable, FloatData {
 	
 	public static final int Dimension = 3;
 	
@@ -304,6 +305,12 @@ public class Vector implements Cloneable {
 		return new double[]{x, y, z, 1};
 	}
 	
+	@Override
+	public int floats() {
+		return Vector.Dimension;
+	}
+	
+	@Override
 	public float[] toFloats() {
 		return new float[]{(float) x, (float) y, (float) z};
 	}

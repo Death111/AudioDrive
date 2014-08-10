@@ -8,11 +8,12 @@ import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.nio.LongBuffer;
 import java.nio.ShortBuffer;
+import java.util.Arrays;
 import java.util.List;
 
 import org.lwjgl.PointerBuffer;
 
-import audiodrive.model.geometry.Vector;
+import audiodrive.model.buffer.FloatData;
 
 /**
  * Utility class to create buffers.
@@ -25,29 +26,29 @@ public class Buffers {
 	}
 	
 	/**
-	 * Construct a direct native-ordered DoubleBuffer with the specified vertices.
-	 * 
+	 * Construct a direct native-ordered FloatBuffer with the specified data.
+	 *
 	 * @param vectors the buffer elements
-	 * @return a DoubleBuffer
+	 * @return a FloatBuffer
 	 */
-	public static DoubleBuffer create(List<Vector> vectors) {
-		DoubleBuffer buffer = createDoubleBuffer(vectors.size() * 3);
-		vectors.stream().map(Vector::toArray).forEach(buffer::put);
+	public static FloatBuffer create(List<? extends FloatData> data) {
+		if (data.isEmpty()) return createFloatBuffer(0);
+		FloatBuffer buffer = createFloatBuffer(data.size() * data.get(0).floats());
+		data.stream().map(FloatData::toFloats).forEach(buffer::put);
 		buffer.flip();
 		return buffer;
 	}
 	
 	/**
-	 * Construct a direct native-ordered DoubleBuffer with the specified vertices.
+	 * Construct a direct native-ordered FloatBuffer with the specified data.
 	 * 
 	 * @param vectors the buffer elements
-	 * @return a DoubleBuffer
+	 * @return a FloatBuffer
 	 */
-	public static DoubleBuffer create(Vector... vectors) {
-		DoubleBuffer buffer = createDoubleBuffer(vectors.length * 3);
-		for (Vector vector : vectors) {
-			buffer.put(vector.toArray());
-		}
+	public static FloatBuffer create(FloatData... data) {
+		if (data.length == 0) return createFloatBuffer(0);
+		FloatBuffer buffer = createFloatBuffer(data.length * data[0].floats());
+		Arrays.stream(data).map(FloatData::toFloats).forEach(buffer::put);
 		buffer.flip();
 		return buffer;
 	}

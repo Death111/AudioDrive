@@ -6,11 +6,11 @@ import java.util.List;
 
 import org.newdawn.slick.opengl.Texture;
 
+import audiodrive.model.buffer.VertexBuffer;
 import audiodrive.model.geometry.Face;
 import audiodrive.model.geometry.Placement;
 import audiodrive.model.geometry.Rotation;
 import audiodrive.model.geometry.Vector;
-import audiodrive.model.geometry.Vertex;
 
 public class Model {
 	
@@ -22,9 +22,12 @@ public class Model {
 	
 	private Texture texture = null;
 	
+	private VertexBuffer vertexBuffer;
+	
 	public Model(String modelName, List<Face> faces) {
 		this.modelName = modelName;
 		this.faces = faces;
+		vertexBuffer = new VertexBuffer(faces).mode(GL_TRIANGLES);
 	}
 	
 	@Override
@@ -46,14 +49,7 @@ public class Model {
 		if (place) placement.apply();
 		if (rotate) rotation.apply();
 		if (scale) glScaled(scaling, scaling, scaling);
-		for (Face face : faces) {
-			List<Vertex> vertexes = face.vertexes;
-			glBegin(GL_TRIANGLES);
-			for (Vertex vertexObject : vertexes) {
-				vertexObject.gl();
-			}
-			glEnd();
-		}
+		vertexBuffer.draw();
 		if (place || scale || rotate) glPopMatrix();
 		
 		if (texture != null) {

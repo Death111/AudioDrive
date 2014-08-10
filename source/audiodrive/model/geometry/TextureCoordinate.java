@@ -1,6 +1,11 @@
 package audiodrive.model.geometry;
 
-public class TextureCoordinate {
+import audiodrive.model.buffer.FloatData;
+
+public class TextureCoordinate implements FloatData {
+	
+	public static final int Dimension = 2;
+	
 	public double x;
 	public double y;
 	
@@ -8,6 +13,16 @@ public class TextureCoordinate {
 		super();
 		this.x = x;
 		this.y = y;
+	}
+	
+	@Override
+	public int floats() {
+		return TextureCoordinate.Dimension;
+	}
+	
+	@Override
+	public float[] toFloats() {
+		return new float[]{(float) x, (float) y};
 	}
 	
 }

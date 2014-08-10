@@ -19,10 +19,9 @@ public class TitleScene extends Scene {
 	@Override
 	public void entering() {
 		title = new Text(AudioDrive.Title).setFont(AudioDrive.Font).setSize(48).setCentered(getWidth() / 2, getHeight() / 2);
-		canvas = new VertexBuffer(Buffers.create(0, 0, 0, getHeight(), getWidth(), getHeight(), getWidth(), 0)).step(2).mode(GL_QUADS);
+		canvas = new VertexBuffer(Buffers.create(0, 0, 0, getHeight(), getWidth(), getHeight(), getWidth(), 0), 2).mode(GL_QUADS);
 		shader = new ShaderProgram("shaders/default.vs", "shaders/title.fs");
 		Camera.overlay(getWidth(), getHeight());
-		glEnableClientState(GL_VERTEX_ARRAY);
 	}
 	
 	@Override

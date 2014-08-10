@@ -14,17 +14,23 @@ import java.util.Objects;
 
 import org.lwjgl.opengl.GL15;
 
+import audiodrive.model.geometry.Face;
+import audiodrive.model.geometry.TextureCoordinate;
 import audiodrive.model.geometry.Vector;
+import audiodrive.model.geometry.Vertex;
 import audiodrive.utilities.Buffers;
 
 public class VertexBuffer {
+	
+	public static final int FloatSize = Float.SIZE / Byte.SIZE;
 	
 	private final int id;
 	private final int target;
 	private final int type;
 	private final int size;
 	
-	private int step = 1;
+	private int stride = 0;
+	private int vertexSize = 1;
 	private int offset = 0;
 	private int mode = GL_POINTS;
 	
@@ -36,9 +42,11 @@ public class VertexBuffer {
 	/**
 	 * Creates a vertex buffer object with the specified target and usage for {@linkplain GL15#glBufferData}.
 	 */
-	public VertexBuffer(Buffer buffer, int target, int usage) {
+	public VertexBuffer(Buffer buffer, int target, int usage, int vertexSize) {
 		this.target = target;
-		size = buffer.limit();
+		if (buffer.limit() % vertexSize != 0) throw new RuntimeException("Buffer limit has to be a multiple of the vertex size.");
+		size = buffer.limit() / vertexSize;
+		this.vertexSize = vertexSize;
 		id = glGenBuffers();
 		glBindBuffer(target, id);
 		if (buffer instanceof DoubleBuffer) {
@@ -69,24 +77,39 @@ public class VertexBuffer {
 	/**
 	 * Creates a vertex buffer object with target {@linkplain GL15#GL_ARRAY_BUFFER} and usage {@linkplain GL15#GL_STATIC_DRAW}.
 	 */
-	public VertexBuffer(Buffer buffer) {
-		this(buffer, GL_ARRAY_BUFFER, GL_STATIC_DRAW);
+	public VertexBuffer(Buffer buffer, int vertexSize) {
+		this(buffer, GL_ARRAY_BUFFER, GL_STATIC_DRAW, vertexSize);
 	}
 	
 	/**
-	 * Creates a vertex buffer object with target {@linkplain GL15#GL_ARRAY_BUFFER} and usage {@linkplain GL15#GL_STATIC_DRAW} and step size = {@linkplain Vector#Dimension}.
+	 * Creates a vertex buffer object with target {@linkplain GL15#GL_ARRAY_BUFFER} and usage {@linkplain GL15#GL_STATIC_DRAW} and vertex size = {@linkplain Vector#Dimension}.
 	 */
 	public VertexBuffer(Vector... vectors) {
-		this(Buffers.create(vectors));
-		step(Vector.Dimension);
+		this(Buffers.create(vectors), Vector.Dimension);
 	}
 	
 	/**
-	 * Creates a vertex buffer object with target {@linkplain GL15#GL_ARRAY_BUFFER} and usage {@linkplain GL15#GL_STATIC_DRAW} and step size = {@linkplain Vector#Dimension}.
+	 * Creates a vertex buffer object with target {@linkplain GL15#GL_ARRAY_BUFFER} and usage {@linkplain GL15#GL_STATIC_DRAW} and vertex size = {@linkplain Vertex#Dimension}.
 	 */
-	public VertexBuffer(List<Vector> vectors) {
-		this(Buffers.create(vectors));
-		step(Vector.Dimension);
+	public VertexBuffer(Vertex... vertices) {
+		this(Buffers.create(vertices), Vertex.Dimension);
+	}
+	
+	/**
+	 * Creates a vertex buffer object with target {@linkplain GL15#GL_ARRAY_BUFFER} and usage {@linkplain GL15#GL_STATIC_DRAW} and vertex size according to the first list entry.
+	 */
+	public VertexBuffer(List<? extends FloatData> data) {
+		this(Buffers.create(data), determineVertexSize(data));
+	}
+	
+	private static int determineVertexSize(List<? extends FloatData> data) {
+		if (!data.isEmpty()) {
+			FloatData firstEntry = data.get(0);
+			if (firstEntry instanceof Vector) return Vector.Dimension;
+			if (firstEntry instanceof Vertex) return Vertex.Dimension;
+			if (firstEntry instanceof Face) return Vertex.Dimension;
+		}
+		throw new RuntimeException("Can't determine the vertex size of an empty list.");
 	}
 	
 	/**
@@ -121,7 +144,19 @@ public class VertexBuffer {
 	 */
 	public void bind() {
 		glBindBuffer(target, id);
-		glVertexPointer(step, type, 0, 0);
+		if (vertexSize == Vertex.Dimension) {
+			int stride = Vertex.Dimension * FloatSize;
+			int offset = Vector.Dimension * FloatSize;
+			glEnableClientState(GL_VERTEX_ARRAY);
+			glVertexPointer(Vector.Dimension, type, stride, 0);
+			glEnableClientState(GL_NORMAL_ARRAY);
+			glNormalPointer(type, stride, offset);
+			glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+			glTexCoordPointer(TextureCoordinate.Dimension, type, stride, 2 * offset);
+		} else {
+			glEnableClientState(GL_VERTEX_ARRAY);
+			glVertexPointer(vertexSize, type, stride * FloatSize, 0);
+		}
 		if (indexBuffer != null) indexBuffer.bind();
 		bound = true;
 	}
@@ -158,7 +193,7 @@ public class VertexBuffer {
 	 */
 	public void draw() {
 		if (!bound) bind();
-		if (indexBuffer == null) glDrawArrays(mode, offset, size / step);
+		if (indexBuffer == null) glDrawArrays(mode, offset, size);
 		else glDrawElements(mode, indexBuffer.size(), GL_UNSIGNED_INT, offset);
 		bound = false;
 	}
@@ -168,7 +203,7 @@ public class VertexBuffer {
 	}
 	
 	/**
-	 * Indicates the type of the buffer. (GL_DOUBLE, GL_Float, ...)
+	 * Indicates the type of the buffer. (GL_DOUBLE, GL_FLOAT, ...)
 	 */
 	public int type() {
 		return type;
@@ -184,18 +219,10 @@ public class VertexBuffer {
 	}
 	
 	/**
-	 * Sets the step size of the buffer. I. e. the entry size.
+	 * Indicates the step width of the buffer. I. e. the vertex size.
 	 */
-	public VertexBuffer step(int step) {
-		this.step = step;
-		return this;
-	}
-	
-	/**
-	 * Indicates the step width of the buffer. I. e. the entry size.
-	 */
-	public int step() {
-		return step;
+	public int vertexSize() {
+		return vertexSize;
 	}
 	
 	/**
