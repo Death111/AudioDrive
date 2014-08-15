@@ -1,6 +1,6 @@
 package audiodrive.model.geometry;
 
-import static org.lwjgl.opengl.GL11.glVertex3d;
+import static org.lwjgl.opengl.GL11.*;
 
 import java.util.stream.Stream;
 
@@ -315,8 +315,12 @@ public class Vector implements Cloneable, FloatData {
 		return new float[]{(float) x, (float) y, (float) z};
 	}
 	
-	public void gl() {
+	public void glVertex() {
 		glVertex3d(x(), y(), z());
+	}
+	
+	public void glNormal() {
+		glNormal3d(x(), y(), z());
 	}
 	
 	private void assertModifiable() {

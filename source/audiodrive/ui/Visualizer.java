@@ -98,19 +98,19 @@ public class Visualizer {
 		double width = (double) Display.getWidth() / leftSpectrum.length;
 		for (int band = 0; band < leftSpectrum.length; band++) {
 			float amplitude = leftSpectrum[band];
-			new Vector().x(x).y(y).gl();
-			new Vector().x(x + width).y(y).gl();
-			new Vector().x(x + width).y(y + amplitude).gl();
-			new Vector().x(x).y(y + amplitude).gl();
+			new Vector().x(x).y(y).glVertex();
+			new Vector().x(x + width).y(y).glVertex();
+			new Vector().x(x + width).y(y + amplitude).glVertex();
+			new Vector().x(x).y(y + amplitude).glVertex();
 			x += width;
 		}
 		x = 0;
 		for (int band = 0; band < rightSpectrum.length; band++) {
 			float amplitude = rightSpectrum[band];
-			new Vector().x(x).y(y).gl();
-			new Vector().x(x + width).y(y).gl();
-			new Vector().x(x + width).y(y - amplitude).gl();
-			new Vector().x(x).y(y - amplitude).gl();
+			new Vector().x(x).y(y).glVertex();
+			new Vector().x(x + width).y(y).glVertex();
+			new Vector().x(x + width).y(y - amplitude).glVertex();
+			new Vector().x(x).y(y - amplitude).glVertex();
 			x += width;
 		}
 		glEnd();

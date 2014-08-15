@@ -6,6 +6,7 @@ import java.awt.Toolkit;
 import org.lwjgl.LWJGLException;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
+import org.lwjgl.opengl.PixelFormat;
 
 import audiodrive.ui.control.Input;
 
@@ -26,7 +27,7 @@ public class Window {
 		if (open) return;
 		open = true;
 		try {
-			Display.create();
+			Display.create(new PixelFormat(0, 8, 1));
 		} catch (LWJGLException exception) {
 			throw new RuntimeException(exception);
 		}

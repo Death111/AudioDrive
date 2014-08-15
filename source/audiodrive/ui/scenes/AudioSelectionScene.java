@@ -219,6 +219,9 @@ public class AudioSelectionScene extends Scene implements ItemListener {
 		case Keyboard.KEY_ESCAPE:
 			exit();
 			break;
+		case Keyboard.KEY_M:
+			Scene.get(ModelViewerScene.class).enter();
+			break;
 		case Keyboard.KEY_N:
 			if (selectedFile != null) {
 				Scene.get(AnalyzationScene.class).enter(new AudioFile(selectedFile));

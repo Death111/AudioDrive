@@ -242,20 +242,20 @@ public class Drive extends Application {
 		double widthFactor = 4.0;
 		for (int band = 0; band < leftSpectrum.length; band++) {
 			double amplitude = leftSpectrum[band] * widthFactor;
-			new Vector().x(x).y(y).gl();
-			new Vector().x(x).y(y + height).gl();
-			new Vector().x(x + amplitude).y(y + height).gl();
-			new Vector().x(x + amplitude).y(y).gl();
+			new Vector().x(x).y(y).glVertex();
+			new Vector().x(x).y(y + height).glVertex();
+			new Vector().x(x + amplitude).y(y + height).glVertex();
+			new Vector().x(x + amplitude).y(y).glVertex();
 			y -= height;
 		}
 		x = Display.getWidth() + 1;
 		y = Display.getHeight();
 		for (int band = 0; band < rightSpectrum.length; band++) {
 			double amplitude = rightSpectrum[band] * widthFactor;
-			new Vector().x(x).y(y).gl();
-			new Vector().x(x).y(y + height).gl();
-			new Vector().x(x - amplitude).y(y + height).gl();
-			new Vector().x(x - amplitude).y(y).gl();
+			new Vector().x(x).y(y).glVertex();
+			new Vector().x(x).y(y + height).glVertex();
+			new Vector().x(x - amplitude).y(y + height).glVertex();
+			new Vector().x(x - amplitude).y(y).glVertex();
 			y -= height;
 		}
 		glEnd();
@@ -266,7 +266,7 @@ public class Drive extends Application {
 		glColor4d(1, 1, 1, 1);
 		glPointSize(3);
 		glBegin(GL_POINTS);
-		centerSpline.forEach(Vector::gl);
+		centerSpline.forEach(Vector::glVertex);
 		glEnd();
 	}
 	
@@ -274,7 +274,7 @@ public class Drive extends Application {
 		glColor4d(1, 1, 1, 1);
 		glPointSize(6);
 		glBegin(GL_POINTS);
-		vectorinates.forEach(Vector::gl);
+		vectorinates.forEach(Vector::glVertex);
 		glEnd();
 	}
 	
@@ -282,9 +282,9 @@ public class Drive extends Application {
 		glPointSize(5);
 		glBegin(GL_POINTS);
 		glColor4d(1, 0, 0, 1);
-		camera.gl();
+		camera.glVertex();
 		glColor4d(1, 0, 1, 1);
-		look.gl();
+		look.glVertex();
 		glEnd();
 	}
 	
@@ -342,11 +342,11 @@ public class Drive extends Application {
 		if (centerSpline != null && centerSpline.size() > 1) for (int i = 0; i < centerSpline.size() - 1; i++) {
 			Vector one = centerSpline.get(i);
 			Vector two = centerSpline.get(i + 1);
-			one.gl();
-			two.gl();
+			one.glVertex();
+			two.glVertex();
 			if (showUpVectors) {
-				one.gl();
-				one.plus(up.multiplied(0.1)).gl();
+				one.glVertex();
+				one.plus(up.multiplied(0.1)).glVertex();
 			}
 		}
 		glEnd();
@@ -369,10 +369,10 @@ public class Drive extends Application {
 			} else {
 				sideTwo = two.minus(one).cross(Vector.Y).length(sideWidth);
 			}
-			one.plus(sideOne.negated()).gl();
-			one.plus(sideOne).gl();
-			two.plus(sideTwo).gl();
-			two.plus(sideTwo.negated()).gl();
+			one.plus(sideOne.negated()).glVertex();
+			one.plus(sideOne).glVertex();
+			two.plus(sideTwo).glVertex();
+			two.plus(sideTwo.negated()).glVertex();
 			sideOne = sideTwo;
 		}
 		glEnd();
@@ -399,10 +399,10 @@ public class Drive extends Application {
 			} else {
 				sideTwo = two.minus(one).cross(Vector.Y).length(sideWidth);
 			}
-			one.plus(sideOne.negated()).gl();
-			one.plus(sideOne).gl();
-			two.plus(sideTwo).gl();
-			two.plus(sideTwo.negated()).gl();
+			one.plus(sideOne.negated()).glVertex();
+			one.plus(sideOne).glVertex();
+			two.plus(sideTwo).glVertex();
+			two.plus(sideTwo.negated()).glVertex();
 			sideOne = sideTwo;
 		}
 		glEnd();
@@ -412,12 +412,12 @@ public class Drive extends Application {
 		glColor4d(1, 1, 0, 1);
 		glBegin(GL_LINES);
 		for (int i = 0; i < rightSpline.size() - 1; i++) {
-			rightSpline.get(i).gl();
-			rightSpline.get(i + 1).gl();
+			rightSpline.get(i).glVertex();
+			rightSpline.get(i + 1).glVertex();
 		}
 		for (int i = 0; i < leftSpline.size() - 1; i++) {
-			leftSpline.get(i).gl();
-			leftSpline.get(i + 1).gl();
+			leftSpline.get(i).glVertex();
+			leftSpline.get(i + 1).glVertex();
 		}
 		glEnd();
 	}
@@ -427,17 +427,17 @@ public class Drive extends Application {
 		if (fill) {
 			glBegin(GL_QUADS);
 			for (int i = 0; i < rightSpline.size() - 2; i++) {
-				leftSpline.get(i).gl();
-				rightSpline.get(i).gl();
-				rightSpline.get(i + 1).gl();
-				leftSpline.get(i + 1).gl();
+				leftSpline.get(i).glVertex();
+				rightSpline.get(i).glVertex();
+				rightSpline.get(i + 1).glVertex();
+				leftSpline.get(i + 1).glVertex();
 			}
 			glEnd();
 		} else {
 			glBegin(GL_LINES);
 			for (int i = 0; i < rightSpline.size() - 1; i++) {
-				leftSpline.get(i).gl();
-				rightSpline.get(i).gl();
+				leftSpline.get(i).glVertex();
+				rightSpline.get(i).glVertex();
 			}
 			glEnd();
 		}
