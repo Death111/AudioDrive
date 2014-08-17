@@ -2,11 +2,16 @@ package audiodrive.ui.scenes;
 
 import static org.lwjgl.opengl.GL11.*;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+
 import org.lwjgl.input.Keyboard;
 
 import audiodrive.audio.Playback;
 import audiodrive.model.Player;
 import audiodrive.model.geometry.Placement;
+import audiodrive.model.geometry.ReflectionPlane;
 import audiodrive.model.geometry.Rotation;
 import audiodrive.model.geometry.Vector;
 import audiodrive.model.loader.ModelLoader;
@@ -20,6 +25,7 @@ public class GameScene extends Scene {
 	
 	private Track track;
 	private Player player;
+	private List<ReflectionPlane> reflectionPlanes = new ArrayList<>(2);
 	
 	private Rotation rotation = new Rotation();
 	private Vector translate = new Vector();
@@ -50,6 +56,7 @@ public class GameScene extends Scene {
 		playback = new Playback(track.getAudio().getFile());
 		rotation.reset();
 		translate.set(Vector.Null);
+		updatePlacement();
 	}
 	
 	@Override
@@ -57,35 +64,50 @@ public class GameScene extends Scene {
 		if (!playback.isRunning()) return;
 		time += elapsed;
 		// time = track.getDuration() - 0.11;
-		Placement placement = track.calculatePlayerPlacement(time);
+		updatePlacement();
+	}
+	
+	private void updatePlacement() {
+		Placement placement = track.getPlayerPlacement(time);
 		player.model().placement(placement);
+		reflectionPlanes.clear();
+		reflectionPlanes.addAll(track.getReflectionPlanes(time));
 	}
 	
 	@Override
 	protected void render() {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-		
+		glEnable(GL_CULL_FACE);
 		glEnable(GL_NORMALIZE);
 		glEnable(GL_LIGHT0);
-		glLight(GL_LIGHT0, GL_AMBIENT, Buffers.create(1f, 1f, 1f, 1f));
+		glLight(GL_LIGHT0, GL_DIFFUSE, Buffers.create(1f, 1f, 1f, 1f));
+		glEnable(GL_COLOR_MATERIAL);
+		glColorMaterial(GL_FRONT, GL_DIFFUSE);
 		glShadeModel(GL_SMOOTH);
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glEnable(GL_LIGHTING);
 		
 		Camera.perspective(45, getWidth(), getHeight(), 0.001, 100);
 		// Camera.position(camera);
 		// Camera.lookAt(look);
 		player.camera();
 		
-		// rotation.apply();
-		// glTranslated(translate.x(), translate.y(), translate.z());
+		rotation.apply();
+		glTranslated(translate.x(), translate.y(), translate.z());
 		
-		// glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		glLight(GL_LIGHT0, GL_POSITION, Buffers.create(0f, 1f, 0f, 0f));
 		track.render();
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 		glDisable(GL_CULL_FACE); // FIXME model face culling
+		glColor4d(1, 1, 1, 1);
 		player.render();
+		
+		reflectionPlanes.stream().filter(Objects::nonNull).forEach(plane -> {
+			plane.reflect(player.model());
+			// plane.render();
+		});
 	}
 	
 	@Override

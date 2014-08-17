@@ -31,8 +31,8 @@ public class ModelViewerScene extends Scene {
 		model = ModelLoader.loadSingleModel("models/xwing/xwing").scale(0.1);
 		double y = -0.25;
 		flatPlane = new ReflectionPlane(new Vector(-1, y, 1), new Vector(1, y, 1), new Vector(1, y, -1), new Vector(-1, y, -1));
-		risingPlane = new ReflectionPlane(new Vector(-1, 2 * y, 1), new Vector(1, 2 * y, 1), new Vector(1, y, 0), new Vector(-1, y, 0));
-		fallingPlane = new ReflectionPlane(new Vector(-1, y, 0), new Vector(1, y, 0), new Vector(1, 2 * y, -1), new Vector(-1, 2 * y, -1));
+		risingPlane = new ReflectionPlane(new Vector(-1, 2 * y, 1), new Vector(1, 2 * y, 1), new Vector(1, y, 0), new Vector(-1, y, 0)).renderNormal(true);
+		fallingPlane = new ReflectionPlane(new Vector(-1, y, 0), new Vector(1, y, 0), new Vector(1, 2 * y, -1), new Vector(-1, 2 * y, -1)).renderNormal(true);
 	}
 	
 	@Override

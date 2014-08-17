@@ -6,14 +6,21 @@ import audiodrive.utilities.Buffers;
 
 public class ReflectionPlane {
 	
-	private Vector a, b, c, d, normal;
+	private Vector a, b, c, d, center, normal;
+	private boolean renderNormal = false;
 	
 	public ReflectionPlane(Vector a, Vector b, Vector c, Vector d) {
 		this.a = a;
 		this.b = b;
 		this.c = c;
 		this.d = d;
+		center = a.plus(c).divided(2);
 		normal = b.minus(a).cross(d.minus(a)).normalize();
+	}
+	
+	public ReflectionPlane renderNormal(boolean renderNormal) {
+		this.renderNormal = renderNormal;
+		return this;
 	}
 	
 	public Vector a() {
@@ -38,7 +45,6 @@ public class ReflectionPlane {
 	
 	public void reflect(Model model) {
 		glClear(GL_STENCIL_BUFFER_BIT);
-		double angle = model.placement().normal().degrees(normal) * Math.signum(model.placement().direction().negated().dot(normal));
 		
 		// disable color and depth updates
 		glDisable(GL_DEPTH_TEST);
@@ -58,8 +64,8 @@ public class ReflectionPlane {
 		// draw reflection on plane
 		glPushMatrix();
 		glRotated(180, 0, 0, 1);
-		glRotated(angle, 1, 0, 0);
-		glTranslated(0, 0.5, 0);
+		glRotated(angle(model), 1, 0, 0);
+		glTranslated(0, 2 * distance(model), 0);
 		glLight(GL_LIGHT0, GL_POSITION, Buffers.create(0f, 1f, 0f, 0f));
 		glColor4d(1, 1, 1, 1);
 		model.render();
@@ -68,18 +74,26 @@ public class ReflectionPlane {
 		glLight(GL_LIGHT0, GL_POSITION, Buffers.create(0f, 1f, 0f, 0f));
 	}
 	
+	public double angle(Model model) {
+		return model.placement().normal().degrees(normal) * Math.signum(model.placement().direction().negated().dot(normal));
+	}
+	
+	public double distance(Model model) {
+		return model.placement().position().minus(center).dot(normal);
+	}
+	
 	public void render() {
 		glColor4d(1, 1, 1, 0.5);
 		sendGeometry();
+		if (!renderNormal) return;
 		glColor4d(1, 1, 1, 1);
-		Vector center = a.plus(c).divided(2);
 		glBegin(GL_LINES);
 		center.glVertex();
 		center.plus(normal).glVertex();
 		glEnd();
 	}
 	
-	private void sendGeometry() {
+	public void sendGeometry() {
 		glBegin(GL_QUADS);
 		normal.glNormal();
 		a.glVertex();
@@ -87,6 +101,11 @@ public class ReflectionPlane {
 		c.glVertex();
 		d.glVertex();
 		glEnd();
+	}
+	
+	@Override
+	public String toString() {
+		return "ReflectionPlane [a=" + a + ", b=" + b + ", c=" + c + ", d=" + d + ", normal=" + normal + "]";
 	}
 	
 }

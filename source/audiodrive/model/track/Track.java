@@ -9,6 +9,7 @@ import audiodrive.audio.AnalyzedAudio;
 import audiodrive.model.buffer.VertexBuffer;
 import audiodrive.model.geometry.CuboidStripRenderer;
 import audiodrive.model.geometry.Placement;
+import audiodrive.model.geometry.ReflectionPlane;
 import audiodrive.model.geometry.Vector;
 import audiodrive.model.track.interpolation.CatmullRom;
 
@@ -98,6 +99,7 @@ public class Track {
 	}
 	
 	public void render() {
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 		glColor4d(1, 1, 1, 1);
 		if (pointBuffer != null) {
 			glPointSize(5f);
@@ -106,27 +108,55 @@ public class Track {
 		if (splineBuffer != null) {
 			splineBuffer.draw();
 		}
-		glColor4d(0.0, 0.5, 0.5, 0.5);
+		glColor4d(1, 1, 1, 0.5);
+		glLineWidth(2.0f);
 		glDisable(GL_CULL_FACE);
 		splineAreaBuffer.draw();
 		glEnable(GL_CULL_FACE);
 		cuboidStripRenderer.render(leftBorderBuffer);
 		cuboidStripRenderer.render(rightBorderBuffer);
+		glColor4d(0.1, 0.1, 0.1, 0.5);
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		splineAreaBuffer.draw();
+		cuboidStripRenderer.render(leftBorderBuffer);
+		cuboidStripRenderer.render(rightBorderBuffer);
 	}
 	
-	public Placement calculatePlayerPlacement(double time) {
-		double calculatedIndex = time * spline.size() / duration;
-		if (calculatedIndex >= spline.size() - 1) calculatedIndex = spline.size() - 2;
-		int index = (int) calculatedIndex;
-		double fraction = calculatedIndex - index;
-		Vector current = spline.get(index);
-		Vector next = spline.get(index + 1);
+	public Index getIndex(double time) {
+		double index = time * spline.size() / duration;
+		if (index >= spline.size() - 1) index = spline.size() - 2;
+		int integer = (int) index;
+		double fraction = index - integer;
+		return new Index(integer, fraction);
+	}
+	
+	public Placement getPlayerPlacement(double time) {
+		Index index = getIndex(time);
+		Vector current = spline.get(index.integer);
+		Vector next = spline.get(index.integer + 1);
 		Vector direction = next.minus(current);
 		Vector normal = Vector.Y;
 		// TODO interpolating the position causes bucking
 		// Vector position = current.plus(direction.multiplied(fraction)).plus(normal.multiplied(flightHeight));
 		Vector position = current.plus(normal.multiplied(flightHeight));
 		return new Placement().position(position).direction(direction).normal(normal);
+	}
+	
+	public List<ReflectionPlane> getReflectionPlanes(double time) {
+		List<ReflectionPlane> planes = new ArrayList<>();
+		Index index = getIndex(time);
+		planes.add(getPlane(index.integer));
+		planes.add(getPlane(index.integer + 1));
+		return planes;
+	}
+	
+	private ReflectionPlane getPlane(int index) {
+		if (index < 0 || index * 2 > splineArea.size() - 4) return null;
+		Vector a = splineArea.get(index * 2);
+		Vector b = splineArea.get(index * 2 + 1);
+		Vector c = splineArea.get(index * 2 + 3);
+		Vector d = splineArea.get(index * 2 + 2);
+		return new ReflectionPlane(a, b, c, d);
 	}
 	
 	public AnalyzedAudio getAudio() {
@@ -147,6 +177,23 @@ public class Track {
 	
 	public List<Vector> spline() {
 		return spline;
+	}
+	
+	public static class Index {
+		
+		final int integer;
+		final double fraction;
+		
+		public Index(int integer, double fraction) {
+			this.integer = integer;
+			this.fraction = fraction;
+		}
+		
+		@Override
+		public String toString() {
+			return "Index [integer=" + integer + ", fraction=" + fraction + "]";
+		}
+		
 	}
 	
 }
