@@ -59,8 +59,8 @@ public class Model {
 		
 	}
 	
-	public Model align(Vector direction, Vector normal) {
-		placement.direction(direction).normal(normal);
+	public Model align(Vector direction, Vector up) {
+		placement.direction(direction).up(up);
 		return this;
 	}
 	
@@ -96,13 +96,13 @@ public class Model {
 		return placement.direction();
 	}
 	
-	public Model normal(Vector normal) {
-		placement.normal().set(normal);
+	public Model up(Vector normal) {
+		placement.up().set(normal);
 		return this;
 	}
 	
-	public Vector normal() {
-		return placement.normal();
+	public Vector up() {
+		return placement.up();
 	}
 	
 	public Model scale(double scaling) {

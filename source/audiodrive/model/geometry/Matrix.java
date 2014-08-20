@@ -158,12 +158,12 @@ public class Matrix {
 		return Math.toDegrees(Matrices.rotationAroundZAxis(M));
 	}
 	
-	public Matrix align(Vector direction, Vector normal) {
+	public Matrix alignment(Vector direction, Vector up) {
 		identity();
 		Vector z = direction.normalized();
-		Vector y = normal;
-		Vector x = z.cross(y).normalize();
-		y = x.cross(z).normalize();
+		Vector y = up;
+		Vector x = y.cross(z).normalize();
+		y = z.cross(x).normalize();
 		insertInColumn0(x);
 		insertInColumn1(y);
 		insertInColumn2(z);

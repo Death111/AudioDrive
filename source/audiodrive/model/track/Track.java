@@ -135,11 +135,11 @@ public class Track {
 		Vector current = spline.get(index.integer);
 		Vector next = spline.get(index.integer + 1);
 		Vector direction = next.minus(current);
-		Vector normal = Vector.Y;
+		Vector up = Vector.Y;
 		// TODO interpolating the position causes bucking
 		// Vector position = current.plus(direction.multiplied(fraction)).plus(normal.multiplied(flightHeight));
-		Vector position = current.plus(normal.multiplied(flightHeight));
-		return new Placement().position(position).direction(direction).normal(normal);
+		Vector position = current.plus(up.multiplied(flightHeight));
+		return new Placement().position(position).direction(direction).up(up);
 	}
 	
 	public List<ReflectionPlane> getReflectionPlanes(double time) {

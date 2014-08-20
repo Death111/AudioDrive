@@ -27,7 +27,7 @@ public class Player {
 	}
 	
 	public void camera() {
-		Camera.position(model().position().plus(model().direction().multiplied(-eyeDistance)).plus(model().normal().multiplied(eyeHeight)));
+		Camera.position(model().position().plus(model().direction().multiplied(-eyeDistance)).plus(model().up().multiplied(eyeHeight)));
 		Camera.lookAt(model().position().plus(model().direction().multiplied(lookDistance)));
 	}
 }

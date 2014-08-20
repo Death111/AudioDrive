@@ -72,7 +72,7 @@ public class Rotation {
 	}
 	
 	public Rotation align(Vector direction, Vector normal) {
-		matrix.align(direction, normal);
+		matrix.alignment(direction, normal);
 		return this;
 	}
 	

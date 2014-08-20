@@ -8,12 +8,12 @@ public class Placement {
 	
 	private final Vector position = new Vector();
 	private final Vector direction = new Vector().set(Vector.Z);
-	private final Vector normal = new Vector().set(Vector.Y);
+	private final Vector up = new Vector().set(Vector.Y);
 	
 	public Placement set(Placement placement) {
 		position.set(placement.position());
 		direction.set(placement.direction());
-		normal.set(placement.normal());
+		up.set(placement.up());
 		return this;
 	}
 	
@@ -38,32 +38,32 @@ public class Placement {
 		return direction;
 	}
 	
-	public Placement normal(Vector normal) {
+	public Placement up(Vector normal) {
 		assertModifiable();
-		this.normal.set(normal);
+		this.up.set(normal);
 		update();
 		return this;
 	}
 	
-	public Vector normal() {
-		return normal;
+	public Vector up() {
+		return up;
 	}
 	
 	private void update() {
 		direction.normalize();
-		normal.normalize();
-		Vector side = direction.cross(normal).normalize();
-		normal.set(side.cross(direction).normalize());
+		up.normalize();
+		Vector side = direction.cross(up).normalize();
+		up.set(side.cross(direction).normalize());
 	}
 	
 	public Placement reset() {
 		direction.set(Vector.Z);
-		normal.set(Vector.Y);
+		up.set(Vector.Y);
 		return this;
 	}
 	
 	public Matrix toMatrix() {
-		return new Matrix().align(direction, normal).translate(position);
+		return new Matrix().alignment(direction, up).translate(position);
 	}
 	
 	public void apply() {
@@ -72,7 +72,7 @@ public class Placement {
 	}
 	
 	public boolean hasDefaultOrientation() {
-		return direction.equals(Vector.Z) && normal.equals(Vector.Y);
+		return direction.equals(Vector.Z) && up.equals(Vector.Y);
 	}
 	
 	public boolean isDefault() {
@@ -84,7 +84,7 @@ public class Placement {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((direction == null) ? 0 : direction.hashCode());
-		result = prime * result + ((normal == null) ? 0 : normal.hashCode());
+		result = prime * result + ((up == null) ? 0 : up.hashCode());
 		result = prime * result + ((position == null) ? 0 : position.hashCode());
 		return result;
 	}
@@ -98,9 +98,9 @@ public class Placement {
 		if (direction == null) {
 			if (other.direction != null) return false;
 		} else if (!direction.equals(other.direction)) return false;
-		if (normal == null) {
-			if (other.normal != null) return false;
-		} else if (!normal.equals(other.normal)) return false;
+		if (up == null) {
+			if (other.up != null) return false;
+		} else if (!up.equals(other.up)) return false;
 		if (position == null) {
 			if (other.position != null) return false;
 		} else if (!position.equals(other.position)) return false;

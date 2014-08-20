@@ -75,7 +75,7 @@ public class ReflectionPlane {
 	}
 	
 	public double angle(Model model) {
-		return model.placement().normal().degrees(normal) * Math.signum(model.placement().direction().negated().dot(normal));
+		return model.placement().up().degrees(normal) * Math.signum(model.placement().direction().negated().dot(normal));
 	}
 	
 	public double distance(Model model) {

@@ -100,7 +100,6 @@ public class GameScene extends Scene {
 		glLight(GL_LIGHT0, GL_POSITION, Buffers.create(0f, 1f, 0f, 0f));
 		track.render();
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-		glDisable(GL_CULL_FACE); // FIXME model face culling
 		glColor4d(1, 1, 1, 1);
 		player.render();
 		
