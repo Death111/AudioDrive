@@ -1,6 +1,5 @@
 package audiodrive.model;
 
-import static org.lwjgl.opengl.GL11.*;
 import audiodrive.model.loader.Model;
 import audiodrive.ui.components.Camera;
 
@@ -12,9 +11,7 @@ public class Player {
 	private double eyeDistance = 0.005;
 	
 	public void render() {
-		glEnable(GL_LIGHTING);
 		model.render();
-		glDisable(GL_LIGHTING);
 	}
 	
 	public Player model(Model model) {

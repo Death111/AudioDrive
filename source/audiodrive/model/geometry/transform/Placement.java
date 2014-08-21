@@ -1,8 +1,10 @@
-package audiodrive.model.geometry;
+package audiodrive.model.geometry.transform;
 
 import static org.lwjgl.opengl.GL11.*;
+import audiodrive.model.geometry.Matrix;
+import audiodrive.model.geometry.Vector;
 
-public class Placement {
+public class Placement extends Transformation {
 	
 	public static final Placement Default = new Placement();
 	
@@ -40,7 +42,7 @@ public class Placement {
 	
 	public Placement up(Vector normal) {
 		assertModifiable();
-		this.up.set(normal);
+		up.set(normal);
 		update();
 		return this;
 	}
@@ -66,7 +68,14 @@ public class Placement {
 		return new Matrix().alignment(direction, up).translate(position);
 	}
 	
+	@Override
+	public boolean ignorable() {
+		return isDefault();
+	}
+	
+	@Override
 	public void apply() {
+		if (ignorable()) return;
 		if (hasDefaultOrientation()) glTranslated(position.x(), position.y(), position.z());
 		else glMultMatrix(toMatrix().toDoubleBuffer());
 	}

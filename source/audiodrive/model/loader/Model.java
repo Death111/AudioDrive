@@ -8,17 +8,14 @@ import org.newdawn.slick.opengl.Texture;
 
 import audiodrive.model.buffer.VertexBuffer;
 import audiodrive.model.geometry.Face;
-import audiodrive.model.geometry.Placement;
-import audiodrive.model.geometry.Rotation;
 import audiodrive.model.geometry.Vector;
+import audiodrive.model.geometry.transform.Placement;
+import audiodrive.model.hierarchy.Node;
 
-public class Model {
+public class Model extends Node {
 	
 	private String modelName;
 	private List<Face> faces;
-	private Placement placement = new Placement();
-	private Rotation rotation = new Rotation();
-	private double scaling = 1.0;
 	
 	private Texture texture = null;
 	
@@ -35,23 +32,14 @@ public class Model {
 		if (texture != null) texture.release();
 	}
 	
-	public void render() {
-		boolean place = !placement.isDefault();
-		boolean rotate = !rotation.isNull();
-		boolean scale = scaling != 1.0;
-		
+	@Override
+	public void draw() {
 		if (texture != null) {
 			glEnable(GL_TEXTURE_2D);
 			glBindTexture(GL_TEXTURE_2D, texture.getTextureID());
 		}
-		
-		if (place || rotate || scale) glPushMatrix();
-		if (place) placement.apply();
-		if (rotate) rotation.apply();
-		if (scale) glScaled(scaling, scaling, scaling);
+		glColor4d(1, 1, 1, 1);
 		vertexBuffer.draw();
-		if (place || scale || rotate) glPopMatrix();
-		
 		if (texture != null) {
 			glBindTexture(GL_TEXTURE_2D, 0);
 			glDisable(GL_TEXTURE_2D);
@@ -60,58 +48,54 @@ public class Model {
 	}
 	
 	public Model align(Vector direction, Vector up) {
-		placement.direction(direction).up(up);
+		placement().direction(direction).up(up);
 		return this;
 	}
 	
 	public Model move(Vector distance) {
-		placement.position().add(distance);
+		placement().position().add(distance);
 		return this;
 	}
 	
 	public Model placement(Placement placement) {
-		this.placement.set(placement);
+		this.placement().set(placement);
 		return this;
 	}
 	
-	public Placement placement() {
-		return placement;
-	}
-	
 	public Model position(Vector position) {
-		placement.position().set(position);
+		placement().position().set(position);
 		return this;
 	}
 	
 	public Vector position() {
-		return placement.position();
+		return placement().position();
 	}
 	
 	public Model direction(Vector direction) {
-		placement.direction().set(direction);
+		placement().direction().set(direction);
 		return this;
 	}
 	
 	public Vector direction() {
-		return placement.direction();
+		return placement().direction();
 	}
 	
 	public Model up(Vector normal) {
-		placement.up().set(normal);
+		placement().up().set(normal);
 		return this;
 	}
 	
 	public Vector up() {
-		return placement.up();
+		return placement().up();
 	}
 	
-	public Model scale(double scaling) {
-		this.scaling = scaling;
+	public Model scale(double scale) {
+		scaling().scale(scale);
 		return this;
 	}
 	
 	public double scale() {
-		return scaling;
+		return scaling().scale();
 	}
 	
 	public final List<Face> getFaces() {

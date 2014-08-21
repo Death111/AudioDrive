@@ -8,9 +8,9 @@ import java.util.List;
 import audiodrive.audio.AnalyzedAudio;
 import audiodrive.model.buffer.VertexBuffer;
 import audiodrive.model.geometry.CuboidStripRenderer;
-import audiodrive.model.geometry.Placement;
 import audiodrive.model.geometry.ReflectionPlane;
 import audiodrive.model.geometry.Vector;
+import audiodrive.model.geometry.transform.Placement;
 import audiodrive.model.track.interpolation.CatmullRom;
 
 public class Track {
@@ -24,7 +24,7 @@ public class Track {
 	private double width = 0.003;
 	private double borderHeight = 0.0005;
 	private double borderWidth = 0.0003;
-	private double flightHeight = 0.001;
+	private double flightHeight = 0.0003;
 	
 	private VertexBuffer pointBuffer;
 	private VertexBuffer splineBuffer;
@@ -115,8 +115,8 @@ public class Track {
 		glEnable(GL_CULL_FACE);
 		cuboidStripRenderer.render(leftBorderBuffer);
 		cuboidStripRenderer.render(rightBorderBuffer);
-		glColor4d(0.1, 0.1, 0.1, 0.5);
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		glColor4d(0.1, 0.1, 0.1, 0.25);
 		splineAreaBuffer.draw();
 		cuboidStripRenderer.render(leftBorderBuffer);
 		cuboidStripRenderer.render(rightBorderBuffer);
@@ -130,14 +130,14 @@ public class Track {
 		return new Index(integer, fraction);
 	}
 	
-	public Placement getPlayerPlacement(double time) {
+	public Placement getPlacement(double time) {
 		Index index = getIndex(time);
 		Vector current = spline.get(index.integer);
 		Vector next = spline.get(index.integer + 1);
 		Vector direction = next.minus(current);
 		Vector up = Vector.Y;
 		// TODO interpolating the position causes bucking
-		// Vector position = current.plus(direction.multiplied(fraction)).plus(normal.multiplied(flightHeight));
+		// Vector position = current.plus(direction.multiplied(index.fraction)).plus(up.multiplied(flightHeight));
 		Vector position = current.plus(up.multiplied(flightHeight));
 		return new Placement().position(position).direction(direction).up(up);
 	}
@@ -146,7 +146,10 @@ public class Track {
 		List<ReflectionPlane> planes = new ArrayList<>();
 		Index index = getIndex(time);
 		planes.add(getPlane(index.integer));
-		planes.add(getPlane(index.integer + 1));
+		ReflectionPlane plane = getPlane(index.integer - 1);
+		if (plane != null) planes.add(plane);
+		// if (index.fraction < 0.5) Get.optional(getPlane(index.integer - 1)).ifPresent(planes::add);
+		// else Get.optional(getPlane(index.integer + 1)).ifPresent(planes::add);
 		return planes;
 	}
 	

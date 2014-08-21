@@ -63,19 +63,20 @@ public class ReflectionPlane {
 		glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
 		// draw reflection on plane
 		glPushMatrix();
-		glRotated(180, 0, 0, 1);
+		model.transform();
+		glTranslated(0, -2 * distance(model) / model.scale(), 0);
 		glRotated(angle(model), 1, 0, 0);
-		glTranslated(0, 2 * distance(model), 0);
+		glRotated(180, 0, 0, 1);
 		glLight(GL_LIGHT0, GL_POSITION, Buffers.create(0f, 1f, 0f, 0f));
-		glColor4d(1, 1, 1, 1);
-		model.render();
+		glColor4d(0.5, 0.5, 0.5, 1);
+		model.draw();
 		glPopMatrix();
 		glDisable(GL_STENCIL_TEST);
 		glLight(GL_LIGHT0, GL_POSITION, Buffers.create(0f, 1f, 0f, 0f));
 	}
 	
 	public double angle(Model model) {
-		return model.placement().up().degrees(normal) * Math.signum(model.placement().direction().negated().dot(normal));
+		return model.placement().up().degrees(normal) * Math.signum(model.placement().direction().dot(normal));
 	}
 	
 	public double distance(Model model) {

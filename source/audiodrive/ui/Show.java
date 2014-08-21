@@ -10,8 +10,8 @@ import org.lwjgl.LWJGLException;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.Display;
 
-import audiodrive.model.geometry.Rotation;
 import audiodrive.model.geometry.Vector;
+import audiodrive.model.geometry.transform.Rotation;
 import audiodrive.model.track.Track;
 import audiodrive.model.track.interpolation.CatmullRom;
 import audiodrive.ui.components.Camera;
