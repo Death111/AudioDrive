@@ -76,7 +76,7 @@ public class AudioSelectionScene extends Scene implements ItemListener {
 
 		int textHeight = 50;
 
-		rootMenu = new Menu(20, 200, FileChooserItem.FILECHOOSER_ITEM_WIDTH, Display.getHeight() - 500, 1);
+		rootMenu = new Menu(20, 200, FileChooserItem.FILECHOOSER_ITEM_WIDTH + 1, Display.getHeight() - 500, 1);
 		itemMenu = new Menu(30 + FileChooserItem.FILECHOOSER_ITEM_WIDTH, 200, Display.getWidth() - FileChooserItem.FILECHOOSER_ITEM_WIDTH - 50, Display.getHeight() - 200 - 3
 				* textHeight, 1);
 		nextMenu = new Menu(20, itemMenu.getHeight() + 200 + 50, 400, Display.getHeight() - itemMenu.getHeight() + 200 + 50, 1);
