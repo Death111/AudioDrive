@@ -4,8 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import audiodrive.ui.menu.item.Item;
+import audiodrive.ui.menu.item.ItemListener;
 
-public class Menu {
+public class Menu implements ItemListener {
 
 	List<Item> items = new ArrayList<Item>();
 	int posX, posY;
@@ -59,6 +60,8 @@ public class Menu {
 	public void mouseMoved(int x, int y) {
 		// Loop through all MenuItems to check onHover
 		for (Item item : this.items) {
+			if (item.isDisabled())
+				continue;
 			final boolean leftBounds = x >= item.getPosX();
 			final boolean rightBounds = x < item.getPosX() + item.getWidth();
 			final boolean topBounds = y >= item.getPosY();
@@ -80,6 +83,8 @@ public class Menu {
 	public void mousePressed(int button, int x, int y) {
 		if (button == 0) {
 			for (Item item : this.items) {
+				if (item.isDisabled())
+					continue;
 				final boolean leftBounds = x >= item.getPosX();
 				final boolean rightBounds = x < item.getPosX() + item.getWidth();
 				final boolean topBounds = y >= item.getPosY();
@@ -95,6 +100,18 @@ public class Menu {
 				}
 			}
 		}
+	}
+
+	@Override
+	public void onHover(Item item, boolean hover) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void onSelect(Item item, boolean select) {
+		// TODO Auto-generated method stub
+
 	}
 
 }

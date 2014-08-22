@@ -11,6 +11,7 @@ public abstract class Item {
 
 	boolean hover = false;
 	boolean selected = false;
+	boolean disabled = false;
 	int posX;
 	int posY;
 	Text text;
@@ -113,5 +114,20 @@ public abstract class Item {
 	public void setSelected(boolean selected) {
 		itemListeners.forEach(itemListener -> itemListener.onSelect(this, selected));
 		this.selected = selected;
+	}
+
+	/**
+	 * @return the disabled
+	 */
+	public final boolean isDisabled() {
+		return disabled;
+	}
+
+	/**
+	 * @param disabled
+	 *            the disabled to set
+	 */
+	public final void setDisabled(boolean disabled) {
+		this.disabled = disabled;
 	}
 }

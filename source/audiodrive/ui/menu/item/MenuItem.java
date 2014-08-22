@@ -33,20 +33,24 @@ public class MenuItem extends Item {
 	@Override
 	public void render() {
 		// TODO make color settings better..
-		if (hover) {
+		if (disabled) {
+			color[0] = 1; // red
+			color[1] = 1; // green
+			color[2] = 1; // blue
+			color[3] = 0.5f; // alpha
+		} else if (hover) {
 			color[0] = 0; // red
 			color[1] = 1; // green
 			color[2] = 0; // blue
 			color[3] = .7f; // alpha
+		} else if (selected) {
+			color[0] = 1; // red
+			color[1] = 1; // green
+			color[2] = 0; // blue
+			color[3] = 0.5f; // alpha
 		} else {
 			color[0] = 1; // red
 			color[1] = 0; // green
-			color[2] = 0; // blue
-			color[3] = 0.5f; // alpha
-		}
-		if (selected) {
-			color[0] = 1; // red
-			color[1] = 1; // green
 			color[2] = 0; // blue
 			color[3] = 0.5f; // alpha
 		}
