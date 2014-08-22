@@ -3,14 +3,20 @@ package audiodrive.ui.menu;
 import java.util.ArrayList;
 import java.util.List;
 
+import audiodrive.ui.menu.item.FileChooserItem;
 import audiodrive.ui.menu.item.Item;
 import audiodrive.ui.menu.item.ItemListener;
 
 public class Menu implements ItemListener {
 
-	List<Item> items = new ArrayList<Item>();
-	int posX, posY;
-	int spacing;
+	private List<Item> items = new ArrayList<Item>();
+	private List<Item> visibleItems = new ArrayList<Item>();
+	private Item nextPage = new FileChooserItem(">> Next page", this);
+	private Item previousPage = new FileChooserItem("<< Previous page", this);
+	private int posX, posY, width, height;
+	private int spacing;
+
+	private int page = 0;
 
 	/**
 	 * @param items
@@ -18,16 +24,74 @@ public class Menu implements ItemListener {
 	 * @param posY
 	 * @param spacing
 	 */
-	public Menu(int posX, int posY, int spacing) {
+	public Menu(int posX, int posY, int width, int height, int spacing) {
 		super();
 		this.posX = posX;
 		this.posY = posY;
+		this.width = width;
+		this.height = height;
 		this.spacing = spacing;
+
+		if (width <= FileChooserItem.FILECHOOSER_ITEM_WIDTH || height <= FileChooserItem.FILECHOOSER_ITEM_HEIGHT) {
+			throw new RuntimeException("No space for menu");
+		}
+
 	}
 
 	public void render() {
-		for (Item item : this.items) {
+
+		calculateVisibleItems();
+
+		for (Item item : this.visibleItems) {
 			item.render();
+		}
+	}
+
+	private void calculateVisibleItems() {
+
+		visibleItems.clear();
+
+		int listSize = this.items.size();
+		final Item item = this.items.get(0);
+
+		final int ROWS = height / (item.getHeight() + spacing);
+		final int COLUMNS = width / (item.getWidth() + spacing);
+
+		if (page > 0) {
+			int a = visibleItems.size() % (ROWS * COLUMNS);
+			int currentColumn = a / ROWS;
+			int currentRow = a % ROWS;
+			final int x = posX + currentColumn * (item.getWidth() + this.spacing);
+			final int y = posY + currentRow * (item.getHeight() + this.spacing);
+			previousPage.setPosX(x);
+			previousPage.setPosY(y);
+			visibleItems.add(previousPage);
+		}
+
+		for (int i = page * ROWS * COLUMNS - page * 2; i < listSize; i++) {
+			Item currentItem = items.get(i);
+			int a = visibleItems.size() % (ROWS * COLUMNS);
+			int currentColumn = a / ROWS;
+			int currentRow = a % ROWS;
+			final int x = posX + currentColumn * (item.getWidth() + this.spacing);
+			final int y = posY + currentRow * (item.getHeight() + this.spacing);
+
+			// Test if limit was reached and this was not the last item
+			if (a == ROWS * COLUMNS - 1 && i < listSize - 1) {
+				nextPage.setPosX(x);
+				nextPage.setPosY(y);
+				visibleItems.add(nextPage);
+				return;
+			}
+
+			if (currentColumn >= COLUMNS) {
+				continue;
+			}
+
+			currentItem.setPosX(x);
+			currentItem.setPosY(y);
+
+			visibleItems.add(currentItem);
 		}
 	}
 
@@ -39,18 +103,7 @@ public class Menu implements ItemListener {
 	 */
 	public void addItem(Item item) {
 		// TODO add pagination if area is out of bounds
-
-		int listSize = this.items.size();
-		final int COLUMN_SIZE = 20;
-		final int column = listSize / COLUMN_SIZE;
-
-		item.setPosX(posX + column * item.getWidth() + column * (this.spacing * 2));
-		listSize -= COLUMN_SIZE * column;
-		final int itemHeight = listSize * item.getHeight();
-		final int spacingHeight = listSize * this.spacing;
-		item.setPosY(posY + itemHeight + spacingHeight);
-
-		this.items.add(item);
+		items.add(item);
 	}
 
 	public void removeAllItems() {
@@ -59,47 +112,55 @@ public class Menu implements ItemListener {
 
 	public void mouseMoved(int x, int y) {
 		// Loop through all MenuItems to check onHover
-		for (Item item : this.items) {
+		for (Item item : this.visibleItems) {
 			if (item.isDisabled())
 				continue;
-			final boolean leftBounds = x >= item.getPosX();
-			final boolean rightBounds = x < item.getPosX() + item.getWidth();
-			final boolean topBounds = y >= item.getPosY();
-			final boolean bottomBounds = y < item.getPosY() + item.getHeight();
-			final boolean inBounds = leftBounds && rightBounds && topBounds && bottomBounds;
+
 			// Check if mouse is inbounds of item
-			if (inBounds) {
-				if (!item.getHover()) {
-					item.setHover(true);
-				}
-			} else {
-				if (item.getHover()) {
-					item.setHover(false);
-				}
-			}
+			setHover(x, y, item);
 		}
 	}
 
 	public void mousePressed(int button, int x, int y) {
 		if (button == 0) {
-			for (Item item : this.items) {
+			for (Item item : this.visibleItems) {
 				if (item.isDisabled())
 					continue;
-				final boolean leftBounds = x >= item.getPosX();
-				final boolean rightBounds = x < item.getPosX() + item.getWidth();
-				final boolean topBounds = y >= item.getPosY();
-				final boolean bottomBounds = y < item.getPosY() + item.getHeight();
-				final boolean inBounds = leftBounds && rightBounds && topBounds && bottomBounds;
-				// Check if mouse is inbounds of item
-				if (inBounds) {
-					// Selected gets focus
-					item.setSelected(true);
-				} else {
-					// All other loose it
-					item.setSelected(false);
-				}
+
+				setSelected(x, y, item);
 			}
 		}
+	}
+
+	private void setHover(int x, int y, Item item) {
+		if (inBounds(item, x, y)) {
+			if (!item.getHover()) {
+				item.setHover(true);
+			}
+		} else {
+			if (item.getHover()) {
+				item.setHover(false);
+			}
+		}
+	}
+
+	private void setSelected(int x, int y, Item item) {
+		// Check if mouse is inbounds of item
+		if (inBounds(item, x, y)) {
+			// Selected gets focus
+			item.setSelected(true);
+		} else {
+			// All other loose it
+			item.setSelected(false);
+		}
+	}
+
+	private boolean inBounds(Item item, int x, int y) {
+		final boolean leftBounds = x >= item.getPosX();
+		final boolean rightBounds = x < item.getPosX() + item.getWidth();
+		final boolean topBounds = y >= item.getPosY();
+		final boolean bottomBounds = y < item.getPosY() + item.getHeight();
+		return (leftBounds && rightBounds && topBounds && bottomBounds);
 	}
 
 	@Override
@@ -110,8 +171,28 @@ public class Menu implements ItemListener {
 
 	@Override
 	public void onSelect(Item item, boolean select) {
-		// TODO Auto-generated method stub
+		if (!select)
+			return;
 
+		if (item == nextPage) {
+			page++;
+		} else if (item == previousPage) {
+			page--;
+		}
+	}
+
+	/**
+	 * @return the width
+	 */
+	public final int getWidth() {
+		return width;
+	}
+
+	/**
+	 * @return the height
+	 */
+	public final int getHeight() {
+		return height;
 	}
 
 }

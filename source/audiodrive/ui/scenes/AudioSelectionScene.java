@@ -14,6 +14,7 @@ import java.util.Set;
 import javax.swing.filechooser.FileSystemView;
 
 import org.lwjgl.input.Keyboard;
+import org.lwjgl.opengl.Display;
 
 import audiodrive.AudioDrive;
 import audiodrive.audio.AudioFile;
@@ -73,15 +74,19 @@ public class AudioSelectionScene extends Scene implements ItemListener {
 
 		titleText = new Text("Choose an AudioFile").setFont(AudioDrive.Font).setSize(48).setPosition(20, 20);
 
-		rootMenu = new Menu(20, 200, 1);
-		itemMenu = new Menu(40 + FileChooserItem.FILECHOOSER_ITEM_WIDTH, 200, 1);
-		nextMenu = new Menu(20, 1000, 1);
+		int textHeight = 50;
+
+		rootMenu = new Menu(20, 200, FileChooserItem.FILECHOOSER_ITEM_WIDTH, Display.getHeight() - 500, 1);
+		itemMenu = new Menu(30 + FileChooserItem.FILECHOOSER_ITEM_WIDTH, 200, Display.getWidth() - FileChooserItem.FILECHOOSER_ITEM_WIDTH - 50, Display.getHeight() - 200 - 3
+				* textHeight, 1);
+		nextMenu = new Menu(20, itemMenu.getHeight() + 200 + 50, 400, Display.getHeight() - itemMenu.getHeight() + 200 + 50, 1);
+
 		continueMenuItem = new MenuItem("Continue", this);
 		continueMenuItem.setDisabled(true);
 		nextMenu.addItem(continueMenuItem);
 
 		currentFolderText = new Text().setFont(AudioDrive.Font).setPosition(20, 150).setSize(30);
-		selectedFileText = new Text().setFont(AudioDrive.Font).setPosition(20, 800).setSize(30);
+		selectedFileText = new Text().setFont(AudioDrive.Font).setPosition(20, itemMenu.getHeight() + 200).setSize(30);
 
 		// Setup start node
 		File rootFile = new File("./music/");
@@ -160,8 +165,8 @@ public class AudioSelectionScene extends Scene implements ItemListener {
 			checkItemExplorer(rootMap);
 		}
 		item = null;
-		itemMenu.render();
 		rootMenu.render();
+		itemMenu.render();
 		nextMenu.render();
 		currentFolderText.render();
 		selectedFileText.render();
