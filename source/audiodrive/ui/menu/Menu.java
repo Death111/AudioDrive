@@ -104,6 +104,7 @@ public class Menu implements ItemListener {
 	public void addItem(Item item) {
 		// TODO add pagination if area is out of bounds
 		items.add(item);
+		page = 0;
 	}
 
 	public void removeAllItems() {
