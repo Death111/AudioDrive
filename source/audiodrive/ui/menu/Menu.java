@@ -16,6 +16,7 @@ public class Menu implements ItemListener {
 	private int posX, posY, width, height;
 	private int spacing;
 
+	private int oldPage = -1;
 	private int page = 0;
 
 	/**
@@ -31,22 +32,25 @@ public class Menu implements ItemListener {
 		this.width = width;
 		this.height = height;
 		this.spacing = spacing;
-
-		if (width <= FileChooserItem.FILECHOOSER_ITEM_WIDTH || height <= FileChooserItem.FILECHOOSER_ITEM_HEIGHT) {
-			throw new RuntimeException("No space for menu");
-		}
-
 	}
 
 	public void render() {
 
-		calculateVisibleItems();
+		// Check if visible items needs to be recalculated
+		if (oldPage != page) {
+			oldPage = page;
+			calculateVisibleItems();
+		}
 
 		for (Item item : this.visibleItems) {
 			item.render();
 		}
 	}
 
+	/**
+	 * Calculates the current visible items and adds them to visibleitems with
+	 * appropriate position
+	 */
 	private void calculateVisibleItems() {
 
 		visibleItems.clear();
@@ -57,6 +61,7 @@ public class Menu implements ItemListener {
 		final int ROWS = height / (item.getHeight() + spacing);
 		final int COLUMNS = width / (item.getWidth() + spacing);
 
+		// Check if "previous page" button has to be added
 		if (page > 0) {
 			int a = visibleItems.size() % (ROWS * COLUMNS);
 			int currentColumn = a / ROWS;
@@ -65,6 +70,7 @@ public class Menu implements ItemListener {
 			final int y = posY + currentRow * (item.getHeight() + this.spacing);
 			previousPage.setPosX(x);
 			previousPage.setPosY(y);
+			previousPage.setSelected(false);
 			visibleItems.add(previousPage);
 		}
 
@@ -76,16 +82,14 @@ public class Menu implements ItemListener {
 			final int x = posX + currentColumn * (item.getWidth() + this.spacing);
 			final int y = posY + currentRow * (item.getHeight() + this.spacing);
 
-			// Test if limit was reached and this was not the last item
+			// Test if limit was reached and items are following
 			if (a == ROWS * COLUMNS - 1 && i < listSize - 1) {
+				// Add a nextPage button
 				nextPage.setPosX(x);
 				nextPage.setPosY(y);
+				nextPage.setSelected(false);
 				visibleItems.add(nextPage);
 				return;
-			}
-
-			if (currentColumn >= COLUMNS) {
-				continue;
 			}
 
 			currentItem.setPosX(x);
@@ -102,12 +106,20 @@ public class Menu implements ItemListener {
 	 *            item to add
 	 */
 	public void addItem(Item item) {
-		// TODO add pagination if area is out of bounds
+		// Check if at least one menu item fits into menu
+		// TODO could cause a infinite "next page" loop
+		if (width <= item.getWidth() || height <= item.getHeight()) {
+			throw new RuntimeException("No space for menu item");
+		}
+
 		items.add(item);
-		page = 0;
+		// reset old page
+		oldPage = -1;
 	}
 
 	public void removeAllItems() {
+		page = 0;
+		oldPage = -1;
 		this.items = new ArrayList<Item>();
 	}
 
