@@ -8,24 +8,24 @@ import audiodrive.ui.components.Text;
 import audiodrive.utilities.Log;
 
 public abstract class Item {
-
+	
 	boolean hover = false;
 	boolean selected = false;
 	boolean disabled = false;
 	int posX;
 	int posY;
 	Text text;
-
+	
 	protected List<ItemListener> itemListeners = new ArrayList<ItemListener>();
 	private int width;
 	private int height;
-
+	
 	public Item(String itemText, int width, int height) {
-		this.posX = 0;
-		this.posY = 0;
+		posX = 0;
+		posY = 0;
 		this.width = width;
 		this.height = height;
-
+		
 		// TODO calculate size by width and height
 		int size = 30;
 		if (width > height) {
@@ -34,10 +34,10 @@ public abstract class Item {
 			size = width / 10;
 		}
 		text = new Text(itemText).setFont(AudioDrive.Font).setPosition(posX, posY).setSize(size);
-
+		
 		// Check if text is to big
 		if (text.getHeight() > height || text.getWidth() > width) {
-			Log.warning("Text '" + itemText + "' is bigger than menuItem. Trimming it");
+			Log.trace("Text '" + itemText + "' is bigger than menuItem. Trimming it");
 			boolean trimmed = false;
 			while (text.getWidth() > width) {
 				String trimmedText = text.getText();
@@ -51,66 +51,66 @@ public abstract class Item {
 			}
 		}
 	}
-
+	
 	public abstract void render();
-
+	
 	public void addItemListener(ItemListener itemListener) {
 		itemListeners.add(itemListener);
 	}
-
+	
 	public final boolean getHover() {
 		return hover;
 	}
-
+	
 	public final boolean getSelected() {
 		return selected;
 	}
-
+	
 	/**
 	 * @return the posX
 	 */
 	public final int getPosX() {
 		return posX;
 	}
-
+	
 	/**
 	 * @return the posY
 	 */
 	public final int getPosY() {
 		return posY;
 	}
-
+	
 	/**
 	 * @return the width
 	 */
 	public final int getWidth() {
-		return this.width;
+		return width;
 	}
-
+	
 	/**
 	 * @return the height
 	 */
 	public final int getHeight() {
-		return this.height;
+		return height;
 	}
-
+	
 	public final String getText() {
-		return this.text.getText();
+		return text.getText();
 	}
-
+	
 	public void setPosY(int y) {
-		this.posY = y;
+		posY = y;
 	}
-
+	
 	public void setPosX(int posX) {
 		this.posX = posX;
 	}
-
+	
 	public void setHover(boolean hover) {
 		itemListeners.forEach(itemListener -> itemListener.onHover(this, hover));
 		this.hover = hover;
 	}
-
+	
 	public void setSelected(boolean selected) {
 		itemListeners.forEach(itemListener -> itemListener.onSelect(this, selected));
 		this.selected = selected;

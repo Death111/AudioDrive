@@ -11,8 +11,8 @@ import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
 
-import audiodrive.model.geometry.Rotation;
 import audiodrive.model.geometry.Vector;
+import audiodrive.model.geometry.transform.Rotation;
 import audiodrive.model.loader.Model;
 import audiodrive.model.loader.ModelLoader;
 import audiodrive.ui.components.Camera;

@@ -1,8 +1,10 @@
-package audiodrive.model.geometry;
+package audiodrive.model.geometry.transform;
 
 import static org.lwjgl.opengl.GL11.glMultMatrix;
+import audiodrive.model.geometry.Matrix;
+import audiodrive.model.geometry.Vector;
 
-public class Rotation {
+public class Rotation extends Transformation {
 	
 	/**
 	 * No rotation. I. e. the rotation matrix is equal to identity.
@@ -72,7 +74,7 @@ public class Rotation {
 	}
 	
 	public Rotation align(Vector direction, Vector normal) {
-		matrix.align(direction, normal);
+		matrix.alignment(direction, normal);
 		return this;
 	}
 	
@@ -85,7 +87,14 @@ public class Rotation {
 		return this;
 	}
 	
+	@Override
+	public boolean ignorable() {
+		return isNull();
+	}
+	
+	@Override
 	public void apply() {
+		if (ignorable()) return;
 		glMultMatrix(matrix.toDoubleBuffer());
 	}
 	

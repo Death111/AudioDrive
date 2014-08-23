@@ -19,6 +19,18 @@ public class Camera {
 		throw new IllegalStateException("This class shall not be instantiated.");
 	}
 	
+	public static Vector eye() {
+		return eye;
+	}
+	
+	public static Vector at() {
+		return at;
+	}
+	
+	public static Vector up() {
+		return up;
+	}
+	
 	public static void reset() {
 		orthograpic(-1, -1, 2, 2, 0, 2);
 		eye.set(0, 0, 1);

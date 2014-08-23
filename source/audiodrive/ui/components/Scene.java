@@ -36,9 +36,10 @@ public class Scene implements Input.Observer {
 		long time = System.nanoTime();
 		double elapsedSeconds = (time - frameTimestamp) / 1000000000.0;
 		frameTimestamp = time;
-		if (active != null) active.update(elapsedSeconds);
-		if (active != null) active.render();
-		else {
+		if (active != null) {
+			active.update(elapsedSeconds);
+			active.render();
+		} else {
 			glClear(GL_COLOR_BUFFER_BIT);
 		}
 	}

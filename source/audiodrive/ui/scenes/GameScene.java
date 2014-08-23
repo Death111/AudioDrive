@@ -2,15 +2,21 @@ package audiodrive.ui.scenes;
 
 import static org.lwjgl.opengl.GL11.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.lwjgl.input.Keyboard;
 
 import audiodrive.audio.Playback;
 import audiodrive.model.Player;
-import audiodrive.model.geometry.Placement;
-import audiodrive.model.geometry.Rotation;
+import audiodrive.model.geometry.ReflectionPlane;
 import audiodrive.model.geometry.Vector;
+import audiodrive.model.geometry.transform.Placement;
+import audiodrive.model.geometry.transform.Rotation;
+import audiodrive.model.geometry.transform.Translation;
 import audiodrive.model.loader.ModelLoader;
 import audiodrive.model.track.Track;
+import audiodrive.ui.GL;
 import audiodrive.ui.components.Camera;
 import audiodrive.ui.components.Scene;
 import audiodrive.utilities.Buffers;
@@ -20,9 +26,10 @@ public class GameScene extends Scene {
 	
 	private Track track;
 	private Player player;
+	private List<ReflectionPlane> reflectionPlanes = new ArrayList<>(2);
 	
 	private Rotation rotation = new Rotation();
-	private Vector translate = new Vector();
+	private Translation translation = new Translation();
 	
 	private Vector look = new Vector();
 	private Vector camera = new Vector(0, 0, 0.01);
@@ -49,7 +56,21 @@ public class GameScene extends Scene {
 		player.model().scale(0.0001).position(position).align(direction, up);
 		playback = new Playback(track.getAudio().getFile());
 		rotation.reset();
-		translate.set(Vector.Null);
+		translation.reset();
+		updatePlacement();
+		Camera.perspective(45, getWidth(), getHeight(), 0.001, 100);
+		GL.pushAttributes();
+		glEnable(GL_CULL_FACE);
+		glEnable(GL_NORMALIZE);
+		glEnable(GL_LIGHT0);
+		glLight(GL_LIGHT0, GL_DIFFUSE, Buffers.create(1f, 1f, 1f, 1f));
+		glEnable(GL_COLOR_MATERIAL);
+		glColorMaterial(GL_FRONT, GL_DIFFUSE);
+		glShadeModel(GL_SMOOTH);
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glEnable(GL_LIGHTING);
 	}
 	
 	@Override
@@ -57,39 +78,33 @@ public class GameScene extends Scene {
 		if (!playback.isRunning()) return;
 		time += elapsed;
 		// time = track.getDuration() - 0.11;
-		Placement placement = track.calculatePlayerPlacement(time);
+		updatePlacement();
+	}
+	
+	private void updatePlacement() {
+		Placement placement = track.getPlacement(time);
 		player.model().placement(placement);
+		reflectionPlanes.clear();
+		reflectionPlanes.addAll(track.getReflectionPlanes(time));
 	}
 	
 	@Override
 	protected void render() {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 		
-		glEnable(GL_NORMALIZE);
-		glEnable(GL_LIGHT0);
-		glLight(GL_LIGHT0, GL_AMBIENT, Buffers.create(1f, 1f, 1f, 1f));
-		glShadeModel(GL_SMOOTH);
-		
-		Camera.perspective(45, getWidth(), getHeight(), 0.001, 100);
-		// Camera.position(camera);
-		// Camera.lookAt(look);
 		player.camera();
 		
+		translation.apply();
 		// rotation.apply();
-		// glTranslated(translate.x(), translate.y(), translate.z());
 		
-		// glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		reflectionPlanes.stream().forEach(plane -> plane.reflect(player.model()));
 		track.render();
-		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-		glDisable(GL_CULL_FACE); // FIXME model face culling
 		player.render();
 	}
 	
 	@Override
 	protected void exiting() {
+		GL.popAttributes();
 		playback.stop();
 		time = 0;
 	}
@@ -119,7 +134,7 @@ public class GameScene extends Scene {
 		default:
 			break;
 		}
-		translate.add(rotation.rotate(translation));
+		this.translation.vector().add(rotation.rotate(translation));
 	}
 	
 	@Override
@@ -130,6 +145,10 @@ public class GameScene extends Scene {
 			break;
 		case Keyboard.KEY_ESCAPE:
 			back();
+			break;
+		case Keyboard.KEY_HOME:
+			translation.reset();
+			rotation.reset();
 			break;
 		default:
 			break;
@@ -145,10 +164,7 @@ public class GameScene extends Scene {
 			rotation.xAdd(vertical).yAdd(horizontal);
 			break;
 		case 1:
-			rotation.xAdd(vertical).zAdd(horizontal);
-			break;
-		case 2:
-			rotation.yAdd(vertical).zAdd(horizontal);
+			rotation.zAdd(horizontal);
 			break;
 		default:
 			break;

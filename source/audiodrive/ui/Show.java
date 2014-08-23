@@ -10,8 +10,8 @@ import org.lwjgl.LWJGLException;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.Display;
 
-import audiodrive.model.geometry.Rotation;
 import audiodrive.model.geometry.Vector;
+import audiodrive.model.geometry.transform.Rotation;
 import audiodrive.model.track.Track;
 import audiodrive.model.track.interpolation.CatmullRom;
 import audiodrive.ui.components.Camera;
@@ -138,7 +138,7 @@ public class Show {
 		glColor4d(1, 1, 1, 1);
 		glPointSize(3);
 		glBegin(GL_POINTS);
-		centerSpline.forEach(Vector::gl);
+		centerSpline.forEach(Vector::glVertex);
 		glEnd();
 	}
 	
@@ -146,7 +146,7 @@ public class Show {
 		glColor4d(1, 1, 1, 1);
 		glPointSize(6);
 		glBegin(GL_POINTS);
-		vectorinates.forEach(Vector::gl);
+		vectorinates.forEach(Vector::glVertex);
 		glEnd();
 	}
 	
@@ -154,9 +154,9 @@ public class Show {
 		glPointSize(5);
 		glBegin(GL_POINTS);
 		glColor4d(1, 0, 0, 1);
-		camera.gl();
+		camera.glVertex();
 		glColor4d(1, 0, 1, 1);
-		look.gl();
+		look.glVertex();
 		glEnd();
 	}
 	
@@ -180,11 +180,11 @@ public class Show {
 		if (centerSpline != null && centerSpline.size() > 1) for (int i = 0; i < centerSpline.size() - 1; i++) {
 			Vector one = centerSpline.get(i);
 			Vector two = centerSpline.get(i + 1);
-			one.gl();
-			two.gl();
+			one.glVertex();
+			two.glVertex();
 			if (showUpVectors) {
-				one.gl();
-				one.plus(up.multiplied(0.1)).gl();
+				one.glVertex();
+				one.plus(up.multiplied(0.1)).glVertex();
 			}
 		}
 		glEnd();
@@ -207,10 +207,10 @@ public class Show {
 			} else {
 				sideTwo = two.minus(one).cross(Vector.Y).length(sideWidth);
 			}
-			one.plus(sideOne.negated()).gl();
-			one.plus(sideOne).gl();
-			two.plus(sideTwo).gl();
-			two.plus(sideTwo.negated()).gl();
+			one.plus(sideOne.negated()).glVertex();
+			one.plus(sideOne).glVertex();
+			two.plus(sideTwo).glVertex();
+			two.plus(sideTwo.negated()).glVertex();
 			sideOne = sideTwo;
 		}
 		glEnd();
@@ -236,10 +236,10 @@ public class Show {
 			} else {
 				sideTwo = two.minus(one).cross(Vector.Y).length(sideWidth);
 			}
-			one.plus(sideOne.negated()).gl();
-			one.plus(sideOne).gl();
-			two.plus(sideTwo).gl();
-			two.plus(sideTwo.negated()).gl();
+			one.plus(sideOne.negated()).glVertex();
+			one.plus(sideOne).glVertex();
+			two.plus(sideTwo).glVertex();
+			two.plus(sideTwo.negated()).glVertex();
 			sideOne = sideTwo;
 		}
 		glEnd();
@@ -249,12 +249,12 @@ public class Show {
 		glColor4d(1, 1, 0, 1);
 		glBegin(GL_LINES);
 		for (int i = 0; i < rightSpline.size() - 1; i++) {
-			rightSpline.get(i).gl();
-			rightSpline.get(i + 1).gl();
+			rightSpline.get(i).glVertex();
+			rightSpline.get(i + 1).glVertex();
 		}
 		for (int i = 0; i < leftSpline.size() - 1; i++) {
-			leftSpline.get(i).gl();
-			leftSpline.get(i + 1).gl();
+			leftSpline.get(i).glVertex();
+			leftSpline.get(i + 1).glVertex();
 		}
 		glEnd();
 	}
@@ -263,8 +263,8 @@ public class Show {
 		glColor4d(0.5, 0.5, 0, 1);
 		glBegin(GL_LINES);
 		for (int i = 0; i < rightSpline.size() - 1; i++) {
-			leftSpline.get(i).gl();
-			rightSpline.get(i).gl();
+			leftSpline.get(i).glVertex();
+			rightSpline.get(i).glVertex();
 		}
 		glEnd();
 	}
