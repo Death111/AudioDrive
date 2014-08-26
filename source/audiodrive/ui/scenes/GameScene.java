@@ -7,6 +7,7 @@ import java.util.List;
 
 import org.lwjgl.input.Keyboard;
 
+import audiodrive.TrackOverview;
 import audiodrive.audio.Playback;
 import audiodrive.model.Player;
 import audiodrive.model.geometry.ReflectionPlane;
@@ -23,30 +24,33 @@ import audiodrive.utilities.Buffers;
 import audiodrive.utilities.Log;
 
 public class GameScene extends Scene {
-	
+
 	private Track track;
 	private Player player;
 	private List<ReflectionPlane> reflectionPlanes = new ArrayList<>(2);
-	
+
 	private Rotation rotation = new Rotation();
 	private Translation translation = new Translation();
-	
+
 	private Vector look = new Vector();
 	private Vector camera = new Vector(0, 0, 0.01);
-	
+
 	private double time;
-	
+
 	private Playback playback;
-	
+	private TrackOverview trackOverview;
+
 	public void enter(Track track) {
 		this.track = track;
 		track.prepare();
 		super.enter();
 	}
-	
+
 	@Override
 	protected void entering() {
+
 		Log.info("starting game...");
+		trackOverview = new TrackOverview(track);
 		player = new Player().model(ModelLoader.loadSingleModel("models/xwing/xwing"));
 		Vector current = track.spline().get(0);
 		Vector next = track.spline().get(1);
@@ -72,43 +76,48 @@ public class GameScene extends Scene {
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glEnable(GL_LIGHTING);
 	}
-	
+
 	@Override
 	protected void update(double elapsed) {
-		if (!playback.isRunning()) return;
+		if (!playback.isRunning())
+			return;
 		time += elapsed;
 		// time = track.getDuration() - 0.11;
 		updatePlacement();
 	}
-	
+
 	private void updatePlacement() {
 		Placement placement = track.getPlacement(time);
 		player.model().placement(placement);
 		reflectionPlanes.clear();
 		reflectionPlanes.addAll(track.getReflectionPlanes(time));
+		trackOverview.updatePlayerPosition(track.getIndex(time));
 	}
-	
+
 	@Override
 	protected void render() {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		
+		Camera.overlay(getWidth(), getHeight());
+		trackOverview.render();
+
+		Camera.perspective(45, getWidth(), getHeight(), 0.001, 100);
 		player.camera();
-		
+
 		translation.apply();
 		// rotation.apply();
-		
+
 		reflectionPlanes.stream().forEach(plane -> plane.reflect(player.model()));
 		track.render();
 		player.render();
 	}
-	
+
 	@Override
 	protected void exiting() {
 		GL.popAttributes();
 		playback.stop();
 		time = 0;
 	}
-	
+
 	@Override
 	public void keyPressed(int key, char character) {
 		Vector translation = new Vector();
@@ -136,7 +145,7 @@ public class GameScene extends Scene {
 		}
 		this.translation.vector().add(rotation.rotate(translation));
 	}
-	
+
 	@Override
 	public void keyReleased(int key, char character) {
 		switch (key) {
@@ -154,7 +163,7 @@ public class GameScene extends Scene {
 			break;
 		}
 	}
-	
+
 	@Override
 	public void mouseDragged(int button, int mouseX, int mouseY, int dx, int dy) {
 		double horizontal = dx * -0.1;
@@ -170,5 +179,5 @@ public class GameScene extends Scene {
 			break;
 		}
 	}
-	
+
 }

@@ -196,6 +196,13 @@ public class Track {
 		public String toString() {
 			return "Index [integer=" + integer + ", fraction=" + fraction + "]";
 		}
+
+		/**
+		 * @return the integer
+		 */
+		public final int getInteger() {
+			return integer;
+		}
 		
 	}
 	
