@@ -7,7 +7,6 @@ import java.util.List;
 
 import org.lwjgl.input.Keyboard;
 
-import audiodrive.TrackOverview;
 import audiodrive.audio.Playback;
 import audiodrive.model.Player;
 import audiodrive.model.geometry.ReflectionPlane;
@@ -18,6 +17,7 @@ import audiodrive.model.geometry.transform.Translation;
 import audiodrive.model.loader.ModelLoader;
 import audiodrive.model.track.Track;
 import audiodrive.ui.GL;
+import audiodrive.ui.TrackOverview;
 import audiodrive.ui.components.Camera;
 import audiodrive.ui.components.Scene;
 import audiodrive.utilities.Buffers;

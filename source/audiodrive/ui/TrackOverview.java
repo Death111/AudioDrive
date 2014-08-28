@@ -1,4 +1,4 @@
-package audiodrive;
+package audiodrive.ui;
 
 import java.util.ArrayList;
 import java.util.List;
