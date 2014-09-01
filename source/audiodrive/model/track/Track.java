@@ -57,6 +57,8 @@ public class Track {
 
 	private void calculateObstacles() {
 
+		// TODO use audio track for generation instead of every 10 units
+		// TODO add collision detection
 		for (int i = 0; i < splineArea.size() - 1; i += 10) {
 			final Vector left = splineArea.get(i);
 			final Vector right = splineArea.get(i + 1);
@@ -70,13 +72,9 @@ public class Track {
 			double mult = ((width * 2) / 4);
 			double rail = (double) (i % 3) + 1;
 
-			// TODO fix outer positions
 			final Vector position = left.minus(horizontal.multiplied(rail * mult)).plus(0, flightHeight, 0);
-
-			// TODO fix direction -.-
 			Vector direction = nextLeft.minus(left);
 			obstacles.add(new Placement().position(position).direction(direction).up(Vector.Y));
-
 		}
 
 		Log.debug("created '" + obstacles.size() + "' obstacles");
