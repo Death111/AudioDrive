@@ -36,7 +36,7 @@ public class Vertex implements FloatData {
 		float[] floats = new float[Dimension];
 		System.arraycopy(position.toFloats(), 0, floats, 0, Vector.Dimension);
 		System.arraycopy(normal.toFloats(), 0, floats, Vector.Dimension, Vector.Dimension);
-		System.arraycopy(textureCoordinate.toFloats(), 0, floats, Vector.Dimension * 2, TextureCoordinate.Dimension);
+		if (textureCoordinate != null) System.arraycopy(textureCoordinate.toFloats(), 0, floats, Vector.Dimension * 2, TextureCoordinate.Dimension);
 		return floats;
 	}
 	
