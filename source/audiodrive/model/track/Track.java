@@ -2,14 +2,22 @@ package audiodrive.model.track;
 
 import static org.lwjgl.opengl.GL11.*;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.newdawn.slick.opengl.Texture;
+import org.newdawn.slick.opengl.TextureLoader;
 
 import audiodrive.audio.AnalyzedAudio;
 import audiodrive.model.buffer.VertexBuffer;
 import audiodrive.model.geometry.CuboidStripRenderer;
 import audiodrive.model.geometry.ReflectionPlane;
+import audiodrive.model.geometry.TextureCoordinate;
 import audiodrive.model.geometry.Vector;
+import audiodrive.model.geometry.Vertex;
 import audiodrive.model.geometry.transform.Placement;
 import audiodrive.model.loader.Model;
 import audiodrive.model.loader.ModelLoader;
@@ -24,6 +32,7 @@ public class Track {
 	private int smoothing;
 	private List<Vector> spline;
 	private List<Vector> splineArea;
+	private List<Vertex> splineArea2;
 	private double width = 0.003;
 	private double borderHeight = 0.0005;
 	private double borderWidth = 0.0003;
@@ -32,6 +41,8 @@ public class Track {
 	private VertexBuffer pointBuffer;
 	private VertexBuffer splineBuffer;
 	private VertexBuffer splineAreaBuffer;
+	private Texture trackTexture;
+	private VertexBuffer splineArea2Buffer;
 	private VertexBuffer leftBorderBuffer;
 	private VertexBuffer rightBorderBuffer;
 	private CuboidStripRenderer cuboidStripRenderer;
@@ -51,8 +62,15 @@ public class Track {
 		obstacleModel.scale(0.0002);
 		calculateObstacles();
 		// pointBuffer = new VertexBuffer(vectors);
-		splineBuffer = new VertexBuffer(spline).mode(GL_LINE_STRIP);
-		splineAreaBuffer = new VertexBuffer(splineArea).mode(GL_QUAD_STRIP);
+		// splineBuffer = new VertexBuffer(spline).mode(GL_LINE_STRIP);
+		// splineAreaBuffer = new VertexBuffer(splineArea).mode(GL_QUAD_STRIP);
+
+		try {
+			trackTexture = TextureLoader.getTexture("PNG", new FileInputStream(new File("models/track/track2.png")));
+		} catch (IOException e) {
+			Log.error(e);
+		}
+		splineArea2Buffer = new VertexBuffer(splineArea2).mode(GL_QUAD_STRIP);
 	}
 
 	private void calculateObstacles() {
@@ -83,30 +101,49 @@ public class Track {
 	private void calculateSpline() {
 		spline = CatmullRom.interpolate(vectors, 15, CatmullRom.Type.Centripetal);
 		splineArea = new ArrayList<>();
+		splineArea2 = new ArrayList<>();
+
 		if (spline == null || spline.isEmpty())
 			return;
 		Vector last = null;
+
 		for (int i = 0; i < spline.size() - 1; i++) {
 			Vector one = spline.get(i);
 			Vector two = spline.get(i + 1);
 			Vector next;
+
+			// Check if first
 			if (last == null) {
 				last = two.minus(one).cross(Vector.Y).length(width);
-				splineArea.add(one.plus(last.negated()));
-				splineArea.add(one.plus(last));
+				final Vector leftPosition = one.plus(last.negated());
+				final Vector rightPosition = one.plus(last);
+
+				splineArea.add(leftPosition);
+				splineArea.add(rightPosition);
+
+				calculateVertex(leftPosition, rightPosition);
 			}
+			// Check if last
 			if (i < spline.size() - 2) {
 				Vector three = spline.get(i + 2);
 				Vector n1 = two.minus(one).cross(Vector.Y).normalize();
 				Vector n2 = three.minus(two).cross(Vector.Y).normalize();
 				next = n1.plus(n2).length(width / Math.cos(n1.angle(n2) * 0.5));
-			} else {
+			} else { // Normal
 				next = two.minus(one).cross(Vector.Y).length(width);
 			}
-			splineArea.add(two.plus(next.negated()));
-			splineArea.add(two.plus(next));
+
+			// Add points
+			final Vector left = two.plus(next.negated());
+			final Vector right = two.plus(next);
+
+			splineArea.add(left);
+			splineArea.add(right);
+
+			calculateVertex(left, right);
 			last = next;
 		}
+
 		List<Vector> leftBorder = new ArrayList<>();
 		List<Vector> rightBorder = new ArrayList<>();
 		Vector height = new Vector().y(borderHeight);
@@ -130,6 +167,43 @@ public class Track {
 		cuboidStripRenderer = new CuboidStripRenderer(spline.size() - 1);
 		leftBorderBuffer = new VertexBuffer(leftBorder).mode(GL_QUAD_STRIP);
 		rightBorderBuffer = new VertexBuffer(rightBorder).mode(GL_QUAD_STRIP);
+
+	}
+
+	private boolean textureToggle = false;
+
+	private void calculateVertex(final Vector leftPosition, final Vector rightPosition) {
+		// Create Vertex
+		final Vertex leftVertex = new Vertex();
+		final Vertex rightVertex = new Vertex();
+
+		// Set position
+		leftVertex.position = leftPosition;
+		rightVertex.position = rightPosition;
+
+		// Calculate normals
+		final Vector leftNormal = rightPosition.cross(leftPosition);
+		final Vector rightNormal = rightPosition.cross(leftPosition);
+		leftVertex.normal = leftNormal;
+		rightVertex.normal = rightNormal;
+
+		// Calculate Texture coordinates
+		final TextureCoordinate rightTexture;
+		final TextureCoordinate leftTexture;
+		if (textureToggle) {
+			leftTexture = new TextureCoordinate(0, 0);
+			rightTexture = new TextureCoordinate(1, 0);
+		} else {
+			leftTexture = new TextureCoordinate(0, 1);
+			rightTexture = new TextureCoordinate(1, 1);
+		}
+		textureToggle = !textureToggle;
+		// Set texture coordinates
+		leftVertex.textureCoordinate = leftTexture;
+		rightVertex.textureCoordinate = rightTexture;
+
+		splineArea2.add(leftVertex);
+		splineArea2.add(rightVertex);
 	}
 
 	public void render() {
@@ -142,23 +216,40 @@ public class Track {
 		if (splineBuffer != null) {
 			splineBuffer.draw();
 		}
-		glColor4d(1, 1, 1, 0.5);
-		glLineWidth(2.0f);
-		glDisable(GL_CULL_FACE);
-		splineAreaBuffer.draw();
+
+		if (splineAreaBuffer != null) {
+			glColor4d(1, 1, 1, 0.5);
+			glLineWidth(2.0f);
+			glDisable(GL_CULL_FACE);
+			splineAreaBuffer.draw();
+			splineAreaBuffer.draw();
+		}
+
 		glEnable(GL_CULL_FACE);
 		cuboidStripRenderer.render(leftBorderBuffer);
 		cuboidStripRenderer.render(rightBorderBuffer);
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-		glColor4d(0.1, 0.1, 0.1, 0.25);
-		splineAreaBuffer.draw();
+		// Draw track
+		{
+			glColor4d(1, 1, 1, 1);
+			if (trackTexture != null) {
+				glEnable(GL_TEXTURE_2D);
+				glBindTexture(GL_TEXTURE_2D, trackTexture.getTextureID());
+			}
+			splineArea2Buffer.draw();
+			if (trackTexture != null) {
+				glBindTexture(GL_TEXTURE_2D, 0);
+				glDisable(GL_TEXTURE_2D);
+			}
+		}
+		glColor4d(.1, .1, .1, .25);
 		cuboidStripRenderer.render(leftBorderBuffer);
 		cuboidStripRenderer.render(rightBorderBuffer);
 
+		// Draw obstacles
+		// TODO limit obstacles to be drawn
 		for (Placement placement : obstacles) {
-			final Vector position = placement.position();
-			final Vector direction = placement.direction();
-			obstacleModel.position(position).direction(direction);
+			obstacleModel.position(placement.position()).direction(placement.direction());
 			obstacleModel.render();
 		}
 
