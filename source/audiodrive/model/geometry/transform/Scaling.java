@@ -53,4 +53,9 @@ public class Scaling extends Transformation {
 		glScaled(x * scale, y * scale, z * scale);
 	}
 	
+	@Override
+	public String toString() {
+		return "Scaling [scale=" + scale + ", x=" + x + ", y=" + y + ", z=" + z + "]";
+	}
+	
 }

@@ -67,6 +67,12 @@ public class Rotation extends Transformation {
 		return this;
 	}
 	
+	public Rotation set(Matrix matrix) {
+		assertModifiable();
+		this.matrix.set(matrix);
+		return this;
+	}
+	
 	public Rotation set(double aroundX, double aroundY, double aroundZ) {
 		assertModifiable();
 		matrix.rotation(aroundX, aroundY, aroundZ);
@@ -85,6 +91,15 @@ public class Rotation extends Transformation {
 		assertModifiable();
 		matrix.identity();
 		return this;
+	}
+	
+	public Rotation invert() {
+		matrix.invert();
+		return this;
+	}
+	
+	public Rotation inverted() {
+		return new Rotation().set(matrix.inverted());
 	}
 	
 	@Override
@@ -133,9 +148,13 @@ public class Rotation extends Transformation {
 		return matrix.equals(((Rotation) obj).matrix);
 	}
 	
+	public Matrix toMatrix() {
+		return new Matrix().set(matrix);
+	}
+	
 	@Override
 	public String toString() {
-		return "Rotation " + matrix.toString();
+		return "Rotation [matrix=" + matrix + "]";
 	}
 	
 	/**

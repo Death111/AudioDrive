@@ -177,6 +177,18 @@ public class Matrix {
 		return this;
 	}
 	
+	public Matrix invert() {
+		return set(Matrices.invert(M));
+	}
+	
+	public Matrix inverted() {
+		return new Matrix().set(Matrices.invert(M));
+	}
+	
+	public double determinant() {
+		return Matrices.determinant(M);
+	}
+	
 	@Override
 	public int hashCode() {
 		return 31 + Arrays.hashCode(M);

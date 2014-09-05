@@ -48,7 +48,6 @@ public class GameScene extends Scene {
 
 	@Override
 	protected void entering() {
-
 		Log.info("starting game...");
 		trackOverview = new TrackOverview(track);
 		player = new Player().model(ModelLoader.loadSingleModel("models/xwing/xwing"));
@@ -79,8 +78,7 @@ public class GameScene extends Scene {
 
 	@Override
 	protected void update(double elapsed) {
-		if (!playback.isRunning())
-			return;
+		if (!playback.isRunning()) return;
 		time += elapsed;
 		// time = track.getDuration() - 0.11;
 		updatePlacement();
@@ -140,6 +138,18 @@ public class GameScene extends Scene {
 		case Keyboard.KEY_NUMPAD8:
 			translation.add(0, -0.0001, 0);
 			break;
+		case Keyboard.KEY_RIGHT:
+			player.model().translation().x(player.model().translation().x() + 0.0001);
+			break;
+		case Keyboard.KEY_LEFT:
+			player.model().translation().x(player.model().translation().x() - 0.0001);
+			break;
+		case Keyboard.KEY_UP:
+			player.model().translation().y(player.model().translation().y() + 0.0001);
+			break;
+		case Keyboard.KEY_DOWN:
+			player.model().translation().y(player.model().translation().y() - 0.0001);
+			break;
 		default:
 			break;
 		}
@@ -164,6 +174,15 @@ public class GameScene extends Scene {
 		}
 	}
 
+	@Override
+	public void mouseMoved(int x, int y, int dx, int dy) {
+		if (!playback.isRunning()) return;
+		double newX = player.model().translation().x() + dx * 0.000005;
+		double maxX = track.width() / 3;
+		player.model().translation().x(Math.max(-maxX, Math.min(maxX, newX)));
+		player.model().rotation().add(dx / 20.0, Vector.Z);
+	}
+	
 	@Override
 	public void mouseDragged(int button, int mouseX, int mouseY, int dx, int dy) {
 		double horizontal = dx * -0.1;

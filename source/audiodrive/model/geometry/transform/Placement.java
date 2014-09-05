@@ -119,4 +119,10 @@ public class Placement extends Transformation {
 	private void assertModifiable() {
 		if (this == Default) throw new UnsupportedOperationException("Can't modify the constant placement 'Default'.");
 	}
+	
+	@Override
+	public String toString() {
+		return "Placement [position=" + position + ", direction=" + direction + ", up=" + up + "]";
+	}
+	
 }

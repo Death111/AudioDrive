@@ -34,8 +34,13 @@ public class Translation extends Transformation {
 		return vector.z();
 	}
 	
-	public Translation vector(Vector vector) {
-		vector.set(vector);
+	public Translation set(Translation translation) {
+		vector.set(translation.vector);
+		return this;
+	}
+	
+	public Translation set(Vector vector) {
+		this.vector.set(vector);
 		return this;
 	}
 	
@@ -48,6 +53,15 @@ public class Translation extends Transformation {
 		return this;
 	}
 	
+	public Translation invert() {
+		vector.negate();
+		return this;
+	}
+	
+	public Translation inverted() {
+		return new Translation().set(vector.negated());
+	}
+	
 	@Override
 	public boolean ignorable() {
 		return vector.isNull();
@@ -57,6 +71,11 @@ public class Translation extends Transformation {
 	public void apply() {
 		if (ignorable()) return;
 		glTranslated(vector.x(), vector.y(), vector.z());
+	}
+	
+	@Override
+	public String toString() {
+		return "Translation [vector=" + vector + "]";
 	}
 	
 }

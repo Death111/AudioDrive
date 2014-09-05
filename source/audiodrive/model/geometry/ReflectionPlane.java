@@ -1,7 +1,9 @@
 package audiodrive.model.geometry;
 
 import static org.lwjgl.opengl.GL11.*;
-import audiodrive.model.loader.Model;
+import audiodrive.model.geometry.transform.Transformation;
+import audiodrive.model.geometry.transform.Translation;
+import audiodrive.model.hierarchy.Node;
 import audiodrive.utilities.Buffers;
 
 public class ReflectionPlane {
@@ -43,7 +45,7 @@ public class ReflectionPlane {
 		return normal;
 	}
 	
-	public void reflect(Model model) {
+	public void reflect(Node node) {
 		glClear(GL_STENCIL_BUFFER_BIT);
 		
 		// disable color and depth updates
@@ -63,24 +65,28 @@ public class ReflectionPlane {
 		glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
 		// draw reflection on plane
 		glPushMatrix();
-		model.transform();
-		glTranslated(0, -2 * distance(model) / model.scale(), 0);
-		glRotated(angle(model), 1, 0, 0);
+		node.placement().apply();
+		glLight(GL_LIGHT0, GL_POSITION, Buffers.create(0f, -1f, 0f, 0f));
+		glTranslated(0, -2 * distance(node), 0);
+		new Translation().set(node.translation()).y(-node.translation().y()).apply();
+		node.rotation().inverted().apply();
+		glRotated(angle(node), 1, 0, 0);
 		glRotated(180, 0, 0, 1);
-		glLight(GL_LIGHT0, GL_POSITION, Buffers.create(0f, 1f, 0f, 0f));
-		glColor4d(0.5, 0.5, 0.5, 1);
-		model.draw();
+		node.scaling().apply();
+		node.transformations().stream().forEach(Transformation::apply);
+		glColor4d(1, 1, 1, 1);
+		node.draw();
 		glPopMatrix();
 		glDisable(GL_STENCIL_TEST);
 		glLight(GL_LIGHT0, GL_POSITION, Buffers.create(0f, 1f, 0f, 0f));
 	}
 	
-	public double angle(Model model) {
-		return model.placement().up().degrees(normal) * Math.signum(model.placement().direction().dot(normal));
+	public double angle(Node node) {
+		return node.placement().up().degrees(normal) * Math.signum(node.placement().direction().dot(normal));
 	}
 	
-	public double distance(Model model) {
-		return model.placement().position().minus(center).dot(normal);
+	public double distance(Node node) {
+		return node.placement().position().minus(center).dot(normal);
 	}
 	
 	public void render() {
