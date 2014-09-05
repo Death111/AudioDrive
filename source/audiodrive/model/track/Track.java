@@ -231,7 +231,7 @@ public class Track {
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 		// Draw track
 		{
-			glColor4d(1, 1, 1, 1);
+			glColor4d(1, 1, 1, .75);
 			if (trackTexture != null) {
 				glEnable(GL_TEXTURE_2D);
 				glBindTexture(GL_TEXTURE_2D, trackTexture.getTextureID());
