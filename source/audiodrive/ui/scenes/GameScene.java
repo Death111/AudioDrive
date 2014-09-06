@@ -143,10 +143,10 @@ public class GameScene extends Scene {
 			translation.add(0, -0.0001, 0);
 			break;
 		case Keyboard.KEY_RIGHT:
-			movePlayer(0.0001);
+			movePlayer(0.0002);
 			break;
 		case Keyboard.KEY_LEFT:
-			movePlayer(-0.0001);
+			movePlayer(-0.0002);
 			break;
 		default:
 			break;
