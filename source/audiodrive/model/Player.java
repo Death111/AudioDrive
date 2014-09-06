@@ -1,5 +1,6 @@
 package audiodrive.model;
 
+import audiodrive.model.geometry.Vector;
 import audiodrive.model.loader.Model;
 import audiodrive.ui.components.Camera;
 import audiodrive.utilities.Arithmetic;
@@ -95,7 +96,8 @@ public class Player {
 	}
 	
 	public void camera() {
-		Camera.position(model().position().plus(model().direction().multiplied(-eyeDistance)).plus(model().up().multiplied(eyeHeight)));
+		double slope = model().up().angle(Vector.Y) * Math.signum(model.direction().dot(Vector.Y)) * 0.0025;
+		Camera.position(model().position().plus(model().direction().multiplied(-eyeDistance)).plus(model().up().multiplied(eyeHeight + slope)));
 		Camera.lookAt(model().position().plus(model().direction().multiplied(lookDistance)));
 	}
 }
