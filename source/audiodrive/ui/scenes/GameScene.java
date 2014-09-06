@@ -131,13 +131,13 @@ public class GameScene extends Scene {
 			translation.add(0, 0.0001, 0);
 			break;
 		case Keyboard.KEY_NUMPAD4:
-			translation.add(0.0001, 0, 0);
+			translation.add(-0.0001, 0, 0);
 			break;
 		case Keyboard.KEY_NUMPAD5:
 			translation.add(0, 0, 0.0001);
 			break;
 		case Keyboard.KEY_NUMPAD6:
-			translation.add(-0.0001, 0, 0);
+			translation.add(0.0001, 0, 0);
 			break;
 		case Keyboard.KEY_NUMPAD8:
 			translation.add(0, -0.0001, 0);
