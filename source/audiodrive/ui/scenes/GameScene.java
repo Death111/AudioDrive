@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.lwjgl.input.Keyboard;
+import org.lwjgl.input.Mouse;
 
 import audiodrive.audio.Playback;
 import audiodrive.model.Player;
@@ -24,28 +25,28 @@ import audiodrive.utilities.Buffers;
 import audiodrive.utilities.Log;
 
 public class GameScene extends Scene {
-
+	
 	private Track track;
 	private Player player;
 	private List<ReflectionPlane> reflectionPlanes = new ArrayList<>(2);
-
+	
 	private Rotation rotation = new Rotation();
 	private Translation translation = new Translation();
-
+	
 	private Vector look = new Vector();
 	private Vector camera = new Vector(0, 0, 0.01);
-
+	
 	private double time;
-
+	
 	private Playback playback;
 	private TrackOverview trackOverview;
-
+	
 	public void enter(Track track) {
 		this.track = track;
 		track.prepare();
 		super.enter();
 	}
-
+	
 	@Override
 	protected void entering() {
 		Log.info("starting game...");
@@ -74,16 +75,18 @@ public class GameScene extends Scene {
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glEnable(GL_LIGHTING);
+		Mouse.setGrabbed(true);
 	}
-
+	
 	@Override
 	protected void update(double elapsed) {
 		if (!playback.isRunning()) return;
 		time += elapsed;
 		// time = track.getDuration() - 0.11;
+		player.update(elapsed);
 		updatePlacement();
 	}
-
+	
 	private void updatePlacement() {
 		Placement placement = track.getPlacement(time);
 		player.model().placement(placement);
@@ -91,31 +94,32 @@ public class GameScene extends Scene {
 		reflectionPlanes.addAll(track.getReflectionPlanes(time));
 		trackOverview.updatePlayerPosition(track.getIndex(time));
 	}
-
+	
 	@Override
 	protected void render() {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		Camera.overlay(getWidth(), getHeight());
 		trackOverview.render();
-
+		
 		Camera.perspective(45, getWidth(), getHeight(), 0.001, 100);
 		player.camera();
-
+		
 		translation.apply();
 		// rotation.apply();
-
+		
 		reflectionPlanes.stream().forEach(plane -> plane.reflect(player.model()));
 		track.render();
 		player.render();
 	}
-
+	
 	@Override
 	protected void exiting() {
 		GL.popAttributes();
 		playback.stop();
 		time = 0;
+		Mouse.setGrabbed(false);
 	}
-
+	
 	@Override
 	public void keyPressed(int key, char character) {
 		Vector translation = new Vector();
@@ -139,23 +143,17 @@ public class GameScene extends Scene {
 			translation.add(0, -0.0001, 0);
 			break;
 		case Keyboard.KEY_RIGHT:
-			player.model().translation().x(player.model().translation().x() + 0.0001);
+			movePlayer(0.0001);
 			break;
 		case Keyboard.KEY_LEFT:
-			player.model().translation().x(player.model().translation().x() - 0.0001);
-			break;
-		case Keyboard.KEY_UP:
-			player.model().translation().y(player.model().translation().y() + 0.0001);
-			break;
-		case Keyboard.KEY_DOWN:
-			player.model().translation().y(player.model().translation().y() - 0.0001);
+			movePlayer(-0.0001);
 			break;
 		default:
 			break;
 		}
 		this.translation.vector().add(rotation.rotate(translation));
 	}
-
+	
 	@Override
 	public void keyReleased(int key, char character) {
 		switch (key) {
@@ -173,14 +171,17 @@ public class GameScene extends Scene {
 			break;
 		}
 	}
-
+	
 	@Override
 	public void mouseMoved(int x, int y, int dx, int dy) {
 		if (!playback.isRunning()) return;
-		double newX = player.model().translation().x() + dx * 0.000005;
+		movePlayer(dx * 0.000005);
+	}
+	
+	private void movePlayer(double x) {
+		double newX = player.model().translation().x() - x; // FIXME why negative?
 		double maxX = track.width() / 3;
 		player.model().translation().x(Math.max(-maxX, Math.min(maxX, newX)));
-		player.model().rotation().add(dx / 20.0, Vector.Z);
 	}
 	
 	@Override
@@ -198,5 +199,5 @@ public class GameScene extends Scene {
 			break;
 		}
 	}
-
+	
 }

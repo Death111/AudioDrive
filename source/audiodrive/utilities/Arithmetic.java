@@ -21,4 +21,20 @@ public class Arithmetic {
 		return value;
 	}
 	
+	public static double fraction(double value) {
+		return value - (int) value;
+	}
+	
+	public static double clamp(double value) {
+		if (value < 0.0) return 0.0;
+		if (value > 1.0) return 1.0;
+		return value;
+	}
+	
+	public static double smooth(double from, double to, double fraction) {
+		fraction = clamp(fraction);
+		fraction = -2.0 * fraction * fraction * fraction + 3.0 * fraction * fraction;
+		return to * fraction + from * (1.0 - fraction);
+	}
+	
 }
