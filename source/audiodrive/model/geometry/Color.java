@@ -25,6 +25,42 @@ public class Color implements FloatData {
 		this.a = a;
 	}
 
+	/**
+	 * @param r
+	 *            the r to set
+	 */
+	public final Color r(double r) {
+		this.r = r;
+		return this;
+	}
+
+	/**
+	 * @param g
+	 *            the g to set
+	 */
+	public final Color g(double g) {
+		this.g = g;
+		return this;
+	}
+
+	/**
+	 * @param b
+	 *            the b to set
+	 */
+	public final Color b(double b) {
+		this.b = b;
+		return this;
+	}
+
+	/**
+	 * @param a
+	 *            the a to set
+	 */
+	public final Color a(double a) {
+		this.a = a;
+		return this;
+	}
+
 	@Override
 	public int floats() {
 		return Color.Dimension;
@@ -38,6 +74,55 @@ public class Color implements FloatData {
 	@Override
 	public String toString() {
 		return this.r + "/" + this.g + "/" + this.b + "/" + this.a;
+	}
+
+	/**
+	 * @return the rED
+	 */
+	public static final Color RED() {
+		return new Color(1, 0, 0);
+	}
+
+	/**
+	 * @return the gREEN
+	 */
+	public static final Color GREEN() {
+		return new Color(0, 1, 0);
+	}
+
+	/**
+	 * @return the bLUE
+	 */
+	public static final Color BLUE() {
+		return new Color(0, 0, 1);
+	}
+
+	/**
+	 * @return the yELLOW
+	 */
+	public static final Color YELLOW() {
+		return new Color(1, 1, 0);
+	}
+
+	/**
+	 * @return the tUERKIS
+	 */
+	public static final Color TUERKIS() {
+		return new Color(0, 1, 1);
+	}
+
+	/**
+	 * @return the wHITE
+	 */
+	public static final Color WHITE() {
+		return new Color(1, 1, 1);
+	}
+
+	/**
+	 * @return the bLACK
+	 */
+	public static final Color BLACK() {
+		return new Color(0, 0, 0);
 	}
 
 }
