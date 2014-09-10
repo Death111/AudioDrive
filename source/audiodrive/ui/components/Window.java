@@ -1,6 +1,10 @@
 package audiodrive.ui.components;
 
 import java.awt.Dimension;
+import java.awt.GraphicsDevice;
+import java.awt.GraphicsEnvironment;
+import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.Toolkit;
 
 import org.lwjgl.LWJGLException;
@@ -17,26 +21,33 @@ public class Window {
 		throw new IllegalStateException("This class shall not be instantiated.");
 	}
 	
+	private static PixelFormat pixelFormat = new PixelFormat(0, 8, 1);
 	private static boolean open;
 	private static boolean fullscreen;
 	private static boolean borderless;
 	private static boolean vSync;
 	private static int framerate = 100;
 	
+	static {
+		System.setProperty("org.lwjgl.input.Mouse.allowNegativeMouseCoords", "true");
+	}
+	
 	public static void open(Scene scene) {
 		if (open) return;
 		open = true;
 		try {
-			Display.create(new PixelFormat(0, 8, 1));
+			Display.create(pixelFormat);
 		} catch (LWJGLException exception) {
 			throw new RuntimeException(exception);
 		}
 		scene.enter();
 		while (open && !Display.isCloseRequested()) {
-			Input.update();
-			Scene.update();
-			Display.update();
-			Display.sync(framerate);
+			if (Display.isVisible()) {
+				Input.update();
+				Scene.update();
+				Display.update();
+				Display.sync(framerate);
+			}
 		}
 		Scene.destroy();
 		Display.destroy();
@@ -59,6 +70,10 @@ public class Window {
 		Window.framerate = framerate;
 	}
 	
+	public static void setResizable(boolean resizable) {
+		Display.setResizable(resizable);
+	}
+	
 	public static void setFullscreen(boolean fullscreen) {
 		if (Window.fullscreen == fullscreen) return;
 		Window.fullscreen = fullscreen;
@@ -68,10 +83,6 @@ public class Window {
 				setSize(screen.width, screen.height);
 			} else {
 				Display.setFullscreen(fullscreen);
-			}
-			if (Display.isCreated()) {
-				Display.destroy();
-				Display.create();
 			}
 		} catch (LWJGLException exception) {
 			throw new RuntimeException(exception);
@@ -88,10 +99,6 @@ public class Window {
 		System.setProperty("org.lwjgl.opengl.Window.undecorated", String.valueOf(borderless));
 		try {
 			Display.setFullscreen(false);
-			if (Display.isCreated()) {
-				Display.destroy();
-				Display.create();
-			}
 		} catch (LWJGLException exception) {
 			throw new RuntimeException(exception);
 		}
@@ -102,12 +109,26 @@ public class Window {
 	}
 	
 	public static void setSize(int width, int height) {
-		if (getWidth() == width && getHeight() == height) return;
+		if (Display.isCreated() && (getWidth() == width && getHeight() == height)) return;
 		try {
 			Display.setDisplayMode(new DisplayMode(width, height));
 		} catch (LWJGLException exception) {
 			throw new RuntimeException(exception);
 		}
+	}
+	
+	public static void setLocation(int x, int y) {
+		Display.setLocation(x, y);
+	}
+	
+	public static void setBounds(Rectangle bounds) {
+		setLocation(bounds.x, bounds.y);
+		setSize(bounds.width, bounds.height);
+	}
+	
+	public static Rectangle getBounds() {
+		if (Display.isCreated()) return new Rectangle(Display.getX(), Display.getY(), Display.getWidth(), Display.getHeight());
+		return GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDefaultConfiguration().getBounds();
 	}
 	
 	public static int getWidth() {
@@ -131,4 +152,34 @@ public class Window {
 		return vSync;
 	}
 	
+	public static void useSecondaryMonitor() {
+		GraphicsDevice[] monitors = GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices();
+		if (monitors.length < 2) return;
+		GraphicsDevice currentMonitor = getMonitor();
+		for (GraphicsDevice monitor : monitors) {
+			if (!monitor.equals(currentMonitor)) setMonitor(monitor);
+		}
+	}
+	
+	public static void setMonitor(GraphicsDevice device) {
+		setBounds(device.getDefaultConfiguration().getBounds());
+	}
+	
+	public static GraphicsDevice getMonitor() {
+		if (Display.isCreated()) {
+			Rectangle bounds = getBounds();
+			for (GraphicsDevice device : GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices()) {
+				if (device.getDefaultConfiguration().getBounds().equals(bounds)) return device;
+			}
+		}
+		return GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
+	}
+	
+	public static GraphicsDevice getMonitor(int x, int y) {
+		Point point = new Point(x, y);
+		for (GraphicsDevice device : GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices()) {
+			if (device.getDefaultConfiguration().getBounds().contains(point)) return device;
+		}
+		return null;
+	}
 }

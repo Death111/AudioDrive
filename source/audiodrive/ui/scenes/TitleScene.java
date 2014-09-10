@@ -1,11 +1,17 @@
 package audiodrive.ui.scenes;
 
 import static org.lwjgl.opengl.GL11.*;
+
+import java.awt.GraphicsDevice;
+
+import org.lwjgl.input.Keyboard;
+
 import audiodrive.AudioDrive;
 import audiodrive.model.buffer.VertexBuffer;
 import audiodrive.ui.components.Camera;
 import audiodrive.ui.components.Scene;
 import audiodrive.ui.components.Text;
+import audiodrive.ui.components.Window;
 import audiodrive.ui.effects.ShaderProgram;
 import audiodrive.utilities.Buffers;
 
@@ -44,6 +50,29 @@ public class TitleScene extends Scene {
 		canvas = null;
 		shader = null;
 		title = null;
+	}
+	
+	@Override
+	public void keyReleased(int key, char character) {
+		switch (key) {
+		case Keyboard.KEY_TAB:
+			Window.useSecondaryMonitor();
+			break;
+		case Keyboard.KEY_ESCAPE:
+			Scene.get(MenuScene.class).enter();
+			break;
+		default:
+			break;
+		}
+	}
+	
+	@Override
+	public void mouseDragged(int button, int x, int y, int dx, int dy) {
+		// would require scene rebuilding
+		GraphicsDevice monitor = Window.getMonitor(x, y);
+		if (!Window.getMonitor().equals(monitor)) {
+			Window.setMonitor(monitor);
+		}
 	}
 	
 }

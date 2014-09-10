@@ -56,12 +56,7 @@ public class GameScene extends Scene {
 		trackOverview = new TrackOverview(track);
 		File model = Files.find("models/player", AudioDrive.Settings.get("model") + ".obj").orElse(Files.list("models/player", ".obj", true).get(0));
 		player = new Player().model(ModelLoader.loadSingleModel(model.getPath()));
-		Vector current = track.spline().get(0);
-		Vector next = track.spline().get(1);
-		Vector position = current.plus(0, 0.0005, 0);
-		Vector direction = next.minus(current);
-		Vector up = Vector.Y;
-		player.model().scale(0.0001).position(position).align(direction, up);
+		player.model().scale(0.02);
 		playback = new Playback(track.getAudio().getFile());
 		rotation.reset();
 		translation.reset();

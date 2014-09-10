@@ -8,9 +8,9 @@ import audiodrive.utilities.Arithmetic;
 public class Player {
 	
 	private Model model;
-	private double lookDistance = 0.005;
-	private double eyeHeight = 0.002;
-	private double eyeDistance = 0.005;
+	private double lookDistance = 1.0;
+	private double eyeHeight = 0.5;
+	private double eyeDistance = 1.0;
 	
 	private double jumpHeight = 0.00005;
 	private double jumpRate = 1.5;
