@@ -11,6 +11,7 @@ public class Player {
 	private double lookDistance = 2.5;
 	private double eyeHeight = 1.0;
 	private double eyeDistance = 2.5;
+	private double slopeFactor = 1.0;
 	
 	private double jumpHeight = 0.05;
 	private double jumpRate = 1.5;
@@ -96,8 +97,8 @@ public class Player {
 	}
 	
 	public void camera() {
-		double slope = model().up().angle(Vector.Y) * Math.signum(model.direction().dot(Vector.Y)) * 0.0025;
-		Camera.position(model().position().plus(model().direction().multiplied(-eyeDistance)).plus(model().up().multiplied(eyeHeight + slope)));
+		double slope = model().up().angle(Vector.Y) * Math.signum(model.direction().dot(Vector.Y)) * slopeFactor;
+		Camera.position(model().position().plus(model().direction().multiplied(-eyeDistance)).plus(model().up().multiplied(eyeHeight + slope * eyeHeight)));
 		Camera.lookAt(model().position().plus(model().direction().multiplied(lookDistance)));
 	}
 }

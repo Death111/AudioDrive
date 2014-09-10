@@ -42,7 +42,7 @@ public class TrackGenerator {
 			int direction = Math.abs(difference) > 100 ? (int) Math.signum(difference) : 0;
 			x += direction * 1;
 			y += (0.5 - (value / max)) * 1;
-			z += 1;
+			z -= 1;
 			index++;
 		}
 		return vectorinates;
@@ -70,7 +70,7 @@ public class TrackGenerator {
 			}
 			x += xi / smoothing;
 			y += yi / smoothing;
-			z += zi / smoothing;
+			z -= zi / smoothing;
 		}
 		return vectorinates;
 	}

@@ -173,14 +173,13 @@ public class GameScene extends Scene {
 	
 	@Override
 	public void mouseMoved(int x, int y, int dx, int dy) {
-		movePlayer(dx * 0.001);
+		movePlayer(dx * 0.002);
 	}
 	
 	private void movePlayer(double x) {
 		if (!playback.isRunning()) return;
 		double newX = player.model().translation().x() - x; // FIXME why negative?
 		double maxX = track.width() / 3;
-		System.out.println(maxX + " " + newX);
 		player.model().translation().x(Math.max(-maxX, Math.min(maxX, newX)));
 	}
 	
