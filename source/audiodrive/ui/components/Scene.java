@@ -19,6 +19,8 @@ public class Scene implements Input.Observer {
 	private static Set<Scene> hierarchy = new LinkedHashSet<>();
 	private static Scene active;
 	private static long frameTimestamp;
+	private static double deltaTime;
+	private static double time;
 	
 	@SuppressWarnings("unchecked")
 	public static <T extends Scene> T get(Class<T> clazz) {
@@ -33,11 +35,12 @@ public class Scene implements Input.Observer {
 	}
 	
 	public static void update() {
-		long time = System.nanoTime();
-		double elapsedSeconds = (time - frameTimestamp) / 1000000000.0;
-		frameTimestamp = time;
+		long nanoTime = System.nanoTime();
+		deltaTime = (nanoTime - frameTimestamp) / 1000000000.0;
+		time += deltaTime;
+		frameTimestamp = nanoTime;
 		if (active != null) {
-			active.update(elapsedSeconds);
+			active.update(deltaTime);
 			active.render();
 		} else {
 			glClear(GL_COLOR_BUFFER_BIT);
@@ -116,6 +119,20 @@ public class Scene implements Input.Observer {
 			current = next;
 		}
 		return null;
+	}
+	
+	/** return time since game start, in seconds */
+	public double time() {
+		return time;
+	}
+	
+	/** return time since last frame, in seconds */
+	public double deltaTime() {
+		return deltaTime;
+	}
+	
+	public static Set<Scene> hierarchy() {
+		return hierarchy;
 	}
 	
 	public int getWidth() {

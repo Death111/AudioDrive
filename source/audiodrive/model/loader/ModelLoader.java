@@ -17,6 +17,7 @@ import audiodrive.model.geometry.Face;
 import audiodrive.model.geometry.TextureCoordinate;
 import audiodrive.model.geometry.Vector;
 import audiodrive.model.geometry.Vertex;
+import audiodrive.model.geometry.transform.Rotation;
 import audiodrive.utilities.Log;
 
 /**
@@ -53,6 +54,10 @@ public class ModelLoader {
 		final Model model = new Model("NA", faces);
 		final Texture texture = models.get(0).getTexture();
 		model.setTexture(texture);
+		// TODO rotate model without breaking it
+		if (fileName.contains("raptor")) {
+			model.transformations().add(new Rotation().x(90).y(180));
+		}
 		return model;
 	}
 	
@@ -64,6 +69,7 @@ public class ModelLoader {
 	 */
 	public static List<Model> loadModels(String fileName) {
 		// TODO Implement exception handling
+		if (fileName.endsWith(".obj")) fileName = fileName.substring(0, fileName.indexOf(".obj"));
 		final String modelFileName = fileName + ".obj";
 		final String textureFileName = fileName + ".png";
 		

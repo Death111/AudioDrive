@@ -54,16 +54,10 @@ public class AudioSelectionScene extends Scene implements ItemListener {
 	private AudioFile selectAudio;
 	private VertexBuffer canvas;
 	private ShaderProgram shader;
-	private double duration;
 	private List<String> supportedFileExtensionList = Arrays.asList("mp3", "wav");
 	// Item which was selected
 	private Item item = null;
-
-	public void enter(double duration) {
-		this.duration = duration;
-		super.enter();
-	}
-
+	
 	@Override
 	public void entering() {
 		Camera.overlay(getWidth(), getHeight());
@@ -87,8 +81,7 @@ public class AudioSelectionScene extends Scene implements ItemListener {
 		selectedFileText = new Text().setFont(AudioDrive.Font).setPosition(20, itemMenu.getHeight() + 200).setSize(30);
 
 		// Setup start node
-		File rootFile = new File("./music/");
-		updateItemExplorer(rootFile);
+		updateItemExplorer(new File(AudioDrive.Settings.get("directory")));
 
 		for (File file : File.listRoots()) {
 			final boolean directory = file.isDirectory();
@@ -113,6 +106,7 @@ public class AudioSelectionScene extends Scene implements ItemListener {
 	 */
 	private void updateItemExplorer(File rootFile) {
 		currentFolderText.setText("Current folder: " + rootFile.getAbsolutePath());
+		AudioDrive.Settings.set("directory", rootFile.getPath());
 		final File[] listFiles = rootFile.listFiles();
 		itemMap.clear();
 		itemMenu.removeAllItems();
@@ -144,15 +138,10 @@ public class AudioSelectionScene extends Scene implements ItemListener {
 	}
 
 	@Override
-	public void update(double elapsed) {
-		duration += elapsed;
-	}
-
-	@Override
 	public void render() {
 		glClear(GL_COLOR_BUFFER_BIT);
 		shader.bind();
-		shader.uniform("time").set(duration);
+		shader.uniform("time").set(time());
 		shader.uniform("resolution").set((float) getWidth(), (float) getHeight());
 		canvas.draw();
 		shader.unbind();
@@ -228,10 +217,7 @@ public class AudioSelectionScene extends Scene implements ItemListener {
 		Log.trace("Key '" + character + "' was realeased,");
 		switch (key) {
 		case Keyboard.KEY_ESCAPE:
-			exit();
-			break;
-		case Keyboard.KEY_M:
-			Scene.get(ModelViewerScene.class).enter();
+			back();
 			break;
 		case Keyboard.KEY_RETURN:
 			onSelect(continueMenuItem, true);

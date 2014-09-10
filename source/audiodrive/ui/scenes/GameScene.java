@@ -2,12 +2,14 @@ package audiodrive.ui.scenes;
 
 import static org.lwjgl.opengl.GL11.*;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 
+import audiodrive.AudioDrive;
 import audiodrive.audio.Playback;
 import audiodrive.model.Player;
 import audiodrive.model.geometry.ReflectionPlane;
@@ -22,6 +24,7 @@ import audiodrive.ui.TrackOverview;
 import audiodrive.ui.components.Camera;
 import audiodrive.ui.components.Scene;
 import audiodrive.utilities.Buffers;
+import audiodrive.utilities.Files;
 import audiodrive.utilities.Log;
 
 public class GameScene extends Scene {
@@ -51,7 +54,8 @@ public class GameScene extends Scene {
 	protected void entering() {
 		Log.info("starting game...");
 		trackOverview = new TrackOverview(track);
-		player = new Player().model(ModelLoader.loadSingleModel("models/xwing/xwing"));
+		File model = Files.find("models/player", AudioDrive.Settings.get("model") + ".obj").orElse(Files.list("models/player", ".obj", true).get(0));
+		player = new Player().model(ModelLoader.loadSingleModel(model.getPath()));
 		Vector current = track.spline().get(0);
 		Vector next = track.spline().get(1);
 		Vector position = current.plus(0, 0.0005, 0);

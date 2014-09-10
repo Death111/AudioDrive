@@ -12,7 +12,6 @@ import audiodrive.utilities.Buffers;
 public class TitleScene extends Scene {
 	
 	private Text title;
-	private double duration;
 	private VertexBuffer canvas;
 	private ShaderProgram shader;
 	
@@ -26,15 +25,14 @@ public class TitleScene extends Scene {
 	
 	@Override
 	public void update(double elapsed) {
-		duration += elapsed;
-		if (duration >= 2.0) Scene.get(AudioSelectionScene.class).enter(duration);
+		if (time() >= 2.0) Scene.get(MenuScene.class).enter();
 	}
 	
 	@Override
 	public void render() {
 		glClear(GL_COLOR_BUFFER_BIT);
 		shader.bind();
-		shader.uniform("time").set(duration);
+		shader.uniform("time").set(time());
 		shader.uniform("resolution").set((float) getWidth(), (float) getHeight());
 		canvas.draw();
 		shader.unbind();

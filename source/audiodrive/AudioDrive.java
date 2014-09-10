@@ -11,11 +11,12 @@ import audiodrive.utilities.Log;
 public class AudioDrive {
 	
 	public static final String Title = "AudioDrive";
+	public static final Settings Settings = new Settings("audiodrive.properties");
 	public static final Font Font = Text.getFont("Shojumaru");
 	
 	public static void main(String[] args) {
 		Log.info("AudioDrive");
-		
+		Settings.load();
 		Window.setBorderless(true);
 		Window.setFullscreen(true);
 		Window.setVSyncEnabled(true);
@@ -24,6 +25,8 @@ public class AudioDrive {
 	
 	public static void exit() {
 		Window.close();
+		Settings.save();
+		Log.info("Ended.");
 	}
 	
 }

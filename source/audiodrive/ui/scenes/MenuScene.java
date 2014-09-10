@@ -39,10 +39,10 @@ public class MenuScene extends Scene implements ItemListener {
 	
 	private VertexBuffer canvas;
 	private ShaderProgram shader;
-	private double duration;
 	
 	public void enter(AnalyzedAudio audio) {
 		this.audio = audio;
+		hierarchy().clear();
 		super.enter();
 	}
 	
@@ -71,15 +71,10 @@ public class MenuScene extends Scene implements ItemListener {
 	}
 	
 	@Override
-	public void update(double elapsed) {
-		duration += elapsed;
-	}
-	
-	@Override
 	public void render() {
 		glClear(GL_COLOR_BUFFER_BIT);
 		shader.bind();
-		shader.uniform("time").set(duration);
+		shader.uniform("time").set(time());
 		shader.uniform("resolution").set((float) getWidth(), (float) getHeight());
 		canvas.draw();
 		shader.unbind();
@@ -151,10 +146,18 @@ public class MenuScene extends Scene implements ItemListener {
 		}
 		selectAudio.play();
 		if (item == visualizeMenuItem) {
+			if (audio == null) {
+				Scene.get(AudioSelectionScene.class).enter();
+				return;
+			}
 			Scene.get(VisualizerScene.class).enter(audio);
 			return;
 		}
 		if (item == playMenuItem) {
+			if (audio == null) {
+				Scene.get(AudioSelectionScene.class).enter();
+				return;
+			}
 			TrackGenerator trackGenerator = new TrackGenerator();
 			Track track = trackGenerator.generate(audio, 25);
 			Scene.get(GameScene.class).enter(track);

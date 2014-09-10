@@ -2,8 +2,12 @@ package audiodrive.ui.scenes;
 
 import static org.lwjgl.opengl.GL11.*;
 
+import java.io.File;
+import java.util.List;
+
 import org.lwjgl.input.Keyboard;
 
+import audiodrive.AudioDrive;
 import audiodrive.model.geometry.ReflectionPlane;
 import audiodrive.model.geometry.Vector;
 import audiodrive.model.geometry.transform.Rotation;
@@ -14,6 +18,8 @@ import audiodrive.ui.components.Camera;
 import audiodrive.ui.components.Scene;
 import audiodrive.ui.components.Window;
 import audiodrive.utilities.Buffers;
+import audiodrive.utilities.Files;
+import audiodrive.utilities.Log;
 
 public class ModelViewerScene extends Scene {
 	
@@ -26,10 +32,14 @@ public class ModelViewerScene extends Scene {
 	private ReflectionPlane flatPlane;
 	private ReflectionPlane risingPlane;
 	private ReflectionPlane fallingPlane;
+	private List<File> list;
+	private int index;
 	
 	@Override
 	protected void entering() {
-		model = ModelLoader.loadSingleModel("models/xwing/xwing").scale(0.1);
+		list = Files.list("models/player", ".obj", true);
+		File modelFile = list.stream().filter(file -> file.getName().endsWith(AudioDrive.Settings.get("model") + ".obj")).findFirst().orElse(list.get(0));
+		loadModel(list.indexOf(modelFile));
 		double y = -0.25;
 		flatPlane = new ReflectionPlane(new Vector(-1, y, 1), new Vector(1, y, 1), new Vector(1, y, -1), new Vector(-1, y, -1));
 		risingPlane = new ReflectionPlane(new Vector(-1, 2 * y, 1), new Vector(1, 2 * y, 1), new Vector(1, y, 0), new Vector(-1, y, 0)).renderNormal(true);
@@ -93,6 +103,17 @@ public class ModelViewerScene extends Scene {
 		glEnd();
 	}
 	
+	private void loadModel(int index) {
+		if (index < 0) index = list.size() - 1;
+		if (index > list.size() - 1) index = 0;
+		this.index = index;
+		File file = list.get(index);
+		model = ModelLoader.loadSingleModel(file.getPath()).scale(0.1);
+		String name = file.getName().substring(0, file.getName().indexOf(".obj"));
+		AudioDrive.Settings.set("model", name);
+		Log.debug("selected model " + name);
+	}
+	
 	@Override
 	public void keyPressed(int key, char character) {
 		switch (key) {
@@ -120,7 +141,6 @@ public class ModelViewerScene extends Scene {
 		case Keyboard.KEY_SUBTRACT:
 			camera.add(camera.minus(look).length(0.1));
 			break;
-		
 		default:
 			break;
 		}
@@ -141,6 +161,12 @@ public class ModelViewerScene extends Scene {
 			break;
 		case Keyboard.KEY_V:
 			Window.toggleVSync();
+			break;
+		case Keyboard.KEY_RIGHT:
+			loadModel(index + 1);
+			break;
+		case Keyboard.KEY_LEFT:
+			loadModel(index - 1);
 			break;
 		default:
 			break;
