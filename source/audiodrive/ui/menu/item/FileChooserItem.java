@@ -2,6 +2,8 @@ package audiodrive.ui.menu.item;
 
 import org.lwjgl.opengl.GL11;
 
+import audiodrive.model.geometry.Color;
+
 public class FileChooserItem extends Item {
 
 	private float[] color = { 1, 0, 0, .5f };
@@ -38,26 +40,19 @@ public class FileChooserItem extends Item {
 
 	@Override
 	public void render() {
-		// TODO make color settings better..
-		if (hover) {
-			color[0] = 0; // red
-			color[1] = 1; // green
-			color[2] = 0; // blue
-			color[3] = .7f; // alpha
-		} else {
-			color[0] = 1; // red
-			color[1] = 0; // green
-			color[2] = 0; // blue
-			color[3] = 0.5f; // alpha
-		}
+		final Color itemColor;
+
 		if (selected) {
-			color[0] = 1; // red
-			color[1] = 1; // green
-			color[2] = 0; // blue
-			color[3] = 0.5f; // alpha
+			itemColor = Color.YELLOW().a(0.5);
+		} else if (hover) {
+			itemColor = Color.GREEN().a(0.5);
+		} else if (isDirectory) {
+			itemColor = Color.TUERKIS().a(0.5);
+		} else {
+			itemColor = Color.RED().a(0.5);
 		}
 
-		GL11.glColor4f(color[0], color[1], color[2], color[3]);
+		GL11.glColor4d(itemColor.r, itemColor.g, itemColor.b, itemColor.a);
 		GL11.glBegin(GL11.GL_QUADS);
 		GL11.glVertex2f(posX + 0f, posY + 0f);
 
@@ -67,5 +62,12 @@ public class FileChooserItem extends Item {
 		GL11.glEnd();
 
 		text.setPosition(posX, posY).render();
+	}
+
+	/**
+	 * @return the isDirectory
+	 */
+	public final boolean isDirectory() {
+		return isDirectory;
 	}
 }
