@@ -13,6 +13,7 @@ import org.newdawn.slick.opengl.TextureLoader;
 
 import audiodrive.audio.AnalyzedAudio;
 import audiodrive.model.buffer.VertexBuffer;
+import audiodrive.model.geometry.Color;
 import audiodrive.model.geometry.CuboidStripRenderer;
 import audiodrive.model.geometry.ReflectionPlane;
 import audiodrive.model.geometry.TextureCoordinate;
@@ -71,7 +72,7 @@ public class Track {
 		} catch (IOException e) {
 			Log.error(e);
 		}
-		splineArea2Buffer = new VertexBuffer(splineArea2).mode(GL_QUAD_STRIP);
+		splineArea2Buffer = new VertexBuffer(splineArea2, true, true).mode(GL_QUAD_STRIP);
 	}
 
 	private void calculateObstacles() {
@@ -199,23 +200,18 @@ public class Track {
 		} else if (textureIndex == 0) {
 			sub = 1;
 		}
-		
+
 		leftTexture = new TextureCoordinate(0, offset);
 		rightTexture = new TextureCoordinate(0.25, offset);
 
 		textureIndex += sub;
 
-		// if (textureToggle) {
-		// leftTexture = new TextureCoordinate(0, 0);
-		// rightTexture = new TextureCoordinate(1, 0);
-		// } else {
-		// leftTexture = new TextureCoordinate(0, 1);
-		// rightTexture = new TextureCoordinate(1, 1);
-		// }
-
 		// Set texture coordinates
 		leftVertex.textureCoordinate = leftTexture;
 		rightVertex.textureCoordinate = rightTexture;
+
+		leftVertex.color = new Color(1, 1, 1, .5);
+		rightVertex.color = new Color(1, 1, 1, .5);
 
 		splineArea2.add(leftVertex);
 		splineArea2.add(rightVertex);
@@ -246,7 +242,6 @@ public class Track {
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 		// Draw track
 		{
-			glColor4d(1, 1, 1, .75);
 			if (trackTexture != null) {
 				glEnable(GL_TEXTURE_2D);
 				glBindTexture(GL_TEXTURE_2D, trackTexture.getTextureID());
