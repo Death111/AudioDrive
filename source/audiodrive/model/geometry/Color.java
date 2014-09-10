@@ -11,6 +11,10 @@ public class Color implements FloatData {
 	public double b;
 	public double a;
 
+	public Color(Color color) {
+		this(color.r, color.g, color.b, color.a);
+	}
+
 	public Color(double r, double g, double b) {
 		this.r = r;
 		this.g = g;
