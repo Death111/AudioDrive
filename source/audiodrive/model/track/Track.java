@@ -38,7 +38,7 @@ public class Track {
 	private double width = 1.5;
 	private double borderHeight = 0.2;
 	private double borderWidth = 0.2;
-	private double flightHeight = 0.5;
+	private double flightHeight = 0.15;
 	
 	private VertexBuffer pointBuffer;
 	private VertexBuffer splineBuffer;
@@ -61,7 +61,7 @@ public class Track {
 	
 	public void prepare() {
 		calculateSpline();
-		obstacleModel.scale(0.0002);
+		obstacleModel.scale(0.1);
 		calculateObstacles();
 		// pointBuffer = new VertexBuffer(vectors);
 		// splineBuffer = new VertexBuffer(spline).mode(GL_LINE_STRIP);
@@ -89,10 +89,9 @@ public class Track {
 			
 			final Vector horizontal = left.minus(right).normalize();
 			
-			double mult = ((width * 2) / 4);
-			double rail = (double) (i % 3) + 1;
+			double rail = i % 3 * width * 2 / 3;
 			
-			final Vector position = left.minus(horizontal.multiplied(rail * mult)).plus(0, flightHeight, 0);
+			final Vector position = left.minus(horizontal.multiplied(0.5 + rail)).plus(0, flightHeight, 0);
 			Vector direction = nextLeft.minus(left);
 			obstacles.add(new Placement().position(position).direction(direction).up(Vector.Y));
 		}
@@ -199,19 +198,19 @@ public class Track {
 		} else if (textureIndex == 0) {
 			sub = 1;
 		}
-
+		
 		leftTexture = new TextureCoordinate(0, offset);
 		rightTexture = new TextureCoordinate(0.25, offset);
 		
 		textureIndex += sub;
-
+		
 		// Set texture coordinates
 		leftVertex.textureCoordinate = leftTexture;
 		rightVertex.textureCoordinate = rightTexture;
-
+		
 		leftVertex.color = new Color(1, 1, 1, .5);
 		rightVertex.color = new Color(1, 1, 1, .5);
-
+		
 		splineArea2.add(leftVertex);
 		splineArea2.add(rightVertex);
 	}

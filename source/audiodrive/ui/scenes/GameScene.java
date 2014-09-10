@@ -56,12 +56,12 @@ public class GameScene extends Scene {
 		trackOverview = new TrackOverview(track);
 		File model = Files.find("models/player", AudioDrive.Settings.get("model") + ".obj").orElse(Files.list("models/player", ".obj", true).get(0));
 		player = new Player().model(ModelLoader.loadSingleModel(model.getPath()));
-		player.model().scale(0.02);
+		player.model().scale(0.05);
 		playback = new Playback(track.getAudio().getFile());
 		rotation.reset();
 		translation.reset();
 		updatePlacement();
-		Camera.perspective(45, getWidth(), getHeight(), 0.001, 100);
+		Camera.perspective(45, getWidth(), getHeight(), 0.1, 10000);
 		GL.pushAttributes();
 		glEnable(GL_CULL_FACE);
 		glEnable(GL_NORMALIZE);
@@ -100,7 +100,7 @@ public class GameScene extends Scene {
 		Camera.overlay(getWidth(), getHeight());
 		trackOverview.render();
 		
-		Camera.perspective(45, getWidth(), getHeight(), 0.001, 100);
+		Camera.perspective(45, getWidth(), getHeight(), 0.1, 10000);
 		player.camera();
 		
 		translation.apply();
@@ -124,28 +124,28 @@ public class GameScene extends Scene {
 		Vector translation = new Vector();
 		switch (key) {
 		case Keyboard.KEY_NUMPAD0:
-			translation.add(0, 0, -0.0001);
+			translation.add(0, 0, -0.01);
 			break;
 		case Keyboard.KEY_NUMPAD2:
-			translation.add(0, 0.0001, 0);
+			translation.add(0, 0.01, 0);
 			break;
 		case Keyboard.KEY_NUMPAD4:
-			translation.add(-0.0001, 0, 0);
+			translation.add(-0.01, 0, 0);
 			break;
 		case Keyboard.KEY_NUMPAD5:
-			translation.add(0, 0, 0.0001);
+			translation.add(0, 0, 0.01);
 			break;
 		case Keyboard.KEY_NUMPAD6:
-			translation.add(0.0001, 0, 0);
+			translation.add(0.01, 0, 0);
 			break;
 		case Keyboard.KEY_NUMPAD8:
-			translation.add(0, -0.0001, 0);
+			translation.add(0, -0.01, 0);
 			break;
 		case Keyboard.KEY_RIGHT:
-			movePlayer(0.0002);
+			movePlayer(0.1);
 			break;
 		case Keyboard.KEY_LEFT:
-			movePlayer(-0.0002);
+			movePlayer(-0.1);
 			break;
 		default:
 			break;
@@ -173,13 +173,14 @@ public class GameScene extends Scene {
 	
 	@Override
 	public void mouseMoved(int x, int y, int dx, int dy) {
-		if (!playback.isRunning()) return;
-		movePlayer(dx * 0.000005);
+		movePlayer(dx * 0.001);
 	}
 	
 	private void movePlayer(double x) {
+		if (!playback.isRunning()) return;
 		double newX = player.model().translation().x() - x; // FIXME why negative?
 		double maxX = track.width() / 3;
+		System.out.println(maxX + " " + newX);
 		player.model().translation().x(Math.max(-maxX, Math.min(maxX, newX)));
 	}
 	

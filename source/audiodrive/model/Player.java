@@ -8,16 +8,16 @@ import audiodrive.utilities.Arithmetic;
 public class Player {
 	
 	private Model model;
-	private double lookDistance = 1.0;
-	private double eyeHeight = 0.5;
-	private double eyeDistance = 1.0;
+	private double lookDistance = 2.5;
+	private double eyeHeight = 1.0;
+	private double eyeDistance = 2.5;
 	
-	private double jumpHeight = 0.00005;
+	private double jumpHeight = 0.05;
 	private double jumpRate = 1.5;
 	private double jumpProgress = 0.0;
 	private boolean jumpUpwards = true;
 	
-	private double tiltThreshold = 0.000001;
+	private double tiltThreshold = 0.001;
 	private double tiltAngle = 25.0;
 	private double tiltRate = 2.0;
 	private double tiltProgress = 0.5;
