@@ -19,8 +19,11 @@ public class Scene implements Input.Observer {
 	private static Set<Scene> hierarchy = new LinkedHashSet<>();
 	private static Scene active;
 	private static long frameTimestamp;
+	private static double secondTimestamp;
 	private static double deltaTime;
 	private static double time;
+	private static int framerate;
+	private static int frames;
 	
 	@SuppressWarnings("unchecked")
 	public static <T extends Scene> T get(Class<T> clazz) {
@@ -39,6 +42,12 @@ public class Scene implements Input.Observer {
 		deltaTime = (nanoTime - frameTimestamp) / 1000000000.0;
 		time += deltaTime;
 		frameTimestamp = nanoTime;
+		frames++;
+		if (time - secondTimestamp >= 1.0) {
+			framerate = frames;
+			frames = 0;
+			secondTimestamp = time;
+		}
 		if (active != null) {
 			active.update(deltaTime);
 			active.render();
@@ -53,6 +62,10 @@ public class Scene implements Input.Observer {
 	
 	public static Scene getActive() {
 		return active;
+	}
+	
+	public static int getFramerate() {
+		return framerate;
 	}
 	
 	public Scene() {}

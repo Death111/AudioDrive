@@ -11,6 +11,7 @@ import audiodrive.model.buffer.VertexBuffer;
 import audiodrive.ui.components.Camera;
 import audiodrive.ui.components.Scene;
 import audiodrive.ui.components.Text;
+import audiodrive.ui.components.Text.Alignment;
 import audiodrive.ui.components.Window;
 import audiodrive.ui.effects.ShaderProgram;
 import audiodrive.utilities.Buffers;
@@ -23,7 +24,7 @@ public class TitleScene extends Scene {
 	
 	@Override
 	public void entering() {
-		title = new Text(AudioDrive.Title).setFont(AudioDrive.Font).setSize(48).setCentered(getWidth() / 2, getHeight() / 2);
+		title = new Text(AudioDrive.Title).setFont(AudioDrive.Font).setSize(48).setPosition(getWidth() / 2, getHeight() / 2).setAlignment(Alignment.Center);
 		canvas = new VertexBuffer(Buffers.create(0, 0, 0, getHeight(), getWidth(), getHeight(), getWidth(), 0), 2).mode(GL_QUADS);
 		shader = new ShaderProgram("shaders/default.vs", "shaders/title.fs");
 		Camera.overlay(getWidth(), getHeight());

@@ -23,6 +23,8 @@ import audiodrive.ui.GL;
 import audiodrive.ui.TrackOverview;
 import audiodrive.ui.components.Camera;
 import audiodrive.ui.components.Scene;
+import audiodrive.ui.components.Text;
+import audiodrive.ui.components.Text.Alignment;
 import audiodrive.utilities.Buffers;
 import audiodrive.utilities.Files;
 import audiodrive.utilities.Log;
@@ -43,6 +45,7 @@ public class GameScene extends Scene {
 	
 	private Playback playback;
 	private TrackOverview trackOverview;
+	private Text framerate;
 	
 	public void enter(Track track) {
 		this.track = track;
@@ -53,6 +56,7 @@ public class GameScene extends Scene {
 	@Override
 	protected void entering() {
 		Log.info("starting game...");
+		framerate = new Text().setFont(AudioDrive.Font).setSize(10).setPosition(getWidth() - 10, 125).setAlignment(Alignment.UpperRight);
 		trackOverview = new TrackOverview(track);
 		File model = Files.find("models/player", AudioDrive.Settings.get("model") + ".obj").orElse(Files.list("models/player", ".obj", true).get(0));
 		player = new Player().model(ModelLoader.loadSingleModel(model.getPath()));
@@ -79,6 +83,7 @@ public class GameScene extends Scene {
 	
 	@Override
 	protected void update(double elapsed) {
+		framerate.setText(getFramerate() + " FPS");
 		if (!playback.isRunning()) return;
 		time += elapsed;
 		// time = track.getDuration() - 0.11;
@@ -99,6 +104,7 @@ public class GameScene extends Scene {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		Camera.overlay(getWidth(), getHeight());
 		trackOverview.render();
+		framerate.render();
 		
 		Camera.perspective(45, getWidth(), getHeight(), 0.1, 10000);
 		player.camera();
@@ -116,6 +122,7 @@ public class GameScene extends Scene {
 		GL.popAttributes();
 		playback.stop();
 		time = 0;
+		framerate = null;
 		Mouse.setGrabbed(false);
 	}
 	

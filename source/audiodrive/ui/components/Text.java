@@ -22,11 +22,15 @@ public class Text {
 	public static final Font DefaultFont = new Font(Font.SANS_SERIF, Font.PLAIN, 15);
 	public static final Map<Font, TrueTypeFont> fonts = new HashMap<>();
 	
+	public static enum Alignment {
+		UpperLeft, UpperCenter, UpperRight, Left, Center, Right, LowerLeft, LowerCenter, LowerRight
+	}
+	
 	private String text;
 	private Color color = Color.white;
 	private Font font;
 	private double x, y;
-	private boolean centered;
+	private Alignment alignment = Alignment.UpperLeft;
 	
 	public Text() {
 		setFont(DefaultFont);
@@ -81,6 +85,15 @@ public class Text {
 		return this;
 	}
 	
+	public Text setAlignment(Alignment alignment) {
+		this.alignment = alignment;
+		return this;
+	}
+	
+	public Alignment getAlignment() {
+		return alignment;
+	}
+	
 	public int getWidth() {
 		if (text == null) return 0;
 		return fonts.get(font).getWidth(text);
@@ -96,6 +109,42 @@ public class Text {
 	
 	public double getY() {
 		return y;
+	}
+	
+	public double getAlignedX() {
+		switch (alignment) {
+		case UpperLeft:
+		case Left:
+		case LowerLeft:
+			return getX();
+		case UpperCenter:
+		case Center:
+		case LowerCenter:
+			return getX() - getWidth() / 2;
+		case UpperRight:
+		case Right:
+		case LowerRight:
+			return getX() - getWidth();
+		}
+		return 0;
+	}
+	
+	public double getAlignedY() {
+		switch (alignment) {
+		case UpperLeft:
+		case UpperCenter:
+		case UpperRight:
+			return getY();
+		case Left:
+		case Center:
+		case Right:
+			return getY() - getHeight() / 2;
+		case LowerLeft:
+		case LowerCenter:
+		case LowerRight:
+			return getY() - getHeight();
+		}
+		return 0;
 	}
 	
 	public Text setX(double x) {
@@ -114,24 +163,10 @@ public class Text {
 		return this;
 	}
 	
-	public Text setCentered(double x, double y) {
-		this.x = x;
-		this.y = y;
-		centered = true;
-		return this;
-	}
-	
-	public Text setCentered(boolean centered) {
-		this.centered = centered;
-		return this;
-	}
-	
 	public void render() {
 		if (text == null) return;
 		glPolygonMode(GL_FRONT, GL_FILL);
-		float x = (float) (centered ? getX() - getWidth() / 2 : getX());
-		float y = (float) (centered ? getY() - getHeight() / 2 : getY());
-		fonts.get(font).drawString(x, y, text, new org.newdawn.slick.Color(color.getRGB()));
+		fonts.get(font).drawString((float) getAlignedX(), (float) getAlignedY(), text, new org.newdawn.slick.Color(color.getRGB()));
 		TextureImpl.bindNone();
 	}
 	
