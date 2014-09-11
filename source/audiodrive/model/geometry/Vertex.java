@@ -1,6 +1,9 @@
 package audiodrive.model.geometry;
 
-import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL11.glColor4d;
+import static org.lwjgl.opengl.GL11.glNormal3d;
+import static org.lwjgl.opengl.GL11.glTexCoord2d;
+import static org.lwjgl.opengl.GL11.glVertex3d;
 import audiodrive.model.buffer.FloatData;
 
 /**
@@ -30,6 +33,42 @@ public class Vertex implements FloatData {
 			glColor4d(color.r, color.g, color.b, color.a);
 		if (position != null)
 			glVertex3d(position.x(), position.y(), position.z());
+	}
+
+	/**
+	 * @param position
+	 *            the position to set
+	 */
+	public final Vertex position(Vector position) {
+		this.position = position;
+		return this;
+	}
+
+	/**
+	 * @param normal
+	 *            the normal to set
+	 */
+	public final Vertex normal(Vector normal) {
+		this.normal = normal;
+		return this;
+	}
+
+	/**
+	 * @param textureCoordinate
+	 *            the textureCoordinate to set
+	 */
+	public final Vertex textureCoordinate(TextureCoordinate textureCoordinate) {
+		this.textureCoordinate = textureCoordinate;
+		return this;
+	}
+
+	/**
+	 * @param color
+	 *            the color to set
+	 */
+	public final Vertex color(Color color) {
+		this.color = color;
+		return this;
 	}
 
 	@Override
