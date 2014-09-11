@@ -6,6 +6,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Properties;
 
+import audiodrive.model.geometry.Color;
 import audiodrive.utilities.Log;
 
 public class Settings {
@@ -19,14 +20,16 @@ public class Settings {
 	
 	public void load() {
 		Log.info("Loading settings...");
+		new File("music").mkdir();
+		set("directory", "music");
+		set("model", "xwing");
+		set("useSecondaryMonitor", "false");
+		set("risingBorderColor", "0.1,0.1,0.1,1");
+		set("fallingBorderColor", "1,1,1,1");
 		try {
 			properties.load(new FileInputStream(filename));
 		} catch (IOException exception) {
-			Log.info("Creating default settings...");
-			File directory = new File("music");
-			directory.mkdir();
-			set("directory", directory.getPath());
-			set("model", "xwing");
+			Log.warning("Couldn't find settings, using defaults.");
 		}
 	}
 	
@@ -48,7 +51,15 @@ public class Settings {
 	}
 	
 	public double getDouble(String key) {
-		return Double.parseDouble(properties.getProperty(key));
+		return Double.parseDouble(get(key));
+	}
+	
+	public boolean getBoolean(String key) {
+		return Boolean.parseBoolean(get(key));
+	}
+	
+	public Color getColor(String key) {
+		return Color.parse(get(key));
 	}
 	
 }

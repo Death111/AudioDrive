@@ -22,34 +22,32 @@ import audiodrive.model.geometry.Vertex;
 import audiodrive.utilities.Buffers;
 
 public class VertexBuffer {
-
+	
 	public static final int FloatSize = Float.SIZE / Byte.SIZE;
-
+	
 	private final int id;
 	private final int target;
 	private final int type;
 	private final int size;
-
+	
 	private int stride = 0;
 	private int vertexSize = 1;
 	private int offset = 0;
 	private int mode = GL_POINTS;
-
+	
 	private boolean normalize = false;
 	private boolean bound = false;
 	private boolean useColor = false;
-	private boolean useTexture = false;;
-
+	private boolean useTexture = false;
+	
 	private IndexBuffer indexBuffer;
-
+	
 	/**
-	 * Creates a vertex buffer object with the specified target and usage for
-	 * {@linkplain GL15#glBufferData}.
+	 * Creates a vertex buffer object with the specified target and usage for {@linkplain GL15#glBufferData}.
 	 */
 	public VertexBuffer(Buffer buffer, int target, int usage, int vertexSize) {
 		this.target = target;
-		if (buffer.limit() % vertexSize != 0)
-			throw new RuntimeException("Buffer limit has to be a multiple of the vertex size.");
+		if (buffer.limit() % vertexSize != 0) throw new RuntimeException("Buffer limit has to be a multiple of the vertex size.");
 		size = buffer.limit() / vertexSize;
 		this.vertexSize = vertexSize;
 		id = glGenBuffers();
@@ -73,99 +71,50 @@ public class VertexBuffer {
 			throw new IllegalArgumentException("Unsupported buffer type.");
 		}
 	}
-
+	
 	@Override
 	protected void finalize() throws Throwable {
 		glDeleteBuffers(id);
 	};
-
+	
 	/**
-	 * Creates a vertex buffer object with target
-	 * {@linkplain GL15#GL_ARRAY_BUFFER} and usage
-	 * {@linkplain GL15#GL_STATIC_DRAW}.
+	 * Creates a vertex buffer object with target {@linkplain GL15#GL_ARRAY_BUFFER} and usage {@linkplain GL15#GL_STATIC_DRAW}.
 	 */
 	public VertexBuffer(Buffer buffer, int vertexSize) {
 		this(buffer, GL_ARRAY_BUFFER, GL_STATIC_DRAW, vertexSize);
 	}
-
+	
 	/**
-	 * Creates a vertex buffer object with target
-	 * {@linkplain GL15#GL_ARRAY_BUFFER} and usage
-	 * {@linkplain GL15#GL_STATIC_DRAW} and vertex size =
-	 * {@linkplain Vector#Dimension}.
+	 * Creates a vertex buffer object with target {@linkplain GL15#GL_ARRAY_BUFFER} and usage {@linkplain GL15#GL_STATIC_DRAW} and vertex size = {@linkplain Vector#Dimension}.
 	 */
 	public VertexBuffer(Vector... vectors) {
 		this(Buffers.create(vectors), Vector.Dimension);
 	}
-
+	
 	/**
-	 * Creates a vertex buffer object with target
-	 * {@linkplain GL15#GL_ARRAY_BUFFER} and usage
-	 * {@linkplain GL15#GL_STATIC_DRAW} and vertex size =
-	 * {@linkplain Vertex#Dimension}.
+	 * Creates a vertex buffer object with target {@linkplain GL15#GL_ARRAY_BUFFER} and usage {@linkplain GL15#GL_STATIC_DRAW} and vertex size = {@linkplain Vertex#Dimension}.
 	 */
 	public VertexBuffer(Vertex... vertices) {
 		this(Buffers.create(vertices), Vertex.Dimension);
 	}
-
+	
 	/**
-	 * Creates a vertex buffer object with target
-	 * {@linkplain GL15#GL_ARRAY_BUFFER} and usage
-	 * {@linkplain GL15#GL_STATIC_DRAW} and vertex size according to the first
-	 * list entry.
-	 * 
-	 * @param data
-	 *            Data to create Vertex buffer of
-	 * @param useColor
-	 *            Whether color shall be used
-	 * @param useTexture
-	 *            Whether textureCoordinates shall be used
-	 */
-	public VertexBuffer(List<? extends FloatData> data, boolean useColor, boolean useTexture) {
-		this(Buffers.create(data), determineVertexSize(data));
-		this.useColor = useColor;
-		this.useTexture = useTexture;
-	}
-
-	/**
-	 * Creates a vertex buffer object with target
-	 * {@linkplain GL15#GL_ARRAY_BUFFER} and usage
-	 * {@linkplain GL15#GL_STATIC_DRAW} and vertex size according to the first
-	 * list entry.
-	 * 
-	 * @param data
-	 *            Data to create Vertex buffer of
-	 * @param useColor
-	 *            If color array shall be used
-	 */
-	public VertexBuffer(List<? extends FloatData> data, boolean useColor) {
-		this(Buffers.create(data), determineVertexSize(data));
-		this.useColor = useColor;
-	}
-
-	/**
-	 * Creates a vertex buffer object with target
-	 * {@linkplain GL15#GL_ARRAY_BUFFER} and usage
-	 * {@linkplain GL15#GL_STATIC_DRAW} and vertex size according to the first
-	 * list entry.
+	 * Creates a vertex buffer object with target {@linkplain GL15#GL_ARRAY_BUFFER} and usage {@linkplain GL15#GL_STATIC_DRAW} and vertex size according to the first list entry.
 	 */
 	public VertexBuffer(List<? extends FloatData> data) {
 		this(Buffers.create(data), determineVertexSize(data));
 	}
-
+	
 	private static int determineVertexSize(List<? extends FloatData> data) {
 		if (!data.isEmpty()) {
 			FloatData firstEntry = data.get(0);
-			if (firstEntry instanceof Vector)
-				return Vector.Dimension;
-			if (firstEntry instanceof Vertex)
-				return Vertex.Dimension;
-			if (firstEntry instanceof Face)
-				return Vertex.Dimension;
+			if (firstEntry instanceof Vector) return Vector.Dimension;
+			if (firstEntry instanceof Vertex) return Vertex.Dimension;
+			if (firstEntry instanceof Face) return Vertex.Dimension;
 		}
 		throw new RuntimeException("Can't determine the vertex size of an empty list.");
 	}
-
+	
 	/**
 	 * Sets the index buffer for this vertex buffer.
 	 */
@@ -177,7 +126,7 @@ public class VertexBuffer {
 		indexBuffer = buffer;
 		return this;
 	}
-
+	
 	/**
 	 * Sets the indices for this vertex buffer using an index buffer.
 	 */
@@ -185,14 +134,14 @@ public class VertexBuffer {
 		indices(new IndexBuffer(indices));
 		return this;
 	}
-
+	
 	/**
 	 * Returns the index buffer of this vertex buffer.
 	 */
 	public IndexBuffer indices() {
 		return indexBuffer;
 	}
-
+	
 	/**
 	 * Binds the buffer to the GL context and sets the vertex pointer.
 	 */
@@ -217,11 +166,10 @@ public class VertexBuffer {
 			glEnableClientState(GL_VERTEX_ARRAY);
 			glVertexPointer(vertexSize, type, stride * FloatSize, 0);
 		}
-		if (indexBuffer != null)
-			indexBuffer.bind();
+		if (indexBuffer != null) indexBuffer.bind();
 		bound = true;
 	}
-
+	
 	/**
 	 * Unbinds the buffer
 	 */
@@ -232,7 +180,7 @@ public class VertexBuffer {
 		glDisableClientState(GL_COLOR_ARRAY);
 		bound = false;
 	}
-
+	
 	/**
 	 * Sets the drawing mode. (GL_POINTS, GL_LINES, GL_TRIANGLES...)
 	 */
@@ -240,7 +188,7 @@ public class VertexBuffer {
 		this.mode = mode;
 		return this;
 	}
-
+	
 	/**
 	 * Sets the drawing offset.
 	 */
@@ -248,72 +196,86 @@ public class VertexBuffer {
 		this.offset = offset;
 		return this;
 	}
-
+	
 	/**
-	 * Draws the buffer content using glDrawElements with the indices of the
-	 * given index buffer.
+	 * Draws the buffer content using glDrawElements with the indices of the given index buffer.
 	 */
 	public void draw(IndexBuffer indices) {
 		Objects.requireNonNull(indices);
-		if (!bound)
-			bind();
+		if (!bound) bind();
 		indices.bind();
 		glDrawElements(mode, indices.size(), GL_UNSIGNED_INT, offset);
+		if (bound) unbind();
 		bound = false;
 	}
-
+	
 	/**
-	 * Draws the buffer content using glDrawArrays or glDrawElements, if indices
-	 * were specified using {@link #indices(int...)} or
-	 * {@link #indices(IndexBuffer)}.
+	 * Draws the buffer content using glDrawArrays or glDrawElements, if indices were specified using {@link #indices(int...)} or {@link #indices(IndexBuffer)}.
 	 */
 	public void draw() {
-		if (!bound)
-			bind();
-
-		if (indexBuffer == null)
-			glDrawArrays(mode, offset, size);
-		else
-			glDrawElements(mode, indexBuffer.size(), GL_UNSIGNED_INT, offset);
-		if (bound) {
-			unbind();
-		}
-
+		if (!bound) bind();
+		if (indexBuffer == null) glDrawArrays(mode, offset, size);
+		else glDrawElements(mode, indexBuffer.size(), GL_UNSIGNED_INT, offset);
+		if (bound) unbind();
 		bound = false;
 	}
-
+	
 	public int id() {
 		return id;
 	}
-
+	
 	/**
 	 * Indicates the type of the buffer. (GL_DOUBLE, GL_FLOAT, ...)
 	 */
 	public int type() {
 		return type;
 	}
-
+	
 	public VertexBuffer normalize(boolean normalize) {
 		this.normalize = normalize;
 		return this;
 	}
-
+	
 	public boolean normalize() {
 		return normalize;
 	}
-
+	
 	/**
 	 * Indicates the step width of the buffer. I. e. the vertex size.
 	 */
 	public int vertexSize() {
 		return vertexSize;
 	}
-
+	
 	/**
 	 * Indicates the number of entries in the buffer.
 	 */
 	public int size() {
 		return size;
 	}
-
+	
+	/**
+	 * Specifies whether to use vertex colors or not.
+	 */
+	public VertexBuffer useColor(boolean useColor) {
+		this.useColor = useColor;
+		return this;
+	}
+	
+	/**
+	 * Specifies whether to use texture coordinates or not.
+	 */
+	public VertexBuffer useTexture(boolean useTexture) {
+		this.useTexture = useTexture;
+		return this;
+	}
+	
+	public boolean useColor() {
+		return useColor;
+	}
+	
+	public boolean useTexture() {
+		return useTexture;
+	}
+	
 }

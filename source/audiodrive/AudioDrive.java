@@ -19,7 +19,7 @@ public class AudioDrive {
 		Settings.load();
 		Window.setBorderless(true);
 		Window.setFullscreen(true);
-		// Window.useSecondaryMonitor();
+		if (Settings.getBoolean("useSecondaryMonitor")) Window.useSecondaryMonitor();
 		Window.setVSyncEnabled(true);
 		Window.open(Scene.get(TitleScene.class));
 	}
