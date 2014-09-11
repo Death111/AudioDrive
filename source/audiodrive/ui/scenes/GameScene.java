@@ -49,7 +49,6 @@ public class GameScene extends Scene {
 	
 	public void enter(Track track) {
 		this.track = track;
-		track.prepare();
 		super.enter();
 	}
 	
@@ -65,6 +64,7 @@ public class GameScene extends Scene {
 		rotation.reset();
 		translation.reset();
 		updatePlacement();
+		track.update(0);
 		Camera.perspective(45, getWidth(), getHeight(), 0.1, 10000);
 		GL.pushAttributes();
 		glEnable(GL_CULL_FACE);
@@ -87,8 +87,9 @@ public class GameScene extends Scene {
 		if (!playback.isRunning()) return;
 		time += elapsed;
 		// time = track.getDuration() - 0.11;
-		player.update(elapsed);
 		updatePlacement();
+		player.update(elapsed);
+		track.update(time);
 	}
 	
 	private void updatePlacement() {

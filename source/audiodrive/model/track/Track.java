@@ -43,11 +43,11 @@ public class Track {
 	private VertexBuffer pointBuffer;
 	private VertexBuffer splineBuffer;
 	private VertexBuffer splineAreaBuffer;
-	private Texture trackTexture;
 	private VertexBuffer splineArea2Buffer;
 	private VertexBuffer leftBorderBuffer;
 	private VertexBuffer rightBorderBuffer;
 	private CuboidStripRenderer cuboidStripRenderer;
+	private Texture trackTexture;
 	
 	private Model obstacleModel = ModelLoader.loadSingleModel("models/obstacle/obstacle");
 	private List<Placement> obstacles = new ArrayList<Placement>();
@@ -57,46 +57,18 @@ public class Track {
 		this.vectors = vectors;
 		this.duration = duration;
 		this.smoothing = smoothing;
-	}
-	
-	public void prepare() {
-		calculateSpline();
 		obstacleModel.scale(0.1);
-		calculateObstacles();
-		// pointBuffer = new VertexBuffer(vectors);
-		// splineBuffer = new VertexBuffer(spline).mode(GL_LINE_STRIP);
-		// splineAreaBuffer = new VertexBuffer(splineArea).mode(GL_QUAD_STRIP);
-		
 		try {
 			trackTexture = TextureLoader.getTexture("PNG", new FileInputStream(new File(TRACK_TEXTURE)));
 		} catch (IOException e) {
 			Log.error(e);
 		}
-		splineArea2Buffer = new VertexBuffer(splineArea2, true, true).mode(GL_QUAD_STRIP);
+		build();
 	}
 	
-	private void calculateObstacles() {
-		
-		// TODO use audio track for generation instead of every 10 units
-		// TODO add collision detection
-		for (int i = 0; i < splineArea.size() - 1; i += 10) {
-			final Vector left = splineArea.get(i);
-			final Vector right = splineArea.get(i + 1);
-			Vector nextLeft = new Vector(0, 0, 0);
-			if (splineArea.size() > i + 2) {
-				nextLeft = splineArea.get(i + 2);
-			}
-			
-			final Vector horizontal = left.minus(right).normalize();
-			
-			double rail = i % 3 * width * 2 / 3;
-			
-			final Vector position = left.minus(horizontal.multiplied(0.5 + rail)).plus(0, flightHeight, 0);
-			Vector direction = nextLeft.minus(left);
-			obstacles.add(new Placement().position(position).direction(direction).up(Vector.Y));
-		}
-		
-		Log.debug("created '" + obstacles.size() + "' obstacles");
+	private void build() {
+		calculateSpline();
+		splineArea2Buffer = new VertexBuffer(splineArea2, true, true).mode(GL_QUAD_STRIP);
 	}
 	
 	private void calculateSpline() {
@@ -215,6 +187,24 @@ public class Track {
 		splineArea2.add(rightVertex);
 	}
 	
+	public void update(double time) {
+		int forecast = 100;
+		double threshold = 75;
+		obstacles.clear();
+		Index index = getIndex(time);
+		int minimum = Math.max(index.integer, 5);
+		int maximum = Math.min(index.integer + forecast, spline.size() - 2);
+		for (int i = minimum; i < maximum; i++) {
+			boolean left = audio.getChannel(0).getPeaks().get(i) > threshold;
+			boolean right = audio.getChannel(1).getPeaks().get(i) > threshold;
+			if (left && right) {
+				obstacles.add(getPlacement(new Index(i, 0), true, 0));
+			} else if (left || right) {
+				obstacles.add(getPlacement(new Index(i, 0), true, left ? -1 : 1));
+			}
+		}
+	}
+	
 	public void render() {
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 		glColor4d(1, 1, 1, 1);
@@ -258,9 +248,9 @@ public class Track {
 		// TODO limit obstacles to be drawn
 		for (Placement placement : obstacles) {
 			obstacleModel.position(placement.position()).direction(placement.direction());
+			// obstacleModel.placement(placement);
 			obstacleModel.render();
 		}
-		
 	}
 	
 	public Index getIndex(double time) {
@@ -272,16 +262,18 @@ public class Track {
 	}
 	
 	public Placement getPlacement(double time) {
-		Index index = getIndex(time);
+		return getPlacement(getIndex(time), false, 0);
+	}
+	
+	private Placement getPlacement(Index index, boolean interpolated, int side) {
 		Vector current = spline.get(index.integer);
 		Vector next = spline.get(index.integer + 1);
 		Vector direction = next.minus(current);
 		Vector up = Vector.Y;
-		// TODO interpolating the position causes bucking
-		// Vector position =
-		// current.plus(direction.multiplied(index.fraction)).plus(up.multiplied(flightHeight));
-		Vector position = current.plus(direction.multiplied(0.5)).plus(up.multiplied(flightHeight));
-		return new Placement().position(position).direction(direction).up(up);
+		Vector position = current.plus(direction.multiplied(interpolated ? index.fraction : 0.5)).plus(up.multiplied(flightHeight));
+		Placement placement = new Placement().position(position).direction(direction).up(up);
+		if (side != 0) placement.position().add(placement.side().multiplied(Math.signum(side) * width * 2 / 3));
+		return placement;
 	}
 	
 	public List<ReflectionPlane> getReflectionPlanes(double time) {

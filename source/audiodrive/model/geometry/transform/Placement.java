@@ -51,6 +51,11 @@ public class Placement extends Transformation {
 		return up;
 	}
 	
+	/** calculates the side vector i.e. the cross product of {@linkplain #direction()} and {@linkplain #up()} */
+	public Vector side() {
+		return direction.cross(up).normalize();
+	}
+	
 	private void update() {
 		direction.normalize();
 		up.normalize();
