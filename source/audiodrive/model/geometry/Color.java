@@ -1,6 +1,7 @@
 package audiodrive.model.geometry;
 
 import audiodrive.model.buffer.FloatData;
+import audiodrive.utilities.Arithmetic;
 
 public class Color implements FloatData {
 
@@ -27,6 +28,11 @@ public class Color implements FloatData {
 		this.g = g;
 		this.b = b;
 		this.a = a;
+	}
+
+	public static Color Lerp(Color a, Color b, float t) {
+		t = (float) Arithmetic.clamp((double) t);
+		return new Color(a.r + (b.r - a.r) * t, a.g + (b.g - a.g) * t, a.b + (b.b - a.b) * t, a.a + (b.a - a.a) * t);
 	}
 
 	/**
