@@ -57,7 +57,7 @@ public class Drive extends Application {
 		AudioAnalyzer analyzer = new AudioAnalyzer();
 		analyzer.analyze(file);
 		TrackGenerator trackGenerator = new TrackGenerator();
-		Track track = trackGenerator.generate(analyzer.getResults(), 25);
+		Track track = trackGenerator.generate(analyzer.getResults());
 		Playback playback = new Playback(file);
 		Show.track(track);
 		playback.start();

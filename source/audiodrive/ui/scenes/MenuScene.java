@@ -159,7 +159,7 @@ public class MenuScene extends Scene implements ItemListener {
 				return;
 			}
 			TrackGenerator trackGenerator = new TrackGenerator();
-			Track track = trackGenerator.generate(audio, 25);
+			Track track = trackGenerator.generate(audio);
 			Scene.get(GameScene.class).enter(track);
 			return;
 		}

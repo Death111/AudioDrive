@@ -7,21 +7,26 @@ import audiodrive.audio.AnalyzedAudio;
 import audiodrive.audio.AnalyzedChannel;
 import audiodrive.model.geometry.Vector;
 import audiodrive.utilities.Log;
+import audiodrive.utilities.Range;
 
 public class TrackGenerator {
 	
-	private int smoothing;
-	private boolean useAverage = false;
+	private int smoothing = 15;
+	
+	private double deltaX = 0.2;
+	private double deltaY = 2.0;
+	private double deltaZ = 1.0;
+	
 	private AnalyzedChannel mixed;
 	private AnalyzedChannel left;
 	private AnalyzedChannel right;
 	
-	public Track generate(AnalyzedAudio file, int smoothing) {
-		this.smoothing = smoothing;
+	public Track generate(AnalyzedAudio file) {
 		mixed = file.getMix();
+		Log.debug(Range.of(mixed.getThreshold()));
 		left = file.getChannel(0);
 		right = file.getChannel(1);
-		List<Vector> vectorinates = useAverage ? calculateUsingAverage() : calculate();
+		List<Vector> vectorinates = calculate();
 		Log.debug(vectorinates.size() + " vectorinates");
 		return new Track(file, vectorinates, file.getDuration(), smoothing);
 	}
@@ -37,46 +42,14 @@ public class TrackGenerator {
 			if (index % smoothing == 0) {
 				vectorinates.add(new Vector(x, y, z));
 			}
-			// float difference = right.threshold.get(index) - left.threshold.get(index);
-			float difference = right.getSpectralSum().get(index) - left.getSpectralSum().get(index);
-			int direction = Math.abs(difference) > 100 ? (int) Math.signum(difference) : 0;
-			x += direction * 1;
-			y += (0.5 - (value / max)) * 1;
-			z -= 1;
+			float difference = right.getThreshold().get(index) - left.getThreshold().get(index);
+			int direction = Math.abs(difference) > 1 ? (int) Math.signum(difference) : 0;
+			x += direction * deltaX;
+			y += (0.5 - (value / max)) * deltaY;
+			z += deltaZ;
 			index++;
 		}
 		return vectorinates;
-	}
-	
-	private List<Vector> calculateUsingAverage() {
-		double max = mixed.getThreshold().stream().mapToDouble(v -> v).max().getAsDouble();
-		List<Vector> vectorinates = new ArrayList<>();
-		double x = 0;
-		double y = 0;
-		double z = 0;
-		for (int i = 0; i < mixed.getThreshold().size(); i += smoothing) {
-			double xi = 0;
-			double yi = 0;
-			double zi = 0;
-			vectorinates.add(new Vector(x, y, z));
-			for (int j = 0; j < smoothing; j++) {
-				int index = i + j;
-				if (index >= mixed.getThreshold().size()) return vectorinates;
-				double value = mixed.getThreshold().get(i + j);
-				int direction = left.getThreshold().get(index) > right.getThreshold().get(index) ? 1 : -1;
-				xi += direction * 0.01;
-				yi += (0.5 - (value / max)) * 0.01;
-				zi += 0.005;
-			}
-			x += xi / smoothing;
-			y += yi / smoothing;
-			z -= zi / smoothing;
-		}
-		return vectorinates;
-	}
-	
-	public int getSmoothing() {
-		return smoothing;
 	}
 	
 }

@@ -47,4 +47,8 @@ public class Settings {
 		return properties.getProperty(key);
 	}
 	
+	public double getDouble(String key) {
+		return Double.parseDouble(properties.getProperty(key));
+	}
+	
 }
