@@ -9,6 +9,7 @@ import org.lwjgl.opengl.GL11;
 import audiodrive.model.geometry.Vector;
 import audiodrive.model.track.Track;
 import audiodrive.model.track.Track.Index;
+import audiodrive.utilities.Arithmetic;
 import audiodrive.utilities.Log;
 
 /**
@@ -26,40 +27,40 @@ public class TrackOverview {
 	private int posX = Display.getWidth() - width - 20, posY = 20;
 	// holds current playerIndex of original list
 	private int playerIndex;
-	
+
 	public TrackOverview(Track track) {
 		final List<Vector> vectors = track.spline();
-		
+
 		rawCoordinates = new ArrayList<Double>();
 		List<Double> scaledCoordinates = new ArrayList<Double>();
 		double maxValue = 0;
 		double minValue = 0;
-		
+
 		for (Vector vector : vectors) {
-			
+
 			final double value = vector.y();
-			
+
 			if (value > maxValue) {
 				maxValue = value;
 			} else if (value < minValue) {
 				minValue = value;
 			}
-			
+
 			rawCoordinates.add(value);
 		}
-		
+
 		// Scale values to range 0 - height
-		for (Double double1 : rawCoordinates) {
-			double value = (height - 0) * (double1 - minValue) / (maxValue - minValue) + 0;
+		for (Double currentValue : rawCoordinates) {
+			double value = Arithmetic.linearScale(currentValue, 0, height, maxValue, minValue);
 			scaledCoordinates.add(value);
 		}
-		
+
 		// Compress values in width to 0 - width
 		int size = rawCoordinates.size();
-		
+
 		// TODO fix to work with short songs (where size is < width)
 		int compressFactor = (size > width) ? size / width : 1;
-		
+
 		for (int i = 0; i < size / compressFactor; i++) {
 			double average = 0;
 			for (int j = i * compressFactor; j < (i + 1) * compressFactor; j++) {
@@ -72,10 +73,10 @@ public class TrackOverview {
 			average /= compressFactor;
 			yCoordinates.add(average);
 		}
-		
+
 		Log.debug("size: " + yCoordinates.size());
 	}
-	
+
 	public void render() {
 		// Draw border
 		GL11.glColor4f(.2f, .2f, .2f, .2f);
@@ -87,7 +88,7 @@ public class TrackOverview {
 			GL11.glVertex2d(posX, posY + height);
 		}
 		GL11.glEnd();
-		
+
 		// Draw track
 		GL11.glColor4f(1, 1, 1, 1);
 		GL11.glBegin(GL11.GL_LINE_STRIP);
@@ -98,7 +99,7 @@ public class TrackOverview {
 			}
 		}
 		GL11.glEnd();
-		
+
 		// Draw player position on screen
 		GL11.glColor4f(1, 0, 0, .5f);
 		GL11.glBegin(GL11.GL_LINES);
@@ -108,9 +109,9 @@ public class TrackOverview {
 			GL11.glVertex2d(posX + index, posY);
 		}
 		GL11.glEnd();
-		
+
 	}
-	
+
 	/**
 	 * Returns appropriate index in compressed data
 	 * 
@@ -119,10 +120,10 @@ public class TrackOverview {
 	 */
 	private int indexToCompressedIndex(int index) {
 		int size = rawCoordinates.size();
-		
+
 		// TODO wont work with short songs
 		int compressFactor = (size > width) ? size / width : 1;
-		
+
 		for (int i = 0; i < size / compressFactor; i++) {
 			for (int j = i * compressFactor; j < (i + 1) * compressFactor; j++) {
 				if (index == j) {
@@ -130,11 +131,11 @@ public class TrackOverview {
 				}
 			}
 		}
-		
+
 		// Couldnt get valid index; returning last valid
 		return yCoordinates.size() - 1;
 	}
-	
+
 	public void updatePlayerPosition(Index index) {
 		playerIndex = index.integer;
 	}
