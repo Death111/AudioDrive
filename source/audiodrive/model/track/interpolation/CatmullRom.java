@@ -72,13 +72,7 @@ public class CatmullRom {
 			
 			// Repeat for the end control point.
 			int n = vertices.size() - 1;
-			dx = vertices.get(n).x() - vertices.get(n - 1).x();
-			dy = vertices.get(n).y() - vertices.get(n - 1).y();
-			dz = vertices.get(n).z() - vertices.get(n - 1).z();
-			double xn = vertices.get(n).x() + dx;
-			double yn = vertices.get(n).y() + dy;
-			double zn = vertices.get(n).y() + dz;
-			Vector end = new Vector(xn, yn, zn);
+			Vector end = vertices.get(n).plus(vertices.get(n).minus(vertices.get(n - 1)));
 			
 			// insert the start control point at the start of the vertices list.
 			vertices.add(0, start);
