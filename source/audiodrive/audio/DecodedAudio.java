@@ -37,6 +37,7 @@ public class DecodedAudio implements Audio {
 		}
 		this.mix = new DecodedChannel(-1, mix, sampleCount, (float) sampleRate, iteration);
 		setIteration(1024);
+		// channels.stream().map(DecodedChannel::getRange).forEach(Log::debug);
 	}
 	
 	protected DecodedAudio(Audio audio) {

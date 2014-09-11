@@ -3,6 +3,8 @@ package audiodrive.audio;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import audiodrive.utilities.Range;
+
 public class DecodedChannel implements Channel {
 	
 	private int channel;
@@ -101,6 +103,10 @@ public class DecodedChannel implements Channel {
 	@Override
 	public String toString() {
 		return (channel < 0) ? "channel mix" : "channel " + channel;
+	}
+	
+	public Range getRange() {
+		return Range.of(getSamples());
 	}
 	
 }
