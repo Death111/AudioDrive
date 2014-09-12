@@ -12,7 +12,7 @@ import audiodrive.model.buffer.FloatData;
  * @author Death
  *
  */
-public class Vertex implements FloatData {
+public class Vertex implements Cloneable, FloatData {
 
 	public static final int Dimension = Vector.Dimension * 2 + TextureCoordinate.Dimension + Color.Dimension;
 
@@ -33,6 +33,15 @@ public class Vertex implements FloatData {
 			glColor4d(color.r, color.g, color.b, color.a);
 		if (position != null)
 			glVertex3d(position.x(), position.y(), position.z());
+	}
+
+	@Override
+	public Vertex clone() {
+		try {
+			return (Vertex) super.clone();
+		} catch (CloneNotSupportedException exception) {
+			throw new RuntimeException(exception);
+		}
 	}
 
 	/**
