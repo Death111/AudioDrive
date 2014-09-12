@@ -176,7 +176,7 @@ public class Track {
 		{
 			final Vector v2 = border.get(2);
 			final Vector v3 = border.get(3);
-			Vertex vertex = getVertex(v1_lastVector, v3, v2);
+			Vertex vertex = getVertex(v1_lastVector, v3, v2, false);
 			vertexList.add(vertex.clone().position(border.get(0)));
 			vertexList.add(vertex.clone().position(border.get(1)));
 			vertexList.add(vertex.clone().position(v2));
@@ -187,7 +187,7 @@ public class Track {
 		for (int i = 2; i < size; i += 3) {
 			final Vector v2 = border.get(i);
 			final Vector v3 = border.get(++i);
-			Vertex vertex = getVertex(v1_lastVector, v3, v2);
+			Vertex vertex = getVertex(v1_lastVector, v3, v2, false);
 			v1_lastVector = v2;
 			vertexList.add(vertex.clone().position(v2));
 			vertexList.add(vertex.clone().position(v3));
@@ -197,7 +197,7 @@ public class Track {
 		{
 			final Vector v2 = border.get(size - 4);
 			final Vector v3 = border.get(size - 3);
-			Vertex vertex = getVertex(v1_lastVector, v3, v2);
+			Vertex vertex = getVertex(v1_lastVector, v3, v2, false);
 			v1_lastVector = v2;
 			vertexList.add(vertex.clone().position(border.get(size - 2)));
 			vertexList.add(vertex.clone().position(border.get(size - 1)));
@@ -209,7 +209,7 @@ public class Track {
 		for (int i = size - 4; i >= 0; i -= 5) {
 			final Vector v2 = border.get(i);
 			final Vector v3 = border.get(++i);
-			Vertex vertex = getVertex(v1_lastVector, v3, v2);
+			Vertex vertex = getVertex(v1_lastVector, v3, v2, true);
 			v1_lastVector = v2;
 			vertexList.add(vertex.clone().position(v2));
 			vertexList.add(vertex.clone().position(v3));
@@ -219,7 +219,7 @@ public class Track {
 		{
 			final Vector v2 = border.get(0);
 			final Vector v3 = border.get(2);
-			Vertex vertex = getVertex(v1_lastVector, v3, v2);
+			Vertex vertex = getVertex(v1_lastVector, v3, v2, false);
 			v1_lastVector = v2;
 			vertexList.add(vertex.clone().position(v2));
 			vertexList.add(vertex.clone().position(v3));
@@ -230,7 +230,7 @@ public class Track {
 			final Vector v2 = border.get(i);
 			i += 2;
 			final Vector v3 = border.get(i);
-			Vertex vertex = getVertex(v1_lastVector, v3, v2);
+			Vertex vertex = getVertex(v1_lastVector, v3, v2, false);
 			v1_lastVector = v2;
 			vertexList.add(vertex.clone().position(v2));
 			vertexList.add(vertex.clone().position(v3));
@@ -242,7 +242,7 @@ public class Track {
 			final Vector v2 = border.get(i);
 			i += 2;
 			final Vector v3 = border.get(i);
-			Vertex vertex = getVertex(v1_lastVector, v3, v2);
+			Vertex vertex = getVertex(v1_lastVector, v3, v2, true);
 			v1_lastVector = v2;
 			vertexList.add(vertex.clone().position(v2));
 			vertexList.add(vertex.clone().position(v3));
@@ -251,8 +251,8 @@ public class Track {
 		return vertexList;
 	}
 
-	private Vertex getVertex(Vector v1, final Vector v2, final Vector v3) {
-		double a = v1.y() - v3.y();
+	private Vertex getVertex(Vector v1, final Vector v2, final Vector v3, boolean switchColor) {
+		double a = (switchColor) ? v3.y() - v1.y() : v1.y() - v3.y();
 		final Color color = getColor(a);
 		Vertex vertex = new Vertex().color(color).normal(v2.clone().subtract(v1).cross(v3.clone().subtract(v1)));
 		return vertex;
