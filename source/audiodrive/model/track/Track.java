@@ -54,7 +54,9 @@ public class Track {
 
 	private Model obstacleModel = ModelLoader.loadSingleModel("models/obstacle/obstacle").color(obstacleColor);
 	private List<Placement> obstacles = new ArrayList<Placement>();
+	List<Vertex> leftVertexList;
 	private VertexBuffer leftBorderVertexBuffer;
+	List<Vertex> rightVertexList;
 	private VertexBuffer rightBorderVertexBuffer;
 
 	private Color risingBorderColor = AudioDrive.Settings.getColor("risingBorderColor");
@@ -150,8 +152,8 @@ public class Track {
 		leftBorderBuffer = new VertexBuffer(leftBorder).mode(GL_QUAD_STRIP);
 		rightBorderBuffer = new VertexBuffer(rightBorder).mode(GL_QUAD_STRIP);
 
-		List<Vertex> leftVertexList = calcBorderVertexes(leftBorder);
-		List<Vertex> rightVertexList = calcBorderVertexes(rightBorder);
+		leftVertexList = calcBorderVertexes(leftBorder);
+		rightVertexList = calcBorderVertexes(rightBorder);
 
 		leftBorderVertexBuffer = new VertexBuffer(leftVertexList).mode(GL_QUAD_STRIP).useColor(true);
 		rightBorderVertexBuffer = new VertexBuffer(rightVertexList).mode(GL_QUAD_STRIP).useColor(true);
@@ -377,6 +379,22 @@ public class Track {
 		// Draw borders
 		leftBorderVertexBuffer.draw();
 		rightBorderVertexBuffer.draw();
+
+		// drawBorderNormals(leftVertexList);
+		// drawBorderNormals(rightVertexList);
+	}
+
+	private void drawBorderNormals(List<Vertex> vertexList) {
+		Color.BLUE().gl();
+		for (Vertex vertex : vertexList) {
+			glBegin(GL_LINES);
+			final Vector position = vertex.position;
+			glVertex3d(position.x(), position.y(), position.z());
+			final Vector normal = vertex.normal;
+			final Vector add = position.clone().add(normal);
+			glVertex3d(add.x(), add.y(), add.z());
+			glEnd();
+		}
 	}
 
 	public Index getIndex(double time) {
