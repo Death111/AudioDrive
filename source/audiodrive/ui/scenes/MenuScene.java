@@ -6,17 +6,16 @@ import org.lwjgl.input.Keyboard;
 
 import audiodrive.audio.AnalyzedAudio;
 import audiodrive.audio.AudioFile;
-import audiodrive.model.buffer.VertexBuffer;
 import audiodrive.model.track.Track;
 import audiodrive.model.track.TrackGenerator;
 import audiodrive.ui.components.Camera;
+import audiodrive.ui.components.Overlay;
 import audiodrive.ui.components.Scene;
 import audiodrive.ui.effects.ShaderProgram;
 import audiodrive.ui.menu.Menu;
 import audiodrive.ui.menu.item.Item;
 import audiodrive.ui.menu.item.ItemListener;
 import audiodrive.ui.menu.item.MenuItem;
-import audiodrive.utilities.Buffers;
 import audiodrive.utilities.Log;
 
 /**
@@ -26,7 +25,8 @@ import audiodrive.utilities.Log;
  */
 public class MenuScene extends Scene implements ItemListener {
 	
-	Menu menu;
+	private Overlay overlay;
+	private Menu menu;
 	private MenuItem visualizeMenuItem;
 	private MenuItem playMenuItem;
 	private MenuItem selectAudioMenuItem;
@@ -37,9 +37,6 @@ public class MenuScene extends Scene implements ItemListener {
 	private AudioFile hoverAudio;
 	private AudioFile selectAudio;
 	
-	private VertexBuffer canvas;
-	private ShaderProgram shader;
-	
 	public void enter(AnalyzedAudio audio) {
 		this.audio = audio;
 		hierarchy().clear();
@@ -49,10 +46,6 @@ public class MenuScene extends Scene implements ItemListener {
 	@Override
 	public void entering() {
 		Log.trace("Entering MenueScene");
-		// Change to Ortho
-		Camera.overlay(getWidth(), getHeight());
-		canvas = new VertexBuffer(Buffers.create(0, 0, 0, getHeight(), getWidth(), getHeight(), getWidth(), 0), 2).mode(GL_QUADS);
-		shader = new ShaderProgram("shaders/default.vs", "shaders/title.fs");
 		
 		menu = new Menu(100, 200, 400, 600, 25);
 		visualizeMenuItem = new MenuItem("Visualize", this);
@@ -68,24 +61,23 @@ public class MenuScene extends Scene implements ItemListener {
 		
 		hoverAudio = new AudioFile("sounds/hover.wav");
 		selectAudio = new AudioFile("sounds/select.wav");
+		
+		overlay = new Overlay().shader(new ShaderProgram("shaders/default.vs", "shaders/title.fs"));
+		Camera.overlay(getWidth(), getHeight());
 	}
 	
 	@Override
 	public void render() {
 		glClear(GL_COLOR_BUFFER_BIT);
-		shader.bind();
-		shader.uniform("time").set(time());
-		shader.uniform("resolution").set((float) getWidth(), (float) getHeight());
-		canvas.draw();
-		shader.unbind();
+		overlay.render();
 		menu.render();
 	}
 	
 	@Override
 	public void exiting() {
 		Log.info("exiting");
-		canvas = null;
-		shader = null;
+		overlay = null;
+		menu = null;
 	}
 	
 	@Override

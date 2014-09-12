@@ -20,11 +20,9 @@ import audiodrive.model.geometry.transform.Translation;
 import audiodrive.model.loader.ModelLoader;
 import audiodrive.model.track.Track;
 import audiodrive.ui.GL;
-import audiodrive.ui.TrackOverview;
 import audiodrive.ui.components.Camera;
 import audiodrive.ui.components.Scene;
-import audiodrive.ui.components.Text;
-import audiodrive.ui.components.Text.Alignment;
+import audiodrive.ui.scenes.overlays.GameOverlay;
 import audiodrive.utilities.Buffers;
 import audiodrive.utilities.Files;
 import audiodrive.utilities.Log;
@@ -44,8 +42,7 @@ public class GameScene extends Scene {
 	private double time;
 	
 	private Playback playback;
-	private TrackOverview trackOverview;
-	private Text framerate;
+	private GameOverlay overlay;
 	
 	public void enter(Track track) {
 		this.track = track;
@@ -55,8 +52,7 @@ public class GameScene extends Scene {
 	@Override
 	protected void entering() {
 		Log.info("starting game...");
-		framerate = new Text().setFont(AudioDrive.Font).setSize(10).setPosition(getWidth() - 10, 125).setAlignment(Alignment.UpperRight);
-		trackOverview = new TrackOverview(track);
+		overlay = new GameOverlay(this);
 		File model = Files.find("models/player", AudioDrive.Settings.get("model") + ".obj").orElse(Files.list("models/player", ".obj", true).get(0));
 		player = new Player().model(ModelLoader.loadSingleModel(model.getPath()));
 		player.model().scale(0.05);
@@ -83,13 +79,13 @@ public class GameScene extends Scene {
 	
 	@Override
 	protected void update(double elapsed) {
-		framerate.setText(getFramerate() + " FPS");
 		if (!playback.isRunning()) return;
 		time += elapsed;
 		// time = track.getDuration() - 0.11;
 		updatePlacement();
 		player.update(elapsed);
 		track.update(time);
+		overlay.update(time);
 	}
 	
 	private void updatePlacement() {
@@ -97,15 +93,12 @@ public class GameScene extends Scene {
 		player.model().placement(placement);
 		reflectionPlanes.clear();
 		reflectionPlanes.addAll(track.getReflectionPlanes(time));
-		trackOverview.updatePlayerPosition(track.getIndex(time));
 	}
 	
 	@Override
 	protected void render() {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		Camera.overlay(getWidth(), getHeight());
-		trackOverview.render();
-		framerate.render();
+		overlay.render();
 		
 		Camera.perspective(45, getWidth(), getHeight(), 0.1, 10000);
 		player.camera();
@@ -123,8 +116,11 @@ public class GameScene extends Scene {
 		GL.popAttributes();
 		playback.stop();
 		time = 0;
-		framerate = null;
 		Mouse.setGrabbed(false);
+	}
+	
+	public Track track() {
+		return track;
 	}
 	
 	@Override

@@ -7,26 +7,23 @@ import java.awt.GraphicsDevice;
 import org.lwjgl.input.Keyboard;
 
 import audiodrive.AudioDrive;
-import audiodrive.model.buffer.VertexBuffer;
 import audiodrive.ui.components.Camera;
+import audiodrive.ui.components.Overlay;
 import audiodrive.ui.components.Scene;
 import audiodrive.ui.components.Text;
 import audiodrive.ui.components.Text.Alignment;
 import audiodrive.ui.components.Window;
 import audiodrive.ui.effects.ShaderProgram;
-import audiodrive.utilities.Buffers;
 
 public class TitleScene extends Scene {
 	
 	private Text title;
-	private VertexBuffer canvas;
-	private ShaderProgram shader;
+	private Overlay overlay;
 	
 	@Override
 	public void entering() {
 		title = new Text(AudioDrive.Title).setFont(AudioDrive.Font).setSize(48).setPosition(getWidth() / 2, getHeight() / 2).setAlignment(Alignment.Center);
-		canvas = new VertexBuffer(Buffers.create(0, 0, 0, getHeight(), getWidth(), getHeight(), getWidth(), 0), 2).mode(GL_QUADS);
-		shader = new ShaderProgram("shaders/default.vs", "shaders/title.fs");
+		overlay = new Overlay().shader(new ShaderProgram("shaders/default.vs", "shaders/title.fs"));
 		Camera.overlay(getWidth(), getHeight());
 	}
 	
@@ -38,18 +35,13 @@ public class TitleScene extends Scene {
 	@Override
 	public void render() {
 		glClear(GL_COLOR_BUFFER_BIT);
-		shader.bind();
-		shader.uniform("time").set(time());
-		shader.uniform("resolution").set((float) getWidth(), (float) getHeight());
-		canvas.draw();
-		shader.unbind();
+		overlay.render();
 		title.render();
 	}
 	
 	@Override
 	public void exiting() {
-		canvas = null;
-		shader = null;
+		overlay = null;
 		title = null;
 	}
 	

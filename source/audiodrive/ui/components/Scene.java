@@ -135,12 +135,12 @@ public class Scene implements Input.Observer {
 	}
 	
 	/** return time since game start, in seconds */
-	public double time() {
+	public static double time() {
 		return time;
 	}
 	
 	/** return time since last frame, in seconds */
-	public double deltaTime() {
+	public static double deltaTime() {
 		return deltaTime;
 	}
 	
