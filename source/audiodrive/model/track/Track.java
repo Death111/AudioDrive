@@ -166,88 +166,98 @@ public class Track {
 	 */
 	private List<Vertex> calcBorderVertexes(List<Vector> border) {
 
-		// TODO calculate normals appropriate
-
 		List<Vertex> vertexList = new ArrayList<>();
 		final int size = border.size();
+
 		// Add front
-		float lastY = 0;
+		Vector v1_lastVector = border.get(0);
 		{
-			float a = lastY - (float) border.get(0).y();
-			final Color color = getColor(a);
-			lastY = (float) border.get(0).y();
-			vertexList.add(new Vertex().position(border.get(0)).color(color).normal(Vector.Y));
-			vertexList.add(new Vertex().position(border.get(1)).color(color).normal(Vector.Y));
-			vertexList.add(new Vertex().position(border.get(2)).color(color).normal(Vector.Y));
-			vertexList.add(new Vertex().position(border.get(3)).color(color).normal(Vector.Y));
+			final Vector v2 = border.get(2);
+			final Vector v3 = border.get(3);
+			Vertex vertex = getVertex(v1_lastVector, v3, v2);
+			vertexList.add(vertex.clone().position(border.get(0)));
+			vertexList.add(vertex.clone().position(border.get(1)));
+			vertexList.add(vertex.clone().position(v2));
+			vertexList.add(vertex.clone().position(v3));
 		}
 
 		// Draw right side
 		for (int i = 2; i < size; i += 3) {
-			float a = lastY - (float) border.get(i).y();
-			final Color color = getColor(a);
-			lastY = (float) border.get(i).y();
-			vertexList.add(new Vertex().position(border.get(i)).color(color).normal(Vector.Y));
-			i++;
-			vertexList.add(new Vertex().position(border.get(i)).color(color).normal(Vector.Y));
+			final Vector v2 = border.get(i);
+			final Vector v3 = border.get(++i);
+			Vertex vertex = getVertex(v1_lastVector, v3, v2);
+			v1_lastVector = v2;
+			vertexList.add(vertex.clone().position(v2));
+			vertexList.add(vertex.clone().position(v3));
 		}
 
 		// Add back
 		{
-			float a = lastY - (float) border.get(size - 1).y();
-			final Color color = getColor(a);
-			lastY = (float) border.get(size - 1).y();
-			vertexList.add(new Vertex().position(border.get(size - 2)).color(color).normal(Vector.Y));
-			vertexList.add(new Vertex().position(border.get(size - 1)).color(color).normal(Vector.Y));
-			vertexList.add(new Vertex().position(border.get(size - 4)).color(color).normal(Vector.Y));
-			vertexList.add(new Vertex().position(border.get(size - 3)).color(color).normal(Vector.Y));
+			final Vector v2 = border.get(size - 4);
+			final Vector v3 = border.get(size - 3);
+			Vertex vertex = getVertex(v1_lastVector, v3, v2);
+			v1_lastVector = v2;
+			vertexList.add(vertex.clone().position(border.get(size - 2)));
+			vertexList.add(vertex.clone().position(border.get(size - 1)));
+			vertexList.add(vertex.clone().position(v2));
+			vertexList.add(vertex.clone().position(v3));
 		}
 
 		// Draw left side
 		for (int i = size - 4; i >= 0; i -= 5) {
-			float a = (float) border.get(i).y() - lastY;
-			final Color color = getColor(a);
-			lastY = (float) border.get(i).y();
-			vertexList.add(new Vertex().position(border.get(i)).color(color).normal(Vector.Y));
-			i++;
-			vertexList.add(new Vertex().position(border.get(i)).color(color).normal(Vector.Y));
+			final Vector v2 = border.get(i);
+			final Vector v3 = border.get(++i);
+			Vertex vertex = getVertex(v1_lastVector, v3, v2);
+			v1_lastVector = v2;
+			vertexList.add(vertex.clone().position(v2));
+			vertexList.add(vertex.clone().position(v3));
 		}
 
 		// Add fix
 		{
-			float a = lastY - (float) border.get(size - 1).y();
-			final Color color = getColor(a);
-			lastY = (float) border.get(size - 1).y();
-			vertexList.add(new Vertex().position(border.get(0)).color(color).normal(Vector.Y));
-			vertexList.add(new Vertex().position(border.get(2)).color(color).normal(Vector.Y));
+			final Vector v2 = border.get(0);
+			final Vector v3 = border.get(2);
+			Vertex vertex = getVertex(v1_lastVector, v3, v2);
+			v1_lastVector = v2;
+			vertexList.add(vertex.clone().position(v2));
+			vertexList.add(vertex.clone().position(v3));
 		}
 
 		// Draw top side
 		for (int i = 4; i < size; i += 2) {
-			float a = lastY - (float) border.get(i).y();
-			final Color color = getColor(a);
-			lastY = (float) border.get(i).y();
-			vertexList.add(new Vertex().position(border.get(i)).color(color).normal(Vector.Y));
+			final Vector v2 = border.get(i);
 			i += 2;
-			vertexList.add(new Vertex().position(border.get(i)).color(color).normal(Vector.Y));
+			final Vector v3 = border.get(i);
+			Vertex vertex = getVertex(v1_lastVector, v3, v2);
+			v1_lastVector = v2;
+			vertexList.add(vertex.clone().position(v2));
+			vertexList.add(vertex.clone().position(v3));
 		}
 
 		// Dont know if needed to draw bottom layer
 		// Draw bottom
 		for (int i = size - 3; i >= 0; i -= 6) {
-			float a = lastY - (float) border.get(i).y();
-			final Color color = getColor(a);
-			lastY = (float) border.get(i).y();
-			vertexList.add(new Vertex().position(border.get(i)).color(color).normal(Vector.Y));
+			final Vector v2 = border.get(i);
 			i += 2;
-			vertexList.add(new Vertex().position(border.get(i)).color(color).normal(Vector.Y));
+			final Vector v3 = border.get(i);
+			Vertex vertex = getVertex(v1_lastVector, v3, v2);
+			v1_lastVector = v2;
+			vertexList.add(vertex.clone().position(v2));
+			vertexList.add(vertex.clone().position(v3));
 		}
 
 		return vertexList;
 	}
 
-	private Color getColor(float index) {
-		return Color.Lerp(risingBorderColor, fallingBorderColor, (float) Arithmetic.linearScale(index, 0, 1, .7f, -.7f));
+	private Vertex getVertex(Vector v1, final Vector v2, final Vector v3) {
+		double a = v1.y() - v3.y();
+		final Color color = getColor(a);
+		Vertex vertex = new Vertex().color(color).normal(v2.clone().subtract(v1).cross(v3.clone().subtract(v1)));
+		return vertex;
+	}
+
+	private Color getColor(double t) {
+		return Color.Lerp(risingBorderColor, fallingBorderColor, (float) Arithmetic.linearScale(t, 0, 1, .7f, -.7f));
 	}
 
 	private int textureIndex = 0;
@@ -367,7 +377,6 @@ public class Track {
 		// Draw borders
 		leftBorderVertexBuffer.draw();
 		rightBorderVertexBuffer.draw();
-
 	}
 
 	public Index getIndex(double time) {
