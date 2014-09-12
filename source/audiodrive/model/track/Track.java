@@ -197,53 +197,51 @@ public class Track {
 			float a = lastY - (float) border.get(size - 1).y();
 			final Color color = getColor(a);
 			lastY = (float) border.get(size - 1).y();
-			vertexList.add(new Vertex().position(border.get(size - 1)).color(color).normal(Vector.Y));
 			vertexList.add(new Vertex().position(border.get(size - 2)).color(color).normal(Vector.Y));
-			vertexList.add(new Vertex().position(border.get(size - 3)).color(color).normal(Vector.Y));
+			vertexList.add(new Vertex().position(border.get(size - 1)).color(color).normal(Vector.Y));
 			vertexList.add(new Vertex().position(border.get(size - 4)).color(color).normal(Vector.Y));
+			vertexList.add(new Vertex().position(border.get(size - 3)).color(color).normal(Vector.Y));
 		}
 
 		// Draw left side
-		// TODO culling
-		for (int i = size - 3; i > 0; i -= 3) {
+		for (int i = size - 4; i >= 0; i -= 5) {
 			float a = (float) border.get(i).y() - lastY;
 			final Color color = getColor(a);
 			lastY = (float) border.get(i).y();
 			vertexList.add(new Vertex().position(border.get(i)).color(color).normal(Vector.Y));
-			i--;
+			i++;
 			vertexList.add(new Vertex().position(border.get(i)).color(color).normal(Vector.Y));
 		}
 
+		// Add fix
+		{
+			float a = lastY - (float) border.get(size - 1).y();
+			final Color color = getColor(a);
+			lastY = (float) border.get(size - 1).y();
+			vertexList.add(new Vertex().position(border.get(0)).color(color).normal(Vector.Y));
+			vertexList.add(new Vertex().position(border.get(2)).color(color).normal(Vector.Y));
+		}
+
 		// Draw top side
-		// TODO culling
-		for (int i = 2; i < size; i += 6) {
+		for (int i = 4; i < size; i += 2) {
 			float a = lastY - (float) border.get(i).y();
 			final Color color = getColor(a);
 			lastY = (float) border.get(i).y();
 			vertexList.add(new Vertex().position(border.get(i)).color(color).normal(Vector.Y));
-			i -= 2;
+			i += 2;
 			vertexList.add(new Vertex().position(border.get(i)).color(color).normal(Vector.Y));
 		}
 
 		// Dont know if needed to draw bottom layer
-		// // Add back
-		// leftVertexList.add(new Vertex().position(leftBorder.get(size -
-		// 2)).color(Color.GREEN()).normal(Vector.Y));
-		// leftVertexList.add(new Vertex().position(leftBorder.get(size -
-		// 4)).color(Color.GREEN()).normal(Vector.Y));
-		// leftVertexList.add(new Vertex().position(leftBorder.get(size -
-		// 3)).color(Color.GREEN()).normal(Vector.Y));
-		// leftVertexList.add(new Vertex().position(leftBorder.get(size -
-		// 1)).color(Color.GREEN()).normal(Vector.Y));
-
 		// Draw bottom
-		// for (int i = size - 3; i < 0; i -= 4) {
-		// leftVertexList.add(new
-		// Vertex().position(leftBorder.get(i)).color(Color.WHITE()).normal(Vector.Y));
-		// i += 2;
-		// leftVertexList.add(new
-		// Vertex().position(leftBorder.get(i)).color(Color.WHITE()).normal(Vector.Y));
-		// }
+		for (int i = size - 3; i >= 0; i -= 6) {
+			float a = lastY - (float) border.get(i).y();
+			final Color color = getColor(a);
+			lastY = (float) border.get(i).y();
+			vertexList.add(new Vertex().position(border.get(i)).color(color).normal(Vector.Y));
+			i += 2;
+			vertexList.add(new Vertex().position(border.get(i)).color(color).normal(Vector.Y));
+		}
 
 		return vertexList;
 	}
@@ -360,14 +358,16 @@ public class Track {
 			GL.popAttributes();
 		}
 
+		// Draw obstacles
+		glEnable(GL_CULL_FACE);
 		for (Placement placement : obstacles) {
 			obstacleModel.placement(placement);
 			obstacleModel.render();
 		}
-
-		glDisable(GL_CULL_FACE);
+		// Draw borders
 		leftBorderVertexBuffer.draw();
 		rightBorderVertexBuffer.draw();
+
 	}
 
 	public Index getIndex(double time) {
