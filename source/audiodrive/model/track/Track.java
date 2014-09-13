@@ -332,7 +332,9 @@ public class Track {
 			float peak = peaks.get(i);
 			// TODO no hax :D
 			final Color color = leftVertexList.get(i * 2).color;
-			if (peak > 0) visibleRings.add(new Ring(color, getPlacement(new Index(i, 0.5), true, 0)));
+			Placement placement = getPlacement(new Index(i, 0.5), true, 0);
+			placement.direction().negate();
+			if (peak > 0) visibleRings.add(new Ring(color, placement));
 		}
 	}
 	
