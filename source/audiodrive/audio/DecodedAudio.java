@@ -8,6 +8,7 @@ import org.tritonus.share.sampled.FloatSampleBuffer;
 
 public class DecodedAudio implements Audio {
 	
+	private final String name;
 	private final AudioFile file;
 	private final int sampleCount;
 	private final double sampleRate;
@@ -18,6 +19,7 @@ public class DecodedAudio implements Audio {
 	private double iterationRate;
 	
 	DecodedAudio(AudioFile file, FloatSampleBuffer buffer) {
+		name = file.getName().substring(0, file.getName().lastIndexOf("."));
 		this.file = file;
 		sampleCount = buffer.getSampleCount();
 		sampleRate = buffer.getSampleRate();
@@ -41,6 +43,7 @@ public class DecodedAudio implements Audio {
 	}
 	
 	protected DecodedAudio(Audio audio) {
+		name = audio.getName();
 		file = audio.getFile();
 		sampleCount = audio.getSampleCount();
 		sampleRate = audio.getSampleRate();
@@ -49,6 +52,10 @@ public class DecodedAudio implements Audio {
 		channelCount = audio.getChannelCount();
 		channels = null;
 		mix = null;
+	}
+	
+	public String getName() {
+		return name;
 	}
 	
 	@Override

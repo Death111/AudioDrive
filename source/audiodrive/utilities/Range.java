@@ -12,6 +12,10 @@ public class Range {
 		this.maximum = maximum;
 	}
 	
+	public boolean contains(double value) {
+		return minimum < value && value < maximum;
+	}
+	
 	@Override
 	public String toString() {
 		return "[" + minimum + ", " + maximum + "]";

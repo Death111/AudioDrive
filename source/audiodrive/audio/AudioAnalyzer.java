@@ -81,7 +81,7 @@ public class AudioAnalyzer {
 			results.getChannelCount(),
 			results.getSampleRate(),
 			results.getSampleCount(),
-			results.getSpectraCount(),
+			results.getIterationCount(),
 			results.getBandCount(),
 			results.getIteration(),
 			results.getIterationRate());

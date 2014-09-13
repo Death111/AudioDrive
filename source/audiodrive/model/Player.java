@@ -1,13 +1,25 @@
 package audiodrive.model;
 
+import audiodrive.AudioDrive;
 import audiodrive.model.geometry.Vector;
 import audiodrive.model.loader.Model;
+import audiodrive.model.track.Block;
+import audiodrive.model.track.Track;
 import audiodrive.ui.components.Camera;
 import audiodrive.utilities.Arithmetic;
+import audiodrive.utilities.Log;
 
 public class Player {
 	
 	private Model model;
+	private Track track;
+	
+	private int hitpoints;
+	private int collected;
+	private int collided;
+	private int points;
+	private int damage;
+	
 	private double lookDistance = 2.5;
 	private double eyeHeight = 1.0;
 	private double eyeDistance = 2.0;
@@ -25,16 +37,34 @@ public class Player {
 	private double tiltProgress = 0.5;
 	private double oldX = 0.0;
 	private double tiltTime;
-	
 	private double time;
+	
+	public Player(Track track) {
+		this.track = track;
+		AudioDrive.Settings.load();
+		double difficulty = Arithmetic.clamp(AudioDrive.Settings.getDouble("difficulty"));
+		hitpoints = Math.max(1, (int) (track.getNumberOfObstacles() * (1 - difficulty)));
+		Log.debug("track \"" + track.getAudio().getFile().getName() + "\"");
+		Log.debug("difficulty " + difficulty);
+		Log.debug("collectables " + track.getNumberOfCollectables());
+		Log.debug("obstacles " + track.getNumberOfObstacles());
+		Log.debug("hitpoints " + hitpoints);
+	}
 	
 	public void update(double elapsed) {
 		time += elapsed;
+		model.placement(track.getPlacement(time));
 		double newX = model.translation().x();
 		double moved = newX - oldX;
 		oldX = newX;
 		boolean tilting = tilt(elapsed, moved);
 		jump(elapsed, tilting ? true : jumpUpwards);
+		checkCollisions();
+	}
+	
+	private void checkCollisions() {
+		int iteration = track.getIndex(time).integer;
+		track.getBlocks().stream().filter(block -> !block.isDestroyed() && block.iteration() == iteration).forEach(this::interact);
 	}
 	
 	private boolean tilt(double elapsed, double moved) {
@@ -88,6 +118,24 @@ public class Player {
 		model.render();
 	}
 	
+	public void interact(Block block) {
+		double x = -model.translation().x(); // FIXME still don't know why it's negative
+		if (track.getRailRange(block.rail()).contains(x)) collide(block);
+	}
+	
+	private void collide(Block block) {
+		if (block.isCollectable()) {
+			collected++;
+			Log.trace("collected %1s", block);
+		} else {
+			collided++;
+			Log.trace("collided with %1s", block);
+		}
+		damage = Math.min(100, (int) Math.round(100.0 * collided / hitpoints));
+		points = (int) Math.round(collected * (1 - damage * 0.01));
+		block.destroy();
+	}
+	
 	public Player model(Model model) {
 		this.model = model;
 		return this;
@@ -95,6 +143,26 @@ public class Player {
 	
 	public Model model() {
 		return model;
+	}
+	
+	public int hitpoints() {
+		return hitpoints;
+	}
+	
+	public int collected() {
+		return collected;
+	}
+	
+	public int collided() {
+		return collided;
+	}
+	
+	public int points() {
+		return points;
+	}
+	
+	public int damage() {
+		return damage;
 	}
 	
 	public void camera() {

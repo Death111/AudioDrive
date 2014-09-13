@@ -20,26 +20,42 @@ public class TrackGenerator {
 		AnalyzedChannel mixed = audio.getMix();
 		AnalyzedChannel left = audio.getChannel(0);
 		AnalyzedChannel right = audio.getChannel(1);
-		
 		List<Vector> vectorinates = new ArrayList<>();
 		double x = 0;
 		double y = 0;
 		double z = 0;
-		int index = 0;
-		for (float value : mixed.getThreshold()) {
-			if (index % smoothing == 0) {
+		for (int iteration = 0; iteration < audio.getIterationCount(); iteration++) {
+			if (iteration % smoothing == 0) {
 				vectorinates.add(new Vector(x, y, z));
 			}
-			float difference = right.getThreshold().get(index) - left.getThreshold().get(index);
+			float difference = right.getThreshold().get(iteration) - left.getThreshold().get(iteration);
 			int direction = Math.abs(difference) > 1 ? (int) Math.signum(difference) : 0;
 			x += direction * deltaX;
-			y += (0.5 - mixed.getThreshold().clamp(value)) * deltaY;
+			y += (0.5 - mixed.getThreshold().getClamped(iteration)) * deltaY;
 			z += deltaZ;
-			index++;
 		}
-		
 		Log.debug(vectorinates.size() + " vectorinates");
-		return new Track(audio, vectorinates, smoothing);
+		List<Block> blocks = new ArrayList<>();
+		for (int iteration = 0; iteration < audio.getIterationCount(); iteration++) {
+			float leftPeak = left.getPeaks().getClamped(iteration);
+			float rightPeak = right.getPeaks().getClamped(iteration);
+			Integer rail = determineRail(leftPeak, rightPeak, 0.2);
+			if (rail != null) {
+				blocks.add(new Block(true, iteration, rail));
+			} else {
+				rail = determineRail(leftPeak, rightPeak, 0.1);
+				if (rail != null) blocks.add(new Block(false, iteration, rail));
+			}
+		}
+		Log.debug(blocks.size() + " blocks");
+		return new Track(audio, vectorinates, blocks, smoothing);
 	}
 	
+	private Integer determineRail(double left, double right, double threshold) {
+		boolean leftSide = left > threshold;
+		boolean rightSide = right > threshold;
+		if (leftSide && rightSide) return 0;
+		if (leftSide || rightSide) return leftSide ? -1 : 1;
+		return null;
+	}
 }

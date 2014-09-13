@@ -14,7 +14,6 @@ import audiodrive.audio.Playback;
 import audiodrive.model.Player;
 import audiodrive.model.geometry.ReflectionPlane;
 import audiodrive.model.geometry.Vector;
-import audiodrive.model.geometry.transform.Placement;
 import audiodrive.model.geometry.transform.Rotation;
 import audiodrive.model.geometry.transform.Translation;
 import audiodrive.model.loader.ModelLoader;
@@ -52,15 +51,17 @@ public class GameScene extends Scene {
 	@Override
 	protected void entering() {
 		Log.info("starting game...");
-		overlay = new GameOverlay(this);
 		File model = Files.find("models/player", AudioDrive.Settings.get("model") + ".obj").orElse(Files.list("models/player", ".obj", true).get(0));
-		player = new Player().model(ModelLoader.loadSingleModel(model.getPath()));
+		player = new Player(track).model(ModelLoader.loadSingleModel(model.getPath()));
 		player.model().scale(0.05);
+		overlay = new GameOverlay(this);
 		playback = new Playback(track.getAudio().getFile());
 		rotation.reset();
 		translation.reset();
-		updatePlacement();
+		player.update(0);
 		track.update(0);
+		overlay.update(0);
+		updateReflection();
 		Camera.perspective(45, getWidth(), getHeight(), 0.1, 10000);
 		GL.pushAttributes();
 		glEnable(GL_CULL_FACE);
@@ -81,16 +82,13 @@ public class GameScene extends Scene {
 	protected void update(double elapsed) {
 		if (!playback.isRunning()) return;
 		time += elapsed;
-		// time = track.getDuration() - 0.11;
-		updatePlacement();
-		player.update(elapsed);
 		track.update(time);
+		player.update(elapsed);
 		overlay.update(time);
+		updateReflection();
 	}
 	
-	private void updatePlacement() {
-		Placement placement = track.getPlacement(time);
-		player.model().placement(placement);
+	private void updateReflection() {
 		reflectionPlanes.clear();
 		reflectionPlanes.addAll(track.getReflectionPlanes(time));
 	}
@@ -98,7 +96,6 @@ public class GameScene extends Scene {
 	@Override
 	protected void render() {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		overlay.render();
 		
 		Camera.perspective(45, getWidth(), getHeight(), 0.1, 10000);
 		player.camera();
@@ -109,6 +106,8 @@ public class GameScene extends Scene {
 		reflectionPlanes.stream().forEach(plane -> plane.reflect(player.model()));
 		track.render();
 		player.render();
+		
+		overlay.render();
 	}
 	
 	@Override
@@ -119,8 +118,12 @@ public class GameScene extends Scene {
 		Mouse.setGrabbed(false);
 	}
 	
-	public Track track() {
+	public Track getTrack() {
 		return track;
+	}
+	
+	public Player getPlayer() {
+		return player;
 	}
 	
 	@Override
@@ -169,6 +172,9 @@ public class GameScene extends Scene {
 		case Keyboard.KEY_HOME:
 			translation.reset();
 			rotation.reset();
+			break;
+		case Keyboard.KEY_P:
+			overlay.togglePeaks();
 			break;
 		default:
 			break;

@@ -5,6 +5,11 @@ import java.util.List;
 public interface Audio {
 	
 	/**
+	 * Returns the name of the audio file.
+	 */
+	String getName();
+	
+	/**
 	 * Returns the original audio file.
 	 */
 	AudioFile getFile();

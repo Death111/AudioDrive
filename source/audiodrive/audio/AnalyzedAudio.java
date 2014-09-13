@@ -7,7 +7,7 @@ public class AnalyzedAudio extends DecodedAudio {
 	
 	private final double duration;
 	private final int bandCount;
-	private final int spectraCount;
+	private final int iterationCount;
 	private final List<AnalyzedChannel> channels;
 	private final AnalyzedChannel mix;
 	
@@ -17,7 +17,7 @@ public class AnalyzedAudio extends DecodedAudio {
 		this.channels = Collections.unmodifiableList(channels);
 		this.mix = mix;
 		bandCount = mix.getSpectra().get(0).length;
-		spectraCount = mix.getSpectra().size();
+		iterationCount = mix.getSpectra().size();
 	}
 	
 	/**
@@ -42,10 +42,10 @@ public class AnalyzedAudio extends DecodedAudio {
 	}
 	
 	/**
-	 * Indicates the number of frequency spectra.
+	 * Indicates the number of iterations, i.e. the number of calculated frequency spectra, thresholds, peak values, ...
 	 */
-	public int getSpectraCount() {
-		return spectraCount;
+	public int getIterationCount() {
+		return iterationCount;
 	}
 	
 	/**

@@ -38,6 +38,10 @@ public class AnalyzationData implements Iterable<Float> {
 		return value / maximumAbsolute;
 	}
 	
+	public float getClamped(int index) {
+		return clamp(values[index]);
+	}
+	
 	public float get(int index) {
 		return values[index];
 	}

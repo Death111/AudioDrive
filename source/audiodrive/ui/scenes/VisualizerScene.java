@@ -62,7 +62,7 @@ public class VisualizerScene extends Scene {
 	protected void update(double elapsed) {
 		duration += elapsed;
 		iteration = (int) (audio.getIterationRate() * duration);
-		if (iteration >= audio.getSpectraCount()) iteration = audio.getSpectraCount() - 1;
+		if (iteration >= audio.getIterationCount()) iteration = audio.getIterationCount() - 1;
 	}
 	
 	@Override

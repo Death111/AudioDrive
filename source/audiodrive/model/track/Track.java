@@ -7,11 +7,13 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.newdawn.slick.opengl.Texture;
 import org.newdawn.slick.opengl.TextureLoader;
 
 import audiodrive.AudioDrive;
+import audiodrive.audio.AnalyzationData;
 import audiodrive.audio.AnalyzedAudio;
 import audiodrive.model.Ring;
 import audiodrive.model.buffer.VertexBuffer;
@@ -22,26 +24,35 @@ import audiodrive.model.geometry.TextureCoordinate;
 import audiodrive.model.geometry.Vector;
 import audiodrive.model.geometry.Vertex;
 import audiodrive.model.geometry.transform.Placement;
-import audiodrive.model.loader.Model;
-import audiodrive.model.loader.ModelLoader;
 import audiodrive.model.track.interpolation.CatmullRom;
 import audiodrive.ui.GL;
 import audiodrive.utilities.Arithmetic;
 import audiodrive.utilities.Log;
+import audiodrive.utilities.Range;
 
 public class Track {
 	
 	private static final String TRACK_TEXTURE = "models/track/track.png";
+	
 	private AnalyzedAudio audio;
-	private List<Vector> vectors;
+	private List<Vector> vectorinates;
+	private List<Block> blocks;
 	private int smoothing;
+	
+	private List<Block> visibleBlocks;
+	private List<Ring> visibleRings;
+	
 	private List<Vector> spline;
 	private List<Vector> splineArea;
 	private List<Vertex> splineArea2;
-	private double width = 1.5;
+	private double width = 3;
 	private double borderHeight = 0.2;
 	private double borderWidth = 0.2;
 	private double flightHeight = 0.15;
+	
+	private int numberOfRails = 3;
+	private int numberOfCollectables;
+	private int numberOfObstacles;
 	
 	private VertexBuffer pointBuffer;
 	private VertexBuffer splineBuffer;
@@ -51,7 +62,6 @@ public class Track {
 	private VertexBuffer rightBorderBuffer;
 	private CuboidStripRenderer cuboidStripRenderer;
 	private Texture trackTexture;
-	private List<Placement> obstacles = new ArrayList<Placement>();
 	private List<Vertex> leftVertexList;
 	private VertexBuffer leftBorderVertexBuffer;
 	private List<Vertex> rightVertexList;
@@ -59,20 +69,19 @@ public class Track {
 	
 	private Color risingBorderColor = AudioDrive.Settings.getColor("risingBorderColor");
 	private Color fallingBorderColor = AudioDrive.Settings.getColor("fallingBorderColor");
-	private Color obstacleColor = AudioDrive.Settings.getColor("obstacleColor");
-	private Model obstacleModel = ModelLoader.loadSingleModel("models/obstacle/obstacle").color(obstacleColor);
-	private List<Ring> rings = new ArrayList<Ring>();
-
-	public Track(AnalyzedAudio audio, List<Vector> vectors, int smoothing) {
+	
+	public Track(AnalyzedAudio audio, List<Vector> vectorinates, List<Block> blocks, int smoothing) {
 		this.audio = audio;
-		this.vectors = vectors;
+		this.vectorinates = vectorinates;
+		this.blocks = blocks;
 		this.smoothing = smoothing;
-		obstacleModel.scale(0.1);
 		try {
 			trackTexture = TextureLoader.getTexture("PNG", new FileInputStream(new File(TRACK_TEXTURE)));
 		} catch (IOException e) {
 			Log.error(e);
 		}
+		numberOfCollectables = (int) blocks.stream().filter(Block::isCollectable).count();
+		numberOfObstacles = blocks.size() - numberOfCollectables;
 		build();
 	}
 	
@@ -82,13 +91,14 @@ public class Track {
 	}
 	
 	private void calculateSpline() {
-		spline = CatmullRom.interpolate(vectors, smoothing, CatmullRom.Type.Centripetal);
+		spline = CatmullRom.interpolate(vectorinates, smoothing, CatmullRom.Type.Centripetal);
 		splineArea = new ArrayList<>();
 		splineArea2 = new ArrayList<>();
 		
 		if (spline == null || spline.isEmpty()) return;
 		Vector last = null;
 		
+		double sideWidth = width / 2;
 		for (int i = 0; i < spline.size() - 1; i++) {
 			Vector one = spline.get(i);
 			Vector two = spline.get(i + 1);
@@ -96,7 +106,7 @@ public class Track {
 			
 			// Check if first
 			if (last == null) {
-				last = two.minus(one).cross(Vector.Y).length(width);
+				last = two.minus(one).cross(Vector.Y).length(sideWidth);
 				final Vector leftPosition = one.plus(last.negated());
 				final Vector rightPosition = one.plus(last);
 				
@@ -110,9 +120,9 @@ public class Track {
 				Vector three = spline.get(i + 2);
 				Vector n1 = two.minus(one).cross(Vector.Y).normalize();
 				Vector n2 = three.minus(two).cross(Vector.Y).normalize();
-				next = n1.plus(n2).length(width / Math.cos(n1.angle(n2) * 0.5));
+				next = n1.plus(n2).length(sideWidth / Math.cos(n1.angle(n2) * 0.5));
 			} else { // Normal
-				next = two.minus(one).cross(Vector.Y).length(width);
+				next = two.minus(one).cross(Vector.Y).length(sideWidth);
 			}
 			
 			// Add points
@@ -306,31 +316,24 @@ public class Track {
 	}
 	
 	public void update(double time) {
-		int forecast = 100;
-		double threshold = 75;
-		obstacles.clear();
-		rings.clear();
+		int preview = 100;
+		int review = 10;
 		Index index = getIndex(time);
-		int minimum = Math.max(index.integer, 5);
-		int maximum = Math.min(index.integer + forecast, spline.size() - 2);
-
+		int minimum = Math.max(index.integer - review, 5);
+		int maximum = Math.min(index.integer + preview, spline.size() - 2);
+		visibleBlocks = blocks.stream().filter(block -> block.iteration() > minimum && block.iteration() < maximum).collect(Collectors.toList());
+		visibleBlocks.forEach(block -> {
+			block.placement(getPlacement(new Index(block.iteration(), 0.5), true, block.rail()));
+			block.placement().direction().negate(); // flip direction for logo
+		});
+		AnalyzationData peaks = audio.getMix().getPeaks();
+		visibleRings = new ArrayList<>();
 		for (int i = minimum; i < maximum; i++) {
-			boolean left = audio.getChannel(0).getPeaks().get(i) > threshold;
-			boolean right = audio.getChannel(1).getPeaks().get(i) > threshold;
-			if (left && right) {
-				final Placement placement = getPlacement(new Index(i, 0), true, 0);
-				placement.direction().negate(); // flip direction for logo
-				obstacles.add(placement);
-				// TODO no hax :D
-				final Color color = leftVertexList.get(i * 2).color;
-				rings.add(new Ring(color, placement));
-			} else if (left || right) {
-				final Placement placement = getPlacement(new Index(i, 0), true, left ? -1 : 1);
-				placement.direction().negate(); // flip direction for logo
-				obstacles.add(placement);
-			}
+			float peak = peaks.get(i);
+			// TODO no hax :D
+			final Color color = leftVertexList.get(i * 2).color;
+			if (peak > 0) visibleRings.add(new Ring(color, getPlacement(new Index(i, 0.5), true, 0)));
 		}
-
 	}
 	
 	public void render() {
@@ -354,40 +357,33 @@ public class Track {
 		glEnable(GL_CULL_FACE);
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 		// Draw track
-		{
-			if (trackTexture != null) {
-				glEnable(GL_TEXTURE_2D);
-				glBindTexture(GL_TEXTURE_2D, trackTexture.getTextureID());
-			}
-			splineArea2Buffer.draw();
-			if (trackTexture != null) {
-				glBindTexture(GL_TEXTURE_2D, 0);
-				glDisable(GL_TEXTURE_2D);
-			}
-			GL.pushAttributes();
-			glDisable(GL_CULL_FACE);
-			glDisable(GL_LIGHTING);
-			splineArea2Buffer.useColor(false);
-			Color.BLACK().gl();
-			splineArea2Buffer.draw();
-			splineArea2Buffer.useColor(true);
-			GL.popAttributes();
+		if (trackTexture != null) {
+			glEnable(GL_TEXTURE_2D);
+			glBindTexture(GL_TEXTURE_2D, trackTexture.getTextureID());
 		}
+		splineArea2Buffer.draw();
+		if (trackTexture != null) {
+			glBindTexture(GL_TEXTURE_2D, 0);
+			glDisable(GL_TEXTURE_2D);
+		}
+		GL.pushAttributes();
+		glDisable(GL_CULL_FACE);
+		glDisable(GL_LIGHTING);
+		splineArea2Buffer.useColor(false);
+		Color.BLACK().gl();
+		splineArea2Buffer.draw();
+		splineArea2Buffer.useColor(true);
+		GL.popAttributes();
 		
 		// Draw obstacles
 		glEnable(GL_CULL_FACE);
-		for (Placement placement : obstacles) {
-			obstacleModel.placement(placement);
-			obstacleModel.render();
-		}
+		visibleBlocks.forEach(Block::render);
+		visibleRings.forEach(Ring::render);
+		
 		// Draw borders
 		leftBorderVertexBuffer.draw();
 		rightBorderVertexBuffer.draw();
-
-		for (Ring ring : rings) {
-			ring.render();
-		}
-
+		
 		// drawBorderNormals(leftVertexList);
 		// drawBorderNormals(rightVertexList);
 	}
@@ -417,14 +413,14 @@ public class Track {
 		return getPlacement(getIndex(time), false, 0);
 	}
 	
-	private Placement getPlacement(Index index, boolean interpolated, int side) {
+	private Placement getPlacement(Index index, boolean interpolated, int rail) {
 		Vector current = spline.get(index.integer);
 		Vector next = spline.get(index.integer + 1);
 		Vector direction = next.minus(current);
 		Vector up = Vector.Y;
 		Vector position = current.plus(direction.multiplied(interpolated ? index.fraction : 0.5)).plus(up.multiplied(flightHeight));
 		Placement placement = new Placement().position(position).direction(direction).up(up);
-		if (side != 0) placement.position().add(placement.side().multiplied(Math.signum(side) * width * 2 / 3));
+		if (rail != 0) placement.position().add(placement.side().multiplied(Math.signum(rail) * railWidth()));
 		return placement;
 	}
 	
@@ -455,7 +451,7 @@ public class Track {
 	}
 	
 	public List<Vector> getVectors() {
-		return vectors;
+		return vectorinates;
 	}
 	
 	public double getDuration() {
@@ -470,8 +466,34 @@ public class Track {
 		return spline;
 	}
 	
+	public List<Block> getBlocks() {
+		return blocks;
+	}
+	
 	public double width() {
-		return width * 2;
+		return width;
+	}
+	
+	public double railWidth() {
+		return width / numberOfRails;
+	}
+	
+	public Range getRailRange(int rail) {
+		double railWidth = railWidth();
+		double offset = rail * railWidth;
+		return new Range(offset - railWidth / 2, offset + railWidth / 2);
+	}
+	
+	public int getNumberOfRails() {
+		return numberOfRails;
+	}
+	
+	public int getNumberOfCollectables() {
+		return numberOfCollectables;
+	}
+	
+	public int getNumberOfObstacles() {
+		return numberOfObstacles;
 	}
 	
 	public static class Index {
