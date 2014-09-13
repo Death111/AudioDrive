@@ -13,6 +13,7 @@ import org.newdawn.slick.opengl.TextureLoader;
 
 import audiodrive.AudioDrive;
 import audiodrive.audio.AnalyzedAudio;
+import audiodrive.model.Ring;
 import audiodrive.model.buffer.VertexBuffer;
 import audiodrive.model.geometry.Color;
 import audiodrive.model.geometry.CuboidStripRenderer;
@@ -53,6 +54,9 @@ public class Track {
 	private Texture trackTexture;
 
 	private Model obstacleModel = ModelLoader.loadSingleModel("models/obstacle/obstacle").color(obstacleColor);
+
+	private List<Ring> rings = new ArrayList<Ring>();
+
 	private List<Placement> obstacles = new ArrayList<Placement>();
 	List<Vertex> leftVertexList;
 	private VertexBuffer leftBorderVertexBuffer;
@@ -311,9 +315,11 @@ public class Track {
 		int forecast = 100;
 		double threshold = 75;
 		obstacles.clear();
+		rings.clear();
 		Index index = getIndex(time);
 		int minimum = Math.max(index.integer, 5);
 		int maximum = Math.min(index.integer + forecast, spline.size() - 2);
+
 		for (int i = minimum; i < maximum; i++) {
 			boolean left = audio.getChannel(0).getPeaks().get(i) > threshold;
 			boolean right = audio.getChannel(1).getPeaks().get(i) > threshold;
@@ -321,12 +327,16 @@ public class Track {
 				final Placement placement = getPlacement(new Index(i, 0), true, 0);
 				placement.direction().negate(); // flip direction for logo
 				obstacles.add(placement);
+				// TODO no hax :D
+				final Color color = leftVertexList.get(i * 2).color;
+				rings.add(new Ring(color, placement));
 			} else if (left || right) {
 				final Placement placement = getPlacement(new Index(i, 0), true, left ? -1 : 1);
 				placement.direction().negate(); // flip direction for logo
 				obstacles.add(placement);
 			}
 		}
+
 	}
 
 	public void render() {
@@ -379,6 +389,10 @@ public class Track {
 		// Draw borders
 		leftBorderVertexBuffer.draw();
 		rightBorderVertexBuffer.draw();
+
+		for (Ring ring : rings) {
+			ring.render();
+		}
 
 		// drawBorderNormals(leftVertexList);
 		// drawBorderNormals(rightVertexList);
