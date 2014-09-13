@@ -45,7 +45,6 @@ public class Player {
 	
 	public Player(Track track) {
 		this.track = track;
-		AudioDrive.Settings.load();
 		double difficulty = Arithmetic.clamp(AudioDrive.Settings.getDouble("difficulty"));
 		hitpoints = Math.max(1, (int) (track.getNumberOfObstacles() * (1 - difficulty)));
 		Log.debug("track \"" + track.getAudio().getFile().getName() + "\"");

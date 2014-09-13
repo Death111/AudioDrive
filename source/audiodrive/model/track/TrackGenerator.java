@@ -16,7 +16,6 @@ public class TrackGenerator {
 	private double deltaZ = 1.0;
 	
 	public Track generate(AnalyzedAudio audio) {
-		AudioDrive.Settings.load();
 		int smoothing = Math.max(10, AudioDrive.Settings.getInteger("smoothing"));
 		AnalyzedChannel mixed = audio.getMix();
 		AnalyzedChannel left = audio.getChannel(0);
