@@ -39,7 +39,7 @@ public class Arithmetic {
 		return to * fraction + from * (1.0 - fraction);
 	}
 
-	public static double linearScale(double current, final int minDest, final int maxDest, double maxSource, double minSource) {
+	public static double linearScale(double current, final double minDest, final double maxDest, final double minSource, final double maxSource) {
 		return (maxDest - minDest) * (current - minSource) / (maxSource - minSource) + minDest;
 	}
 

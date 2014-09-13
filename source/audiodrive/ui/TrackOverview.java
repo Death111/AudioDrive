@@ -51,7 +51,7 @@ public class TrackOverview {
 
 		// Scale values to range 0 - height
 		for (Double currentValue : rawCoordinates) {
-			double value = Arithmetic.linearScale(currentValue, 0, height, maxValue, minValue);
+			double value = Arithmetic.linearScale(currentValue, 0, height, minValue, maxValue);
 			scaledCoordinates.add(value);
 		}
 

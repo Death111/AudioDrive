@@ -267,7 +267,7 @@ public class Track {
 	}
 	
 	private Color getColor(double t) {
-		return Color.Lerp(risingBorderColor, fallingBorderColor, (float) Arithmetic.linearScale(t, 0, 1, .7f, -.7f));
+		return Color.Lerp(risingBorderColor, fallingBorderColor, (float) Arithmetic.linearScale(t, 0, 1, -.7f, .7f));
 	}
 	
 	private int textureIndex = 0;
