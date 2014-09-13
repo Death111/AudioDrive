@@ -37,6 +37,28 @@ public class Color implements FloatData {
 	}
 
 	/**
+	 * Changes the intensity of the color
+	 * 
+	 * @param itensity
+	 *            0 - 100
+	 * @return
+	 */
+	public Color itensity(double itensity) {
+
+		final int max = 100;
+		if (itensity > max)
+			itensity = max;
+		else if (itensity < 0)
+			itensity = 0;
+
+		r = r / max * itensity;
+		g = g / max * itensity;
+		b = b / max * itensity;
+
+		return this;
+	}
+
+	/**
 	 * @param r
 	 *            the r to set
 	 */
