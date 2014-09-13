@@ -3,6 +3,7 @@ package audiodrive.model.track;
 import java.util.ArrayList;
 import java.util.List;
 
+import audiodrive.AudioDrive;
 import audiodrive.audio.AnalyzedAudio;
 import audiodrive.audio.AnalyzedChannel;
 import audiodrive.model.geometry.Vector;
@@ -10,13 +11,13 @@ import audiodrive.utilities.Log;
 
 public class TrackGenerator {
 	
-	private int smoothing = 15;
-	
 	private double deltaX = 0.2;
 	private double deltaY = 2.0;
 	private double deltaZ = 1.0;
 	
 	public Track generate(AnalyzedAudio audio) {
+		AudioDrive.Settings.load();
+		int smoothing = Math.max(10, AudioDrive.Settings.getInteger("smoothing"));
 		AnalyzedChannel mixed = audio.getMix();
 		AnalyzedChannel left = audio.getChannel(0);
 		AnalyzedChannel right = audio.getChannel(1);

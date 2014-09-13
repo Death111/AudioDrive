@@ -29,6 +29,7 @@ public class Settings {
 		set("collectableColor", "0,0,1,1");
 		set("obstacleColor", "0.5,0.5,0.5,1");
 		set("difficulty", "0.5");
+		set("smoothing", "15");
 		try {
 			properties.load(new FileInputStream(filename));
 		} catch (IOException exception) {
@@ -51,6 +52,10 @@ public class Settings {
 	
 	public String get(String key) {
 		return properties.getProperty(key);
+	}
+	
+	public int getInteger(String key) {
+		return Integer.parseInt(get(key));
 	}
 	
 	public double getDouble(String key) {
