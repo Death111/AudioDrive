@@ -20,6 +20,7 @@ import audiodrive.utilities.Log;
 
 public class Ring {
 
+	private static double scale = 2;
 	private static Model model;
 	private Color color;
 	private Placement placement;
@@ -44,7 +45,7 @@ public class Ring {
 		faces.add(f1);
 		faces.add(f2);
 
-		model = new Model("ring", faces).scale(2);
+		model = new Model("ring", faces);
 		try {
 			model.setTexture(TextureLoader.getTexture("PNG", new FileInputStream(new File("models/ring/ring.png"))));
 		} catch (Exception e) {
@@ -54,7 +55,12 @@ public class Ring {
 
 	public void render() {
 		glDepthMask(false); // disable depth
-		model.placement(placement).color(color).render();
+		model.placement(placement).color(color).scale(scale).render();
 		glDepthMask(true); // enable depth
+	}
+
+	public Ring scale(double scale) {
+		this.scale = scale;
+		return this;
 	}
 }
