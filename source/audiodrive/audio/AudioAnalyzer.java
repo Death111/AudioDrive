@@ -93,15 +93,15 @@ public class AudioAnalyzer {
 		Stopwatch stopwatch = new Stopwatch().start();
 		List<float[]> spectra = calculateSpectra(channel);
 		Log.trace("spectra calculation of %s took %.3f seconds", channel, stopwatch.getSeconds());
-		List<Float> spectralSum = calculateSpectralSum(spectra, channel);
+		AnalyzationData spectralSum = calculateSpectralSum(spectra, channel);
 		Log.trace("spectralSum calculation of %s took %.3f seconds", channel, stopwatch.getSeconds());
-		List<Float> spectralFlux = calculateSpectralFlux(spectra, channel);
+		AnalyzationData spectralFlux = calculateSpectralFlux(spectra, channel);
 		Log.trace("spectralFlux calculation of %s took %.3f seconds", channel, stopwatch.getSeconds());
-		List<Float> threshold = calculateThreshold(spectralFlux);
+		AnalyzationData threshold = calculateThreshold(spectralFlux);
 		Log.trace("threshold calculation of %s took %.3f seconds", channel, stopwatch.getSeconds());
-		List<Float> prunnedSpectralFlux = calculatePrunnedSpectralFlux(spectralFlux, threshold);
+		AnalyzationData prunnedSpectralFlux = calculatePrunnedSpectralFlux(spectralFlux, threshold);
 		Log.trace("prunnedSpectralFlux of %s calculation took %.3f seconds", channel, stopwatch.getSeconds());
-		List<Float> peaks = calculatePeaks(prunnedSpectralFlux);
+		AnalyzationData peaks = calculatePeaks(prunnedSpectralFlux);
 		Log.trace("peaks calculation of %s took %.3f seconds", channel, stopwatch.getSeconds());
 		return new AnalyzedChannel(channel, spectra, spectralSum, spectralFlux, threshold, prunnedSpectralFlux, peaks);
 	}
@@ -115,37 +115,40 @@ public class AudioAnalyzer {
 		}).collect(Collectors.toList());
 	}
 	
-	private List<Float> calculateSpectralSum(List<float[]> spectra, Channel channel) {
-		List<Float> spectralSum = new ArrayList<Float>();
+	private AnalyzationData calculateSpectralSum(List<float[]> spectra, Channel channel) {
+		float[] values = new float[spectra.size()];
+		int index = 0;
 		for (float[] spectrum : spectra) {
 			float sum = 0;
 			for (int i = 0; i < spectrum.length; i++) {
 				sum += spectrum[i];
 			}
-			spectralSum.add(sum);
+			values[index++] = sum;
 		}
-		return spectralSum;
+		return new AnalyzationData(values);
 	}
 	
-	private List<Float> calculateSpectralFlux(List<float[]> spectra, Channel channel) {
-		List<Float> spectralFlux = new ArrayList<Float>();
+	private AnalyzationData calculateSpectralFlux(List<float[]> spectra, Channel channel) {
+		float[] values = new float[spectra.size()];
+		int index = 0;
 		float[] lastSpectrum = null;
 		for (float[] spectrum : spectra) {
+			float flux = 0;
 			if (lastSpectrum != null) {
-				float flux = 0;
 				for (int i = 0; i < spectrum.length; i++) {
 					float value = (spectrum[i] - lastSpectrum[i]);
 					flux += value < 0 ? 0 : value;
 				}
-				spectralFlux.add(flux);
 			}
+			values[index++] = flux;
 			lastSpectrum = spectrum;
 		}
-		return spectralFlux;
+		return new AnalyzationData(values);
 	}
 	
-	private List<Float> calculateThreshold(List<Float> spectralFlux) {
-		List<Float> threshold = new ArrayList<Float>(spectralFlux.size());
+	private AnalyzationData calculateThreshold(AnalyzationData spectralFlux) {
+		float[] values = new float[spectralFlux.size()];
+		int index = 0;
 		for (int i = 0; i < spectralFlux.size(); i++) {
 			int start = Math.max(0, i - thresholdWindowSize);
 			int end = Math.min(spectralFlux.size() - 1, i + thresholdWindowSize);
@@ -153,27 +156,30 @@ public class AudioAnalyzer {
 			for (int j = start; j <= end; j++)
 				mean += spectralFlux.get(j);
 			mean /= (end - start);
-			threshold.add(mean * thresholdMultiplier);
+			values[index++] = mean * thresholdMultiplier;
+			
 		}
-		return threshold;
+		return new AnalyzationData(values);
 	}
 	
-	private List<Float> calculatePrunnedSpectralFlux(List<Float> spectralFlux, List<Float> threshold) {
-		List<Float> prunnedSpectralFlux = new ArrayList<Float>(threshold.size());
+	private AnalyzationData calculatePrunnedSpectralFlux(AnalyzationData spectralFlux, AnalyzationData threshold) {
+		float[] values = new float[spectralFlux.size()];
+		int index = 0;
 		for (int i = 0; i < threshold.size(); i++) {
-			if (threshold.get(i) <= spectralFlux.get(i)) prunnedSpectralFlux.add(spectralFlux.get(i) - threshold.get(i));
-			else prunnedSpectralFlux.add((float) 0);
+			if (threshold.get(i) <= spectralFlux.get(i)) values[index++] = spectralFlux.get(i) - threshold.get(i);
+			else values[index++] = 0;
 		}
-		return prunnedSpectralFlux;
+		return new AnalyzationData(values);
 	}
 	
-	private List<Float> calculatePeaks(List<Float> prunnedSpectralFlux) {
-		List<Float> peaks = new ArrayList<Float>(prunnedSpectralFlux.size());
+	private AnalyzationData calculatePeaks(AnalyzationData prunnedSpectralFlux) {
+		float[] values = new float[prunnedSpectralFlux.size()];
+		int index = 0;
 		for (int i = 0; i < prunnedSpectralFlux.size() - 1; i++) {
-			if (prunnedSpectralFlux.get(i) > prunnedSpectralFlux.get(i + 1)) peaks.add(prunnedSpectralFlux.get(i));
-			else peaks.add((float) 0);
+			if (prunnedSpectralFlux.get(i) > prunnedSpectralFlux.get(i + 1)) values[index++] = prunnedSpectralFlux.get(i);
+			else values[index++] = 0;
 		}
-		return peaks;
+		return new AnalyzationData(values);
 	}
 	
 	public Audio getSamples() {

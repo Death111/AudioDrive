@@ -7,7 +7,6 @@ import audiodrive.audio.AnalyzedAudio;
 import audiodrive.audio.AnalyzedChannel;
 import audiodrive.model.geometry.Vector;
 import audiodrive.utilities.Log;
-import audiodrive.utilities.Range;
 
 public class TrackGenerator {
 	
@@ -17,22 +16,11 @@ public class TrackGenerator {
 	private double deltaY = 2.0;
 	private double deltaZ = 1.0;
 	
-	private AnalyzedChannel mixed;
-	private AnalyzedChannel left;
-	private AnalyzedChannel right;
-	
-	public Track generate(AnalyzedAudio file) {
-		mixed = file.getMix();
-		Log.debug(Range.of(mixed.getThreshold()));
-		left = file.getChannel(0);
-		right = file.getChannel(1);
-		List<Vector> vectorinates = calculate();
-		Log.debug(vectorinates.size() + " vectorinates");
-		return new Track(file, vectorinates, file.getDuration(), smoothing);
-	}
-	
-	private List<Vector> calculate() {
-		double max = mixed.getThreshold().stream().mapToDouble(v -> v).max().getAsDouble();
+	public Track generate(AnalyzedAudio audio) {
+		AnalyzedChannel mixed = audio.getMix();
+		AnalyzedChannel left = audio.getChannel(0);
+		AnalyzedChannel right = audio.getChannel(1);
+		
 		List<Vector> vectorinates = new ArrayList<>();
 		double x = 0;
 		double y = 0;
@@ -45,11 +33,13 @@ public class TrackGenerator {
 			float difference = right.getThreshold().get(index) - left.getThreshold().get(index);
 			int direction = Math.abs(difference) > 1 ? (int) Math.signum(difference) : 0;
 			x += direction * deltaX;
-			y += (0.5 - (value / max)) * deltaY;
+			y += (0.5 - mixed.getThreshold().clamp(value)) * deltaY;
 			z += deltaZ;
 			index++;
 		}
-		return vectorinates;
+		
+		Log.debug(vectorinates.size() + " vectorinates");
+		return new Track(audio, vectorinates, smoothing);
 	}
 	
 }
