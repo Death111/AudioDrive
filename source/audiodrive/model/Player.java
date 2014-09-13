@@ -1,6 +1,7 @@
 package audiodrive.model;
 
 import audiodrive.AudioDrive;
+import audiodrive.audio.AudioFile;
 import audiodrive.model.geometry.Vector;
 import audiodrive.model.loader.Model;
 import audiodrive.model.track.Block;
@@ -10,6 +11,9 @@ import audiodrive.utilities.Arithmetic;
 import audiodrive.utilities.Log;
 
 public class Player {
+	
+	private static final AudioFile CollectSound = new AudioFile("sounds/Collect.mp3");
+	private static final AudioFile CollideSound = new AudioFile("sounds/Collide.mp3");
 	
 	private Model model;
 	private Track track;
@@ -125,9 +129,11 @@ public class Player {
 	
 	private void collide(Block block) {
 		if (block.isCollectable()) {
+			CollectSound.play();
 			collected++;
 			Log.trace("collected %1s", block);
 		} else {
+			CollideSound.play();
 			collided++;
 			Log.trace("collided with %1s", block);
 		}
