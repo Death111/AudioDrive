@@ -29,6 +29,7 @@ public class Player {
 	private double eyeDistance = 2.0;
 	private double lookShifting = 0.3;
 	private double eyeShifting = 0.5;
+	private double zoom = 1.0;
 	
 	private double jumpHeight = 0.05;
 	private double jumpRate = 1.5;
@@ -170,10 +171,21 @@ public class Player {
 		return damage;
 	}
 	
+	public Player zoom(double zoom) {
+		this.zoom = Arithmetic.clamp(zoom, 1.0, 3.0);
+		return this;
+	}
+	
+	public double zoom() {
+		return zoom;
+	}
+	
 	public void camera() {
 		double slope = model().up().angle(Vector.Y) * Math.signum(model.direction().dot(Vector.Y));
 		double height = eyeHeight + eyeHeight * slope;
 		double distance = eyeDistance + eyeDistance * 0.6 * slope;
+		height *= zoom;
+		distance *= zoom;
 		Vector eyePosition = eyeShifting == 0.0 ? model().position() : model().position().plus(model().translation().vector().multiplied(eyeShifting));
 		Vector lookPosition = lookShifting == 0.0 ? model().position() : model().position().plus(model().translation().vector().multiplied(lookShifting));
 		Camera.position(eyePosition.plus(model().direction().multiplied(-distance)).plus(model().up().multiplied(height)));

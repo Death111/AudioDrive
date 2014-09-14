@@ -74,7 +74,7 @@ public class GameScene extends Scene {
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-//		glEnable(GL_LIGHTING);
+		// glEnable(GL_LIGHTING);
 		Mouse.setGrabbed(true);
 	}
 	
@@ -172,6 +172,7 @@ public class GameScene extends Scene {
 		case Keyboard.KEY_HOME:
 			translation.reset();
 			rotation.reset();
+			player.zoom(1.0);
 			break;
 		case Keyboard.KEY_P:
 			overlay.togglePeaks();
@@ -207,6 +208,11 @@ public class GameScene extends Scene {
 		default:
 			break;
 		}
+	}
+	
+	@Override
+	public void mouseWheelRotated(int rotation, int x, int y) {
+		player.zoom(player.zoom() + rotation * 0.001);
 	}
 	
 }
