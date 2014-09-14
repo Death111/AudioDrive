@@ -76,6 +76,7 @@ public class Track {
 	private Color fallingBorderColor = AudioDrive.Settings.getColor("fallingBorderColor");
 	private boolean staticObstacleColor = AudioDrive.Settings.getBoolean("staticObstacleColor");
 	private List<MusicTower> musicTowers;
+	final SpectraMinMax spectraMinMaxBand_1;
 	
 	private Index index;
 	
@@ -93,6 +94,7 @@ public class Track {
 		numberOfCollectables = (int) blocks.stream().filter(Block::isCollectable).count();
 		numberOfObstacles = blocks.size() - numberOfCollectables;
 		build();
+		spectraMinMaxBand_1 = new SpectraMinMax(audio.getMix(), 1);
 	}
 	
 	private void build() {
@@ -360,18 +362,16 @@ public class Track {
 			
 		}
 		
-		final int band = 1; // Use bass as color intensity index
-		final SpectraMinMax spectraMinMax = new SpectraMinMax(mix, band);
 		final float[] spectrum2 = mix.getSpectrum(iteration);
-		final float current = spectrum2[band];
-		final double linearIntensity = Arithmetic.linearScale(current, 0.1, 1.0, spectraMinMax.min, spectraMinMax.max);
+		final float current = spectrum2[spectraMinMaxBand_1.band];
+		final double linearIntensity = Arithmetic.linearScale(current, 0.1, 1.0, spectraMinMaxBand_1.min, spectraMinMaxBand_1.max);
 		
 		visibleMusicTowers = musicTowers
 			.stream()
 			.filter(musicTower -> musicTower.iteration() > index.integer - 10 && musicTower.iteration() < index.integer + 900)
 			.collect(Collectors.toList());
 		visibleMusicTowers.forEach(musicTower -> {
-			final float f = mix.getSpectrum(musicTower.iteration())[band];
+			final float f = mix.getSpectrum(musicTower.iteration())[spectraMinMaxBand_1.band];
 			Placement a = getPlacement(new Index(musicTower.iteration(), 0), true, 0);
 			if (musicTower instanceof TubeTower) a.position().xAdd((((int) f) % 2 == 0) ? -50 : 50).zAdd(-50);
 			else a.position().yAdd(10);
