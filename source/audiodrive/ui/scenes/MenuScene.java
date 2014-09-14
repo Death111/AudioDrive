@@ -63,8 +63,8 @@ public class MenuScene extends Scene implements ItemListener {
 		exitMenuItem = new MenuItem("Exit", this);
 		menu.addItem(exitMenuItem);
 		
-		hoverAudio = new AudioFile("sounds/hover.wav");
-		selectAudio = new AudioFile("sounds/select.wav");
+		hoverAudio = new AudioFile("sounds/Hover.mp3");
+		selectAudio = new AudioFile("sounds/Select.mp3");
 		
 		overlay = new Overlay().shader(new ShaderProgram("shaders/default.vs", "shaders/title.fs"));
 		Camera.overlay(getWidth(), getHeight());

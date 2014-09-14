@@ -111,6 +111,7 @@ public class Playback {
 	 * <i>Range: 0.0 - 2.0</i>
 	 */
 	public Playback setVolume(double volume) {
+		initialize();
 		FloatControl control = (FloatControl) line.getControl(FloatControl.Type.MASTER_GAIN);
 		float decibel = Math.min(control.getMaximum(), (float) (Math.log(volume) / Math.log(10.0) * 20.0));
 		control.setValue(decibel);
@@ -123,24 +124,32 @@ public class Playback {
 	 * <i>Range: 0.0 - 2.0</i>
 	 */
 	public double getVolume() {
+		initialize();
 		FloatControl control = (FloatControl) line.getControl(FloatControl.Type.MASTER_GAIN);
 		double volume = Math.round(Math.pow(Math.E, control.getValue() * Math.log(10) / 20) * 1000.0) * 0.001;
 		return volume;
 	}
 	
 	public Playback setMute(Boolean mute) {
+		initialize();
 		BooleanControl control = (BooleanControl) line.getControl(BooleanControl.Type.MUTE);
 		control.setValue(mute);
 		return this;
 	}
 	
 	public boolean isMute() {
+		initialize();
 		BooleanControl control = (BooleanControl) line.getControl(BooleanControl.Type.MUTE);
 		return control.getValue();
 	}
 	
 	public AudioFile getFile() {
 		return file;
+	}
+	
+	public double getTime() {
+		if (line == null) return 0.0;
+		return line.getMicrosecondPosition() / 1000000.0;
 	}
 	
 	private boolean initialized() {

@@ -7,6 +7,7 @@ import audiodrive.model.loader.Model;
 import audiodrive.model.track.Block;
 import audiodrive.model.track.Track;
 import audiodrive.ui.components.Camera;
+import audiodrive.ui.scenes.GameScene;
 import audiodrive.utilities.Arithmetic;
 import audiodrive.utilities.Log;
 
@@ -15,6 +16,7 @@ public class Player {
 	private static final AudioFile CollectSound = new AudioFile("sounds/Collect.mp3");
 	private static final AudioFile CollideSound = new AudioFile("sounds/Collide.mp3");
 	
+	private GameScene scene;
 	private Model model;
 	private Track track;
 	
@@ -42,10 +44,10 @@ public class Player {
 	private double tiltProgress = 0.5;
 	private double oldX = 0.0;
 	private double tiltTime;
-	private double time;
 	
-	public Player(Track track) {
-		this.track = track;
+	public Player(GameScene scene) {
+		this.scene = scene;
+		track = scene.getTrack();
 		double difficulty = Arithmetic.clamp(AudioDrive.Settings.getDouble("difficulty"));
 		hitpoints = Math.max(1, (int) (track.getNumberOfObstacles() * (1 - difficulty)));
 		Log.debug("track \"" + track.getAudio().getFile().getName() + "\"");
@@ -56,8 +58,7 @@ public class Player {
 	}
 	
 	public void update(double elapsed) {
-		time += elapsed;
-		model.placement(track.getPlacement(time));
+		model.placement(track.getPlacement(scene.playtime()));
 		double newX = model.translation().x();
 		double moved = newX - oldX;
 		oldX = newX;
@@ -67,7 +68,7 @@ public class Player {
 	}
 	
 	private void checkCollisions() {
-		int iteration = track.getIndex(time).integer;
+		int iteration = track.getIndex(scene.playtime()).integer;
 		track.getBlocks().stream().filter(block -> !block.isDestroyed() && block.iteration() == iteration).forEach(this::interact);
 	}
 	
@@ -85,9 +86,9 @@ public class Player {
 				tiltProgress -= elapsed * rate;
 				if (tiltProgress < 0.0) tiltProgress = 0.0;
 			}
-			tiltTime = time;
+			tiltTime = scene.playtime();
 		} else if (tiltProgress != 0.5) { // reset
-			if (time - tiltTime < 0.1) return true; // delay
+			if (scene.playtime() - tiltTime < 0.1) return true; // delay
 			double sign = -Math.signum(tiltProgress - 0.5);
 			tiltProgress += sign * elapsed * tiltRate * 0.5;
 			if (sign < 0 && tiltProgress < 0.5 || sign > 0 && tiltProgress > 0.5) tiltProgress = 0.5;

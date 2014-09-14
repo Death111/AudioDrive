@@ -32,6 +32,7 @@ public class Text {
 	private Font font;
 	private double x, y;
 	private Alignment alignment = Alignment.UpperLeft;
+	private boolean visible = true;
 	
 	public Text() {
 		setFont(DefaultFont);
@@ -164,8 +165,17 @@ public class Text {
 		return this;
 	}
 	
+	public Text setVisible(boolean visible) {
+		this.visible = visible;
+		return this;
+	}
+	
+	public boolean isVisible() {
+		return visible;
+	}
+	
 	public void render() {
-		if (text == null) return;
+		if (!visible || text == null) return;
 		glPolygonMode(GL_FRONT, GL_FILL);
 		float[] floats = color.toFloats();
 		fonts.get(font).drawString((float) getAlignedX(), (float) getAlignedY(), text, new org.newdawn.slick.Color(floats[0], floats[1], floats[2], floats[3]));

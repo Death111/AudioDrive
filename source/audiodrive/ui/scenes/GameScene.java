@@ -10,6 +10,7 @@ import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 
 import audiodrive.AudioDrive;
+import audiodrive.audio.AudioFile;
 import audiodrive.audio.Playback;
 import audiodrive.model.Player;
 import audiodrive.model.geometry.ReflectionPlane;
@@ -28,6 +29,11 @@ import audiodrive.utilities.Log;
 
 public class GameScene extends Scene {
 	
+	public static enum State {
+		Running, Paused, Ended, Destroyed
+	}
+	
+	private State state;
 	private Track track;
 	private Player player;
 	private List<ReflectionPlane> reflectionPlanes = new ArrayList<>(2);
@@ -35,13 +41,10 @@ public class GameScene extends Scene {
 	private Rotation rotation = new Rotation();
 	private Translation translation = new Translation();
 	
-	private Vector look = new Vector();
-	private Vector camera = new Vector(0, 0, 0.01);
-	
-	private double time;
-	
 	private Playback playback;
 	private GameOverlay overlay;
+	
+	private double time;
 	
 	public void enter(Track track) {
 		this.track = track;
@@ -51,16 +54,17 @@ public class GameScene extends Scene {
 	@Override
 	protected void entering() {
 		Log.info("starting game...");
+		state = State.Paused;
 		File model = Files.find("models/player", AudioDrive.Settings.get("model") + ".obj").orElse(Files.list("models/player", ".obj", true).get(0));
-		player = new Player(track).model(ModelLoader.loadSingleModel(model.getPath()));
+		player = new Player(this).model(ModelLoader.loadSingleModel(model.getPath()));
 		player.model().scale(0.05);
 		overlay = new GameOverlay(this);
 		playback = new Playback(track.getAudio().getFile());
 		rotation.reset();
 		translation.reset();
+		time = 0;
 		player.update(0);
 		track.update(0);
-		overlay.update(0);
 		updateReflection();
 		Camera.perspective(45, getWidth(), getHeight(), 0.1, 10000);
 		GL.pushAttributes();
@@ -80,17 +84,31 @@ public class GameScene extends Scene {
 	
 	@Override
 	protected void update(double elapsed) {
-		if (!playback.isRunning()) return;
-		time += elapsed;
-		track.update(time);
+		updateState();
+		overlay.update();
+		if (state != State.Running) return;
+		time = playback.getTime();
+		track.update(playback.getTime());
 		player.update(elapsed);
-		overlay.update(time);
 		updateReflection();
+	}
+	
+	private void updateState() {
+		State oldState = state;
+		if (player.damage() >= 100) state = State.Destroyed;
+		else if (track.index().integer == track.lastIndex()) state = State.Ended;
+		else if (!playback.isRunning()) state = State.Paused;
+		else state = State.Running;
+		if (state == oldState) return;
+		if (state == State.Destroyed) {
+			playback.stop();
+			new AudioFile("sounds/Destroyed.mp3").play();
+		}
 	}
 	
 	private void updateReflection() {
 		reflectionPlanes.clear();
-		reflectionPlanes.addAll(track.getReflectionPlanes(time));
+		reflectionPlanes.addAll(track.getReflectionPlanes(playback.getTime()));
 	}
 	
 	@Override
@@ -114,7 +132,6 @@ public class GameScene extends Scene {
 	protected void exiting() {
 		GL.popAttributes();
 		playback.stop();
-		time = 0;
 		Mouse.setGrabbed(false);
 	}
 	
@@ -124,6 +141,18 @@ public class GameScene extends Scene {
 	
 	public Player getPlayer() {
 		return player;
+	}
+	
+	public void setState(State state) {
+		this.state = state;
+	}
+	
+	public State getState() {
+		return state;
+	}
+	
+	public double playtime() {
+		return time;
 	}
 	
 	@Override

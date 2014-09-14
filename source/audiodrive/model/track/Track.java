@@ -77,6 +77,8 @@ public class Track {
 	
 	private List<MusicTower> musicTowers;
 	
+	private Index index;
+	
 	public Track(AnalyzedAudio audio, List<Vector> vectorinates, List<Block> blocks, List<MusicTower> musicTowers, int smoothing) {
 		this.audio = audio;
 		this.vectorinates = vectorinates;
@@ -327,7 +329,7 @@ public class Track {
 	public void update(double time) {
 		int preview = 250;
 		int review = 10;
-		Index index = getIndex(time);
+		index = getIndex(time);
 		int minimum = Math.max(index.integer - review, 5);
 		int maximum = Math.min(index.integer + preview, spline.size() - 2);
 		
@@ -450,6 +452,14 @@ public class Track {
 			glVertex3d(add.x(), add.y(), add.z());
 			glEnd();
 		}
+	}
+	
+	public Index index() {
+		return index;
+	}
+	
+	public int lastIndex() {
+		return spline.size() - 2;
 	}
 	
 	public Index getIndex(double time) {
