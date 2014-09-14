@@ -15,15 +15,15 @@ import audiodrive.model.hierarchy.Node;
 
 public class Model extends Node {
 	
-	private String modelName;
+	private String name;
 	private List<Face> faces;
 	private Color color = Color.White;
 	private Texture texture = null;
 	
 	private VertexBuffer vertexBuffer;
 	
-	public Model(String modelName, List<Face> faces) {
-		this.modelName = modelName;
+	public Model(String name, List<Face> faces) {
+		this.name = name;
 		this.faces = faces;
 		// Check if textureCoordinates were set
 		final boolean useTexture = faces.get(0).vertices.get(0).textureCoordinate != null;
@@ -105,8 +105,8 @@ public class Model extends Node {
 		return faces;
 	}
 	
-	public final String getModelName() {
-		return modelName;
+	public final String getName() {
+		return name;
 	}
 	
 	public final void setTexture(Texture texture) {

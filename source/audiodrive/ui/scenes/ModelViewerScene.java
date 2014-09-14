@@ -109,9 +109,6 @@ public class ModelViewerScene extends Scene {
 		this.index = index;
 		File file = list.get(index);
 		model = ModelLoader.loadSingleModel(file.getPath()).scale(0.1);
-		String name = file.getName().substring(0, file.getName().indexOf(".obj"));
-		AudioDrive.Settings.set("model", name);
-		Log.debug("selected model " + name);
 	}
 	
 	@Override
@@ -157,6 +154,11 @@ public class ModelViewerScene extends Scene {
 			translate.set(Vector.Null);
 			break;
 		case Keyboard.KEY_ESCAPE:
+			back();
+			break;
+		case Keyboard.KEY_RETURN:
+			AudioDrive.Settings.set("model", model.getName());
+			Log.debug("selected model " + model.getName());
 			back();
 			break;
 		case Keyboard.KEY_V:

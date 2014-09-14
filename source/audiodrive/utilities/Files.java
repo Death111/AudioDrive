@@ -45,4 +45,11 @@ public class Files {
 		return Optional.empty();
 	}
 	
+	public static String plainName(String path) {
+		String name = new File(path).getName();
+		int end = name.lastIndexOf(".");
+		if (end > 0) return name.substring(0, end);
+		return name;
+	}
+	
 }

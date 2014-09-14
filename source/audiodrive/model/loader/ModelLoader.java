@@ -18,6 +18,7 @@ import audiodrive.model.geometry.TextureCoordinate;
 import audiodrive.model.geometry.Vector;
 import audiodrive.model.geometry.Vertex;
 import audiodrive.model.geometry.transform.Rotation;
+import audiodrive.utilities.Files;
 import audiodrive.utilities.Log;
 
 /**
@@ -51,7 +52,7 @@ public class ModelLoader {
 		}
 		
 		// TODO What shall the name and texture of the model be?
-		final Model model = new Model("NA", faces);
+		final Model model = new Model(Files.plainName(fileName), faces);
 		final Texture texture = models.get(0).getTexture();
 		model.setTexture(texture);
 		// TODO rotate model without breaking it
