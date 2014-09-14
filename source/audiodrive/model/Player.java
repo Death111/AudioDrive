@@ -8,6 +8,7 @@ import audiodrive.model.track.Block;
 import audiodrive.model.track.Track;
 import audiodrive.ui.components.Camera;
 import audiodrive.ui.scenes.GameScene;
+import audiodrive.ui.scenes.overlays.ParticleEffects;
 import audiodrive.utilities.Arithmetic;
 import audiodrive.utilities.Log;
 
@@ -133,6 +134,7 @@ public class Player {
 			CollectSound.play();
 			collected++;
 			Log.trace("collected %1s", block);
+			ParticleEffects.createParticles(block.color(), scene.playtime());
 		} else {
 			CollideSound.play();
 			collided++;

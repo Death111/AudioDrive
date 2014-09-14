@@ -125,4 +125,20 @@ public class Color implements FloatData {
 		glColor4d(r, g, b, a);
 	}
 	
+	public static Color generateRandomColor(Color mix) {
+		double red = Math.random();
+		double green = Math.random();
+		double blue = Math.random();
+		
+		// mix the color
+		if (mix != null) {
+			red = (red + mix.r) / 2;
+			green = (green + mix.g) / 2;
+			blue = (blue + mix.b) / 2;
+		}
+		
+		Color color = new Color(red, green, blue);
+		return color;
+	}
+	
 }
