@@ -20,7 +20,7 @@ public class ParticleEffects {
 	private static int rows = 2;
 	private static int columns = 2;
 	
-	private static int particleCount = 30;
+	private static int particleCount = 10;
 	
 	private static List<Model> models = null;
 	private static List<ParticleInstance> particles = new ArrayList<>();
@@ -83,7 +83,7 @@ public class ParticleEffects {
 		final ArrayList<Particle> particleList = new ArrayList<Particle>(particleCount);
 		final int j = Display.getWidth() / 3;
 		final int x = j * ((int) time % 3);
-		final Vector startPosition = new Vector(x, 30, 0);
+		final Vector startPosition = new Vector(x, -50, 0);
 		for (int i = 0; i < particleCount; i++) {
 			Particle par = new Particle();
 			par.color = Color.generateRandomColor(color);
