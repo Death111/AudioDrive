@@ -7,8 +7,10 @@ import audiodrive.AudioDrive;
 import audiodrive.audio.AnalyzedAudio;
 import audiodrive.audio.AnalyzedChannel;
 import audiodrive.audio.SpectraMinMax;
-import audiodrive.model.MusicTower;
 import audiodrive.model.geometry.Vector;
+import audiodrive.model.tower.MusicTower;
+import audiodrive.model.tower.RotationTower;
+import audiodrive.model.tower.TubeTower;
 import audiodrive.utilities.Log;
 
 public class TrackGenerator {
@@ -59,7 +61,10 @@ public class TrackGenerator {
 			final float f = mixed.getSpectrum(iteration)[band];
 			// if current value is in the last 10th of the range put tower
 			if (f > spectraMinMax.max - spectraMinMax.max / 10) {
-				musicTowers.add(new MusicTower(iteration));
+				if (musicTowers.size() % 4 == 0)
+					musicTowers.add(new RotationTower(iteration));
+				else
+					musicTowers.add(new TubeTower(iteration));
 			}
 
 		}
