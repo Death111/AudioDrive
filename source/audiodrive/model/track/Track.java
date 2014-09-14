@@ -339,7 +339,8 @@ public class Track {
 		
 		visibleBlocks = blocks.stream().filter(block -> block.iteration() > minimum && block.iteration() < maximum).collect(Collectors.toList());
 		visibleBlocks.forEach(block -> {
-			block.placement(getPlacement(new Index(block.iteration(), 0.5), true, block.rail()));
+			double position = block.iteration() - (block.iteration() - index.integer) / 2.0;
+			block.placement(getPlacement(new Index((int) position, position - (int) position), true, block.rail()));
 			block.placement().direction().negate(); // flip direction for logo
 		});
 		
