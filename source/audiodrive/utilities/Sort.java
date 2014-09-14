@@ -1,6 +1,10 @@
 package audiodrive.utilities;
 
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.Enumeration;
+import java.util.Properties;
+import java.util.TreeSet;
 
 public class Sort {
 	
@@ -19,6 +23,17 @@ public class Sort {
 				return 0;
 			}
 		};
+	}
+	
+	public static Properties properties(Properties properties) {
+		Properties sorted = new Properties() {
+			@Override
+			public synchronized Enumeration<Object> keys() {
+				return Collections.enumeration(new TreeSet<Object>(super.keySet()));
+			}
+		};
+		sorted.putAll(properties);
+		return sorted;
 	}
 	
 }

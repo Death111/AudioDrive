@@ -8,6 +8,7 @@ import java.util.Properties;
 
 import audiodrive.model.geometry.Color;
 import audiodrive.utilities.Log;
+import audiodrive.utilities.Sort;
 
 public class Settings {
 	
@@ -31,6 +32,8 @@ public class Settings {
 		set("obstacleColor", "0.5,0.5,0.5,1");
 		set("difficulty", "0.5");
 		set("smoothing", "15");
+		set("analyzationWindow", "20");
+		set("analyzationThreshold", "1.8");
 		try {
 			properties.load(new FileInputStream(filename));
 		} catch (IOException exception) {
@@ -41,7 +44,7 @@ public class Settings {
 	public void save() {
 		Log.info("Saving settings...");
 		try {
-			properties.store(new FileOutputStream(filename), null);
+			Sort.properties(properties).store(new FileOutputStream(filename), null);
 		} catch (IOException exception) {
 			exception.printStackTrace();
 		}

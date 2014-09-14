@@ -5,14 +5,13 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
+import audiodrive.AudioDrive;
 import audiodrive.audio.analysis.FastFourierTransformation;
+import audiodrive.utilities.Arithmetic;
 import audiodrive.utilities.Log;
 import audiodrive.utilities.Stopwatch;
 
 public class AudioAnalyzer {
-	
-	private int thresholdWindowSize = 20;
-	private float thresholdMultiplier = 1.8f;
 	
 	private AtomicBoolean done = new AtomicBoolean();
 	private Stopwatch stopwatch = new Stopwatch();
@@ -20,6 +19,14 @@ public class AudioAnalyzer {
 	private AudioFile file;
 	private DecodedAudio samples;
 	private AnalyzedAudio results;
+	
+	private int thresholdWindowSize;
+	private float thresholdMultiplier;
+	
+	public AudioAnalyzer() {
+		thresholdWindowSize = Arithmetic.clamp(AudioDrive.Settings.getInteger("analyzationWindow"), 5, 1000);
+		thresholdMultiplier = (float) Arithmetic.clamp(AudioDrive.Settings.getDouble("analyzationThreshold"), 0.5, 5.0);
+	}
 	
 	/**
 	 * Sets the threshold window size. (default: 20)
@@ -157,7 +164,6 @@ public class AudioAnalyzer {
 				mean += spectralFlux.get(j);
 			mean /= (end - start);
 			values[index++] = mean * thresholdMultiplier;
-			
 		}
 		return new AnalyzationData(values);
 	}
