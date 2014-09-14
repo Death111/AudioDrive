@@ -1,11 +1,13 @@
 package audiodrive.ui;
 
+import static org.lwjgl.opengl.GL11.*;
+
 import java.util.ArrayList;
 import java.util.List;
 
 import org.lwjgl.opengl.Display;
-import org.lwjgl.opengl.GL11;
 
+import audiodrive.model.geometry.Color;
 import audiodrive.model.geometry.Vector;
 import audiodrive.model.track.Track;
 import audiodrive.model.track.Track.Index;
@@ -78,38 +80,34 @@ public class TrackOverview {
 	}
 
 	public void render() {
-		// Draw border
-		GL11.glColor4f(.2f, .2f, .2f, .2f);
-		GL11.glBegin(GL11.GL_LINE_LOOP);
-		{
-			GL11.glVertex2d(posX, posY);
-			GL11.glVertex2d(posX + width, posY);
-			GL11.glVertex2d(posX + width, posY + height);
-			GL11.glVertex2d(posX, posY + height);
-		}
-		GL11.glEnd();
-
 		// Draw track
-		GL11.glColor4f(1, 1, 1, 1);
-		GL11.glBegin(GL11.GL_LINE_STRIP);
+		Color.White.gl();
+		glBegin(GL_LINE_STRIP);
 		{
 			for (int i = 0; i < yCoordinates.size(); i++) {
 				Double value = yCoordinates.get(i);
-				GL11.glVertex2d(posX + i, posY + height - value);
+				glVertex2d(posX + i, posY + height - value);
 			}
 		}
-		GL11.glEnd();
+		glEnd();
 
 		// Draw player position on screen
-		GL11.glColor4f(1, 0, 0, .5f);
-		GL11.glBegin(GL11.GL_LINES);
+		Color.White.clone().alpha(.9).gl();
+		// glBegin(GL_LINES);
+		// {
+		// final int index = indexToCompressedIndex(playerIndex);
+		// glVertex2d(posX + index, posY + height);
+		// glVertex2d(posX + index, posY);
+		// }
+		// glEnd();
+
+		glPointSize(6);
+		glBegin(GL_POINTS);
 		{
 			final int index = indexToCompressedIndex(playerIndex);
-			GL11.glVertex2d(posX + index, posY + height);
-			GL11.glVertex2d(posX + index, posY);
+			glVertex2d(posX + index, posY + height - yCoordinates.get(index));
 		}
-		GL11.glEnd();
-
+		glEnd();
 	}
 
 	/**
