@@ -74,7 +74,7 @@ public class Track {
 	
 	private Color risingBorderColor = AudioDrive.Settings.getColor("risingBorderColor");
 	private Color fallingBorderColor = AudioDrive.Settings.getColor("fallingBorderColor");
-	
+	private boolean staticObstacleColor = AudioDrive.Settings.getBoolean("staticObstacleColor");
 	private List<MusicTower> musicTowers;
 	
 	private Index index;
@@ -340,21 +340,23 @@ public class Track {
 		final AnalyzationData spectralSum = mix.getSpectralSum();
 		final double linearScale = Arithmetic.linearScale(spectrum, 2, 3, spectralSum.minimum, spectralSum.maximum);
 		
+		final Color currentColor = getColorAtIndex(index.integer);
 		visibleBlocks = blocks.stream().filter(block -> block.iteration() > minimum && block.iteration() < maximum).collect(Collectors.toList());
 		visibleBlocks.forEach(block -> {
 			double position = block.iteration() - (block.iteration() - index.integer) / 2.0;
 			block.placement(getPlacement(new Index((int) position, position - (int) position), true, block.rail()));
 			block.placement().direction().negate(); // flip direction for logo
+			if (!staticObstacleColor && block.isCollectable()) block.color(currentColor);
 		});
 		
 		AnalyzationData peaks = mix.getPeaks();
 		visibleRings = new ArrayList<>();
 		for (int i = minimum; i < maximum; i++) {
 			float peak = peaks.get(i);
-			final Color color = getColorAtIndex(i);
+			final Color ringColor = getColorAtIndex(i);
 			Placement placement = getPlacement(new Index(i, 0.5), true, 0);
 			placement.direction().negate();
-			if (peak > 0) visibleRings.add(new Ring(color, placement).scale(linearScale));
+			if (peak > 0) visibleRings.add(new Ring(ringColor, placement).scale(linearScale));
 			
 		}
 		
@@ -363,7 +365,6 @@ public class Track {
 		final float[] spectrum2 = mix.getSpectrum(iteration);
 		final float current = spectrum2[band];
 		final double linearIntensity = Arithmetic.linearScale(current, 0.1, 1.0, spectraMinMax.min, spectraMinMax.max);
-		final Color color = getColorAtIndex(index.integer);
 		
 		visibleMusicTowers = musicTowers
 			.stream()
@@ -373,11 +374,11 @@ public class Track {
 			final float f = mix.getSpectrum(musicTower.iteration())[band];
 			Placement a = getPlacement(new Index(musicTower.iteration(), 0), true, 0);
 			if (musicTower instanceof TubeTower) a.position().xAdd((((int) f) % 2 == 0) ? -50 : 50).zAdd(-50);
-			else a.position().yAdd(20);
+			else a.position().yAdd(10);
 			
-			a.direction(Vector.Z);
+			// a.direction(Vector.Z);
 			musicTower.intensity(linearIntensity);
-			musicTower.placement(a).color(color);
+			musicTower.placement(a).color(currentColor);
 		});
 		
 	}

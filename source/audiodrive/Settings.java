@@ -34,6 +34,7 @@ public class Settings {
 		set("smoothing", "15");
 		set("analyzationWindow", "20");
 		set("analyzationThreshold", "1.8");
+		set("staticObstacleColor", "true");
 		try {
 			properties.load(new FileInputStream(filename));
 		} catch (IOException exception) {
