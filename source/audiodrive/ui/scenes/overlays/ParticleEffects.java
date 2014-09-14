@@ -81,17 +81,16 @@ public class ParticleEffects {
 	public static void createParticles(Color color, double time) {
 		
 		final ArrayList<Particle> particleList = new ArrayList<Particle>(particleCount);
-		final int j = Display.getWidth() / 4;
-		final int x = (int) (Math.random() * 4 * j);
+		final int x = (int) (Math.random() * Display.getWidth());
 		final Vector startPosition = new Vector(x, -50, 0);
 		for (int i = 0; i < particleCount; i++) {
-			Particle par = new Particle();
-			par.color = Color.generateRandomColor(color);
-			par.model = models.get(i % models.size());
-			par.startPosition = startPosition;
-			par.speed = Display.getWidth() * (float) (1f + Math.random());
-			par.velocity = new Vector(Math.random() - .5, Math.random(), 0);
-			particleList.add(par);
+			Particle particle = new Particle();
+			particle.color = Color.generateRandomColor(color);
+			particle.model = models.get(i % models.size());
+			particle.startPosition = startPosition;
+			particle.speed = Display.getWidth() * (float) (1f + Math.random());
+			particle.velocity = new Vector(Math.random() - .5, Math.random(), 0);
+			particleList.add(particle);
 		}
 		
 		final ParticleInstance particleInstanz = new ParticleInstance(particleList, time);
