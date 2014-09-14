@@ -6,7 +6,6 @@ import java.util.List;
 import audiodrive.AudioDrive;
 import audiodrive.audio.AnalyzedAudio;
 import audiodrive.audio.AnalyzedChannel;
-import audiodrive.audio.SpectraMinMax;
 import audiodrive.model.geometry.Vector;
 import audiodrive.model.tower.MusicTower;
 import audiodrive.model.tower.RotationTower;
@@ -28,7 +27,8 @@ public class TrackGenerator {
 		double x = 0;
 		double y = 0;
 		double z = 0;
-		for (int iteration = 0; iteration < audio.getIterationCount(); iteration++) {
+		final int iterationCount = audio.getIterationCount();
+		for (int iteration = 0; iteration < iterationCount; iteration++) {
 			if (iteration % smoothing == 0) {
 				vectorinates.add(new Vector(x, y, z));
 			}
@@ -40,7 +40,7 @@ public class TrackGenerator {
 		}
 		Log.debug(vectorinates.size() + " vectorinates");
 		List<Block> blocks = new ArrayList<>();
-		for (int iteration = 0; iteration < audio.getIterationCount(); iteration++) {
+		for (int iteration = 0; iteration < iterationCount; iteration++) {
 			float leftPeak = left.getPeaks().getClamped(iteration);
 			float rightPeak = right.getPeaks().getClamped(iteration);
 			Integer rail = determineRail(leftPeak, rightPeak, 0.2);
@@ -54,18 +54,13 @@ public class TrackGenerator {
 		}
 		Log.debug(blocks.size() + " blocks");
 
+		int spacing = 600;
 		List<MusicTower> musicTowers = new ArrayList<>();
-		final int band = 1; // Use bass criteria
-		final SpectraMinMax spectraMinMax = new SpectraMinMax(mixed, band);
-		for (int iteration = 0; iteration < audio.getIterationCount(); iteration++) {
-			final float f = mixed.getSpectrum(iteration)[band];
-			// if current value is in the last 10th of the range put tower
-			if (f > spectraMinMax.max - spectraMinMax.max / 10) {
-				if (musicTowers.size() % 4 == 0)
-					musicTowers.add(new RotationTower(iteration));
-				else
-					musicTowers.add(new TubeTower(iteration));
-			}
+		for (int iteration = 0; iteration < iterationCount; iteration += spacing) {
+			if (Math.random() > .75)
+				musicTowers.add(new RotationTower(iteration));
+			else
+				musicTowers.add(new TubeTower(iteration));
 
 		}
 		Log.debug(musicTowers.size() + " musicTowers");
