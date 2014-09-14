@@ -543,12 +543,13 @@ public class Track {
 		return numberOfObstacles;
 	}
 	
-	public static class Index {
+	public class Index {
 		
 		public final int integer;
 		public final double fraction;
 		
 		public Index(int integer, double fraction) {
+			if (integer > spline.size() - 2) integer = spline.size() - 2;
 			this.integer = integer;
 			this.fraction = fraction;
 		}
