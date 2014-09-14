@@ -81,8 +81,8 @@ public class ParticleEffects {
 	public static void createParticles(Color color, double time) {
 		
 		final ArrayList<Particle> particleList = new ArrayList<Particle>(particleCount);
-		final int j = Display.getWidth() / 3;
-		final int x = j * ((int) time % 3);
+		final int j = Display.getWidth() / 4;
+		final int x = (int) (Math.random() * 4 * j);
 		final Vector startPosition = new Vector(x, -50, 0);
 		for (int i = 0; i < particleCount; i++) {
 			Particle par = new Particle();
