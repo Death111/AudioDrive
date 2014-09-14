@@ -44,7 +44,7 @@ public class GameOverlay extends Overlay {
 	
 	public void update(double time) {
 		trackOverview.updatePlayerPosition(scene.getTrack().getIndex(time));
-		text("points").setText("Points: " + player.points() + " / " + collectables);
+		text("points").setText(String.format("Points: %d / %d (%.0f%%)", player.points(), collectables, 100.0 * player.points() / collectables));
 		text("damage").setText("Damage: " + player.collided() + " / " + player.hitpoints() + " (" + player.damage() + "%)");
 		text("collected").setText(String.format("Collected: %.1f%%", 100.0 * player.collected() / collectables));
 		text("collided").setText(String.format("Collided: %.1f%%", 100.0 * player.collided() / obstacles));
