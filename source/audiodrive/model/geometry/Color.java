@@ -36,6 +36,10 @@ public class Color implements FloatData {
 		return new Color(a.r + (b.r - a.r) * t, a.g + (b.g - a.g) * t, a.b + (b.b - a.b) * t, a.a + (b.a - a.a) * t);
 	}
 
+	public Color clone() {
+		return new Color(this);
+	}
+
 	/**
 	 * Changes the intensity of the color
 	 * 
@@ -45,7 +49,8 @@ public class Color implements FloatData {
 	 */
 	public Color itensity(double itensity) {
 
-		final int max = 100;
+		final float max = 100;
+
 		if (itensity > max)
 			itensity = max;
 		else if (itensity < 0)

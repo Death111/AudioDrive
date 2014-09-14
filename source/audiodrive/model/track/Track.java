@@ -315,6 +315,7 @@ public class Track {
 
 		splineArea2.add(leftVertex);
 		splineArea2.add(rightVertex);
+
 	}
 
 	public void update(double time) {
@@ -351,7 +352,7 @@ public class Track {
 
 	private Color getColorAtIndex(int index) {
 		// TODO no hax :D
-		final Color color = leftVertexList.get(index * 2).color;
+		final Color color = leftVertexList.get(index * 2).color.clone();
 		return color;
 	}
 
