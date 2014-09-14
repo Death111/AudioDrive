@@ -2,7 +2,6 @@ package audiodrive.ui.components;
 
 import static org.lwjgl.opengl.GL11.*;
 
-import java.awt.Color;
 import java.awt.Font;
 import java.awt.FontFormatException;
 import java.awt.GraphicsEnvironment;
@@ -17,6 +16,8 @@ import org.newdawn.slick.TrueTypeFont;
 import org.newdawn.slick.opengl.TextureImpl;
 import org.newdawn.slick.util.ResourceLoader;
 
+import audiodrive.model.geometry.Color;
+
 public class Text {
 	
 	public static final Font DefaultFont = new Font(Font.SANS_SERIF, Font.PLAIN, 15);
@@ -27,7 +28,7 @@ public class Text {
 	}
 	
 	private String text;
-	private Color color = Color.white;
+	private Color color = Color.White;
 	private Font font;
 	private double x, y;
 	private Alignment alignment = Alignment.UpperLeft;
@@ -166,7 +167,8 @@ public class Text {
 	public void render() {
 		if (text == null) return;
 		glPolygonMode(GL_FRONT, GL_FILL);
-		fonts.get(font).drawString((float) getAlignedX(), (float) getAlignedY(), text, new org.newdawn.slick.Color(color.getRGB()));
+		float[] floats = color.toFloats();
+		fonts.get(font).drawString((float) getAlignedX(), (float) getAlignedY(), text, new org.newdawn.slick.Color(floats[0], floats[1], floats[2], floats[3]));
 		TextureImpl.bindNone();
 	}
 	

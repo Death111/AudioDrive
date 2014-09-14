@@ -24,6 +24,7 @@ public class Settings {
 		set("directory", "music");
 		set("model", "xwing");
 		set("useSecondaryMonitor", "false");
+		set("useItemBoxes", "false");
 		set("risingBorderColor", "0.1,0.1,0.1,1");
 		set("fallingBorderColor", "1,1,1,1");
 		set("collectableColor", "0,0,1,1");

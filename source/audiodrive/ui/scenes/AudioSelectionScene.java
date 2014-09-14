@@ -16,6 +16,7 @@ import org.lwjgl.opengl.Display;
 
 import audiodrive.AudioDrive;
 import audiodrive.audio.AudioFile;
+import audiodrive.model.geometry.Color;
 import audiodrive.ui.components.Camera;
 import audiodrive.ui.components.Overlay;
 import audiodrive.ui.components.Scene;
@@ -73,6 +74,8 @@ public class AudioSelectionScene extends Scene implements ItemListener {
 		nextMenu = new Menu(20, itemMenu.getHeight() + 200 + 50, 400, Display.getHeight() - itemMenu.getHeight() + 200 + 50, 1);
 		
 		continueMenuItem = new MenuItem("Continue", this);
+		continueMenuItem.colorMapping().put(Item.State.Normal, new Item.Colors(Color.Green, Color.White, Color.TransparentGreen));
+		continueMenuItem.setFilled(true);
 		continueMenuItem.setDisabled(true);
 		nextMenu.addItem(continueMenuItem);
 		
@@ -82,6 +85,9 @@ public class AudioSelectionScene extends Scene implements ItemListener {
 		// Setup start node
 		updateItemExplorer(new File(AudioDrive.Settings.get("directory")));
 		
+		FileChooserItem defaultFCI = new FileChooserItem("default", true, this);
+		rootMenu.addItem(defaultFCI);
+		rootMap.put(defaultFCI, new File("music"));
 		for (File file : File.listRoots()) {
 			final boolean directory = file.isDirectory();
 			if (!directory) {
@@ -93,6 +99,7 @@ public class AudioSelectionScene extends Scene implements ItemListener {
 			rootMenu.addItem(fci);
 			rootMap.put(fci, file);
 		}
+		
 		hoverAudio = new AudioFile("sounds/hover.wav");
 		selectAudio = new AudioFile("sounds/select.wav");
 	}

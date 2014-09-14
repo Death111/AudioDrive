@@ -1,28 +1,45 @@
 package audiodrive.ui.menu.item;
 
+import static org.lwjgl.opengl.GL11.*;
+
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import audiodrive.AudioDrive;
+import audiodrive.model.geometry.Color;
 import audiodrive.ui.components.Text;
 import audiodrive.utilities.Log;
 
 public abstract class Item {
 	
-	boolean hover = false;
-	boolean selected = false;
-	boolean disabled = false;
-	int posX;
-	int posY;
-	Text text;
+	public static enum State {
+		Normal, Hovering, Selected, Disabled
+	}
 	
+	protected static final Map<State, Colors> DefaultColors = new HashMap<>();
+	static {
+		DefaultColors.put(State.Normal, new Colors(Color.White, Color.White, Color.TransparentBlack));
+		DefaultColors.put(State.Hovering, new Colors(Color.Blue, Color.White, Color.TransparentBlue));
+		DefaultColors.put(State.Selected, new Colors(Color.Green, Color.White, Color.TransparentGreen));
+		DefaultColors.put(State.Disabled, new Colors(Color.Gray, Color.White, Color.TransparentGray));
+	}
+	
+	private State state = State.Normal;
+	protected Text text;
+	protected int x;
+	protected int y;
+	protected int width;
+	protected int height;
+	protected boolean filled = true;
+	protected boolean box = AudioDrive.Settings.getBoolean("useItemBoxes");
 	protected List<ItemListener> itemListeners = new ArrayList<ItemListener>();
-	private int width;
-	private int height;
+	protected Map<State, Colors> colorMapping;
 	
 	public Item(String itemText, int width, int height) {
-		posX = 0;
-		posY = 0;
+		x = 0;
+		y = 0;
 		this.width = width;
 		this.height = height;
 		
@@ -33,8 +50,7 @@ public abstract class Item {
 		} else {
 			size = width / 10;
 		}
-		text = new Text(itemText).setFont(AudioDrive.Font).setPosition(posX, posY).setSize(size);
-		
+		text = new Text(itemText).setFont(AudioDrive.Font).setPosition(x, y).setSize(size);
 		// Check if text is to big
 		if (text.getHeight() > height || text.getWidth() > width) {
 			Log.trace("Text '" + itemText + "' is bigger than menuItem. Trimming it");
@@ -52,44 +68,73 @@ public abstract class Item {
 		}
 	}
 	
-	public abstract void render();
+	public void render() {
+		Colors colors = getColors();
+		if (box) {
+			colors.background.gl();
+			glPolygonMode(GL_FRONT, filled ? GL_FILL : GL_LINE);
+			glBegin(GL_QUADS);
+			glVertex2f(x, y);
+			glVertex2f(x, y + height);
+			glVertex2f(x + width, y + height);
+			glVertex2f(x + width, y);
+			glEnd();
+		}
+		text.setColor(box ? colors.foreground : colors.text).setPosition(x, y).render();
+	};
 	
 	public void addItemListener(ItemListener itemListener) {
 		itemListeners.add(itemListener);
 	}
 	
-	public final boolean getHover() {
-		return hover;
+	public void setState(State state) {
+		if (state == this.state) return;
+		fireStateChange(this.state, false);
+		fireStateChange(state, true);
+		this.state = state;
 	}
 	
-	public final boolean getSelected() {
-		return selected;
+	private void fireStateChange(State state, boolean activated) {
+		switch (state) {
+		case Hovering:
+			itemListeners.forEach(itemListener -> itemListener.onHover(this, activated));
+			return;
+		case Selected:
+			itemListeners.forEach(itemListener -> itemListener.onSelect(this, activated));
+			return;
+		default:
+			break;
+		}
 	}
 	
-	/**
-	 * @return the posX
-	 */
-	public final int getPosX() {
-		return posX;
+	public void setBox(boolean box) {
+		this.box = box;
 	}
 	
-	/**
-	 * @return the posY
-	 */
-	public final int getPosY() {
-		return posY;
+	public void setFilled(boolean filled) {
+		this.filled = filled;
 	}
 	
-	/**
-	 * @return the width
-	 */
+	public void setY(int y) {
+		this.y = y;
+	}
+	
+	public void setX(int x) {
+		this.x = x;
+	}
+	
+	public final int getX() {
+		return x;
+	}
+	
+	public final int getY() {
+		return y;
+	}
+	
 	public final int getWidth() {
 		return width;
 	}
 	
-	/**
-	 * @return the height
-	 */
 	public final int getHeight() {
 		return height;
 	}
@@ -98,36 +143,56 @@ public abstract class Item {
 		return text.getText();
 	}
 	
-	public void setPosY(int y) {
-		posY = y;
-	}
-	
-	public void setPosX(int posX) {
-		this.posX = posX;
-	}
-	
-	public void setHover(boolean hover) {
-		itemListeners.forEach(itemListener -> itemListener.onHover(this, hover));
-		this.hover = hover;
+	public void setHovering(boolean hover) {
+		setState(hover ? State.Hovering : State.Normal);
 	}
 	
 	public void setSelected(boolean selected) {
-		itemListeners.forEach(itemListener -> itemListener.onSelect(this, selected));
-		this.selected = selected;
+		setState(selected ? State.Selected : State.Normal);
 	}
-
-	/**
-	 * @return the disabled
-	 */
-	public final boolean isDisabled() {
-		return disabled;
+	
+	public void setDisabled(boolean disabled) {
+		setState(disabled ? State.Disabled : State.Normal);
 	}
-
-	/**
-	 * @param disabled
-	 *            the disabled to set
-	 */
-	public final void setDisabled(boolean disabled) {
-		this.disabled = disabled;
+	
+	public boolean isHovering() {
+		return state == State.Hovering;
 	}
+	
+	public boolean isSelected() {
+		return state == State.Selected;
+	}
+	
+	public boolean isDisabled() {
+		return state == State.Disabled;
+	}
+	
+	public State getState() {
+		return state;
+	}
+	
+	public Map<State, Colors> colorMapping() {
+		if (colorMapping == null) colorMapping = new HashMap<>(DefaultColors);
+		return colorMapping;
+	}
+	
+	public Colors getColors() {
+		return colorMapping != null ? colorMapping.get(state) : DefaultColors.get(state);
+	}
+	
+	public static class Colors {
+		/** text color if box is disabled */
+		public final Color text;
+		/** foreground/text color if box is enabled */
+		public final Color foreground;
+		/** background/border color if box is enabled */
+		public final Color background;
+		
+		public Colors(Color text, Color foreground, Color background) {
+			this.text = text != null ? text : Color.White;
+			this.foreground = foreground != null ? foreground : Color.Transparent;
+			this.background = background != null ? background : Color.Transparent;
+		}
+	}
+	
 }

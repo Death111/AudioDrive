@@ -4,6 +4,7 @@ import static org.lwjgl.opengl.GL11.*;
 
 import org.lwjgl.input.Keyboard;
 
+import audiodrive.AudioDrive;
 import audiodrive.audio.AnalyzedAudio;
 import audiodrive.audio.AudioFile;
 import audiodrive.model.track.Track;
@@ -31,6 +32,7 @@ public class MenuScene extends Scene implements ItemListener {
 	private MenuItem playMenuItem;
 	private MenuItem selectAudioMenuItem;
 	private MenuItem selectModelMenuItem;
+	private MenuItem settingsMenuItem;
 	private MenuItem exitMenuItem;
 	
 	private AnalyzedAudio audio;
@@ -56,6 +58,8 @@ public class MenuScene extends Scene implements ItemListener {
 		menu.addItem(selectAudioMenuItem);
 		selectModelMenuItem = new MenuItem("Select Model", this);
 		menu.addItem(selectModelMenuItem);
+		settingsMenuItem = new MenuItem("Settings", this);
+		menu.addItem(settingsMenuItem);
 		exitMenuItem = new MenuItem("Exit", this);
 		menu.addItem(exitMenuItem);
 		
@@ -161,6 +165,10 @@ public class MenuScene extends Scene implements ItemListener {
 		}
 		if (item == selectModelMenuItem) {
 			Scene.get(ModelViewerScene.class).enter();
+			return;
+		}
+		if (item == selectAudioMenuItem) {
+			AudioDrive.Settings.load();
 			return;
 		}
 		if (item == exitMenuItem) {
