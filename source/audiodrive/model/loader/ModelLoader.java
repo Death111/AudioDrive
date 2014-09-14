@@ -208,7 +208,7 @@ public class ModelLoader {
 		return null;
 	}
 	
-	private static Texture getTexture(String fileName) {
+	public static Texture getTexture(String fileName) {
 		Texture texture = null;
 		Log.debug("Trying to load texture '" + fileName + "'.");
 		try {
