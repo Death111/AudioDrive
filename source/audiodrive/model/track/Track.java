@@ -16,6 +16,8 @@ import audiodrive.AudioDrive;
 import audiodrive.audio.AnalyzationData;
 import audiodrive.audio.AnalyzedAudio;
 import audiodrive.audio.AnalyzedChannel;
+import audiodrive.audio.SpectraMinMax;
+import audiodrive.model.MusicTower;
 import audiodrive.model.Ring;
 import audiodrive.model.buffer.VertexBuffer;
 import audiodrive.model.geometry.Color;
@@ -42,6 +44,7 @@ public class Track {
 
 	private List<Block> visibleBlocks;
 	private List<Ring> visibleRings;
+	List<MusicTower> visibleMusicTowers;
 
 	private List<Vector> spline;
 	private List<Vector> splineArea;
@@ -71,10 +74,13 @@ public class Track {
 	private Color risingBorderColor = AudioDrive.Settings.getColor("risingBorderColor");
 	private Color fallingBorderColor = AudioDrive.Settings.getColor("fallingBorderColor");
 
-	public Track(AnalyzedAudio audio, List<Vector> vectorinates, List<Block> blocks, int smoothing) {
+	private List<MusicTower> musicTowers;
+
+	public Track(AnalyzedAudio audio, List<Vector> vectorinates, List<Block> blocks, List<MusicTower> musicTowers, int smoothing) {
 		this.audio = audio;
 		this.vectorinates = vectorinates;
 		this.blocks = blocks;
+		this.musicTowers = musicTowers;
 		this.smoothing = smoothing;
 		try {
 			trackTexture = TextureLoader.getTexture("PNG", new FileInputStream(new File(TRACK_TEXTURE)));
@@ -338,6 +344,7 @@ public class Track {
 			block.placement(getPlacement(new Index(block.iteration(), 0.5), true, block.rail()));
 			block.placement().direction().negate(); // flip direction for logo
 			});
+
 		AnalyzationData peaks = mix.getPeaks();
 		visibleRings = new ArrayList<>();
 		for (int i = minimum; i < maximum; i++) {
@@ -347,7 +354,26 @@ public class Track {
 			placement.direction().negate();
 			if (peak > 0)
 				visibleRings.add(new Ring(color, placement).scale(linearScale));
+
 		}
+
+		final int band = 1; // Use bass as color intensity index
+		final SpectraMinMax spectraMinMax = new SpectraMinMax(mix, band);
+		final float[] spectrum2 = mix.getSpectrum(iteration);
+		final float current = spectrum2[band];
+		final double linearIntensity = Arithmetic.linearScale(current, 10, 100, spectraMinMax.min, spectraMinMax.max);
+		final Color color = getColorAtIndex(index.integer).itensity(linearIntensity);
+
+		visibleMusicTowers = musicTowers.stream().filter(musicTower -> musicTower.iteration() > index.integer - 10 && musicTower.iteration() < index.integer + 900)
+				.collect(Collectors.toList());
+		visibleMusicTowers.forEach(musicTower -> {
+			final float f = mix.getSpectrum(musicTower.iteration())[band];
+			Placement a = getPlacement(new Index(musicTower.iteration(), 0.5), true, 0);
+			a.position().xAdd((((int) f) % 2 == 0) ? -50 : 50).zAdd(-50);
+			a.direction(Vector.Z);
+			musicTower.placement(a).color(color);
+		});
+
 	}
 
 	private Color getColorAtIndex(int index) {
@@ -394,9 +420,10 @@ public class Track {
 		splineArea2Buffer.draw();
 		splineArea2Buffer.useColor(true);
 		GL.popAttributes();
-
 		// Draw obstacles
 		glEnable(GL_CULL_FACE);
+
+		visibleMusicTowers.forEach(MusicTower::render);
 		visibleBlocks.forEach(Block::render);
 		visibleRings.forEach(Ring::render);
 
