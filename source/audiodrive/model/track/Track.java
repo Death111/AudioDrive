@@ -19,12 +19,7 @@ import audiodrive.audio.AnalyzedChannel;
 import audiodrive.audio.SpectraMinMax;
 import audiodrive.model.Ring;
 import audiodrive.model.buffer.VertexBuffer;
-import audiodrive.model.geometry.Color;
-import audiodrive.model.geometry.CuboidStripRenderer;
-import audiodrive.model.geometry.ReflectionPlane;
-import audiodrive.model.geometry.TextureCoordinate;
-import audiodrive.model.geometry.Vector;
-import audiodrive.model.geometry.Vertex;
+import audiodrive.model.geometry.*;
 import audiodrive.model.geometry.transform.Placement;
 import audiodrive.model.tower.MusicTower;
 import audiodrive.model.tower.TubeTower;
@@ -377,7 +372,7 @@ public class Track {
 			else a.position().yAdd(10);
 			
 			// a.direction(Vector.Z);
-			musicTower.intensity(linearIntensity);
+			musicTower.intensity(linearIntensity, time);
 			musicTower.placement(a).color(currentColor);
 		});
 		

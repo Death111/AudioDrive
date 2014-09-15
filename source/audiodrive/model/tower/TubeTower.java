@@ -16,7 +16,7 @@ public class TubeTower extends MusicTower {
 	}
 
 	@Override
-	public MusicTower intensity(double intensity) {
+	public MusicTower intensity(double intensity, double time) {
 		this.intensity = intensity;
 		return this;
 	}
