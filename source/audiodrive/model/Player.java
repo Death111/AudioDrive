@@ -7,8 +7,8 @@ import audiodrive.model.loader.Model;
 import audiodrive.model.track.Block;
 import audiodrive.model.track.Track;
 import audiodrive.ui.components.Camera;
+import audiodrive.ui.effects.ParticleEffects;
 import audiodrive.ui.scenes.GameScene;
-import audiodrive.ui.scenes.overlays.ParticleEffects;
 import audiodrive.utilities.Arithmetic;
 import audiodrive.utilities.Log;
 

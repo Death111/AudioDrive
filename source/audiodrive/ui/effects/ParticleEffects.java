@@ -1,4 +1,4 @@
-package audiodrive.ui.scenes.overlays;
+package audiodrive.ui.effects;
 
 import java.util.ArrayList;
 import java.util.List;

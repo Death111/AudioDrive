@@ -16,6 +16,7 @@ import audiodrive.ui.components.Overlay;
 import audiodrive.ui.components.Scene;
 import audiodrive.ui.components.Text;
 import audiodrive.ui.components.Text.Alignment;
+import audiodrive.ui.effects.ParticleEffects;
 import audiodrive.ui.scenes.GameScene;
 import audiodrive.ui.scenes.GameScene.State;
 import audiodrive.utilities.Format;
