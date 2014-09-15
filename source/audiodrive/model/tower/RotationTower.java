@@ -1,11 +1,24 @@
 package audiodrive.model.tower;
 
+import static org.lwjgl.opengl.GL11.*;
 import audiodrive.model.geometry.Color;
+import audiodrive.model.geometry.transform.Transformation;
 import audiodrive.model.loader.ModelLoader;
 
 public class RotationTower extends MusicTower {
 
 	private double rotation = 0;
+	private Transformation transformation = new Transformation() {
+		@Override
+		public boolean ignorable() {
+			return false;
+		}
+		
+		@Override
+		public void apply() {
+			glRotated(rotation, 0, 1, 0);
+		}
+	};
 
 	public RotationTower(int iteration) {
 		this.iteration = iteration;
@@ -14,6 +27,7 @@ public class RotationTower extends MusicTower {
 			return;
 
 		model = ModelLoader.loadSingleModel("models/musictower2/musictower2");
+		model.transformations().add(transformation);
 	}
 
 	public void render() {
@@ -25,9 +39,13 @@ public class RotationTower extends MusicTower {
 	public RotationTower intensity(double intensity) {
 		this.intensity = intensity;
 		// TODO thomas, how does roation work, it's silly
-		rotation += intensity * 0.2;
-		this.model.rotation().y(rotation);
+		rotation += intensity;
+		rotation = rotation % 360;
 		return this;
+	}
+	
+	public double getR(){
+		return rotation;
 	}
 
 }
