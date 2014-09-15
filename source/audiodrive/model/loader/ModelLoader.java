@@ -55,10 +55,6 @@ public class ModelLoader {
 		final Model model = new Model(Files.plainName(fileName), faces);
 		final Texture texture = models.get(0).getTexture();
 		model.setTexture(texture);
-		// TODO rotate model without breaking it
-		if (fileName.contains("raptor")) {
-			model.transformations().add(new Rotation().x(90).y(180));
-		}
 		return model;
 	}
 	
