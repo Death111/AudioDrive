@@ -1,13 +1,8 @@
 package audiodrive.model.hierarchy;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
-import audiodrive.model.geometry.transform.Placement;
-import audiodrive.model.geometry.transform.Rotation;
-import audiodrive.model.geometry.transform.Scaling;
-import audiodrive.model.geometry.transform.Transformation;
-import audiodrive.model.geometry.transform.Translation;
+import audiodrive.model.geometry.transform.*;
 import audiodrive.ui.GL;
 
 public abstract class Node {
@@ -66,6 +61,11 @@ public abstract class Node {
 	
 	public Scaling scaling() {
 		return scaling;
+	}
+	
+	public Node scaling(Scaling scaling) {
+		this.scaling = scaling;
+		return this;
 	}
 	
 }
