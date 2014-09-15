@@ -1,6 +1,6 @@
 package audiodrive.model.geometry.transform;
 
-import static org.lwjgl.opengl.GL11.glMultMatrix;
+import static org.lwjgl.opengl.GL11.*;
 import audiodrive.model.geometry.Matrix;
 import audiodrive.model.geometry.Vector;
 
@@ -11,20 +11,21 @@ public class Rotation extends Transformation {
 	 */
 	public static final Rotation Null = new Rotation();
 	
+	private double x, y, z;
 	private final Matrix matrix = new Matrix().identity();
 	
 	public Rotation x(double angle) {
-		xAdd(angle - x());
+		set(angle, y, z);
 		return this;
 	}
 	
 	public Rotation y(double angle) {
-		yAdd(angle - y());
+		set(x, angle, z);
 		return this;
 	}
 	
 	public Rotation z(double angle) {
-		zAdd(angle - z());
+		set(x, y, angle);
 		return this;
 	}
 	
@@ -44,42 +45,56 @@ public class Rotation extends Transformation {
 	}
 	
 	public double x() {
-		return matrix.getRotationAroundXAxis();
+		if (isMultiplex()) throw new RuntimeException("Euler angles are ambiguous for a rotation around more than one axis.");
+		return x;
 	}
 	
 	public double y() {
-		return matrix.getRotationAroundYAxis();
+		if (isMultiplex()) throw new RuntimeException("Euler angles are ambiguous for a rotation around more than one axis.");
+		return y;
 	}
 	
 	public double z() {
-		return matrix.getRotationAroundZAxis();
+		if (isMultiplex()) throw new RuntimeException("Euler angles are ambiguous for a rotation around more than one axis.");
+		return z;
 	}
 	
 	public Rotation add(double angle, Vector axis) {
 		assertModifiable();
+		if (!isMultiplex()) {
+			if (axis.equals(Vector.X) || axis.equals(Vector.X.negated())) x += angle;
+			else if (axis.equals(Vector.Y) || axis.equals(Vector.Y.negated())) y += angle;
+			else if (axis.equals(Vector.Z) || axis.equals(Vector.Z.negated())) z += angle;
+		}
 		matrix.rotate(unify180(angle), axis);
 		return this;
 	}
 	
 	public Rotation set(Rotation rotation) {
 		assertModifiable();
-		matrix.set(rotation.matrix);
+		set(rotation.x, rotation.y, rotation.z);
 		return this;
 	}
 	
 	public Rotation set(Matrix matrix) {
 		assertModifiable();
+		markAsMultiplex(); // since we can't determine unambiguous Euler angles from a rotation matrix
 		this.matrix.set(matrix);
 		return this;
 	}
 	
-	public Rotation set(double aroundX, double aroundY, double aroundZ) {
+	public Rotation set(double x, double y, double z) {
 		assertModifiable();
-		matrix.rotation(aroundX, aroundY, aroundZ);
+		this.x = x;
+		this.y = y;
+		this.z = z;
+		matrix.set(matrix);
 		return this;
 	}
 	
 	public Rotation align(Vector direction, Vector normal) {
+		assertModifiable();
+		markAsMultiplex();
 		matrix.alignment(direction, normal);
 		return this;
 	}
@@ -89,11 +104,17 @@ public class Rotation extends Transformation {
 	 */
 	public Rotation reset() {
 		assertModifiable();
+		x = 0;
+		y = 0;
+		z = 0;
 		matrix.identity();
 		return this;
 	}
 	
 	public Rotation invert() {
+		x = -x;
+		y = -y;
+		z = -z;
 		matrix.invert();
 		return this;
 	}
@@ -110,7 +131,13 @@ public class Rotation extends Transformation {
 	@Override
 	public void apply() {
 		if (ignorable()) return;
-		glMultMatrix(matrix.toDoubleBuffer());
+		if (isMultiplex()) {
+			glMultMatrix(matrix.toDoubleBuffer());
+		} else {
+			if (x != 0) glRotated(x, 1, 0, 0);
+			else if (y != 0) glRotated(y, 0, 1, 0);
+			else glRotated(z, 0, 0, 1);
+		}
 	}
 	
 	/**
@@ -125,6 +152,20 @@ public class Rotation extends Transformation {
 	 */
 	public Matrix rotate(Matrix matrix) {
 		return matrix.multiplied(this.matrix);
+	}
+	
+	private void markAsMultiplex() {
+		x = Double.NaN;
+	}
+	
+	/**
+	 * Indicates whether the rotation is multiplex, i.e. a rotation around more than one axis.
+	 */
+	public boolean isMultiplex() {
+		if (x == 0 && y == 0) return false;
+		if (x == 0 && z == 0) return false;
+		if (y == 0 && z == 0) return false;
+		return true;
 	}
 	
 	public boolean isNull() {

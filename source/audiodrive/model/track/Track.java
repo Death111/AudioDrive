@@ -19,9 +19,15 @@ import audiodrive.audio.AnalyzedChannel;
 import audiodrive.audio.SpectraMinMax;
 import audiodrive.model.Ring;
 import audiodrive.model.buffer.VertexBuffer;
-import audiodrive.model.geometry.*;
+import audiodrive.model.geometry.Color;
+import audiodrive.model.geometry.CuboidStripRenderer;
+import audiodrive.model.geometry.ReflectionPlane;
+import audiodrive.model.geometry.TextureCoordinate;
+import audiodrive.model.geometry.Vector;
+import audiodrive.model.geometry.Vertex;
 import audiodrive.model.geometry.transform.Placement;
 import audiodrive.model.tower.MusicTower;
+import audiodrive.model.tower.RotationTower;
 import audiodrive.model.tower.TubeTower;
 import audiodrive.model.track.interpolation.CatmullRom;
 import audiodrive.ui.GL;
@@ -360,6 +366,7 @@ public class Track {
 		final float[] spectrum2 = mix.getSpectrum(iteration);
 		final float current = spectrum2[spectraMinMaxBand_1.band];
 		final double linearIntensity = Arithmetic.linearScale(current, 0.1, 1.0, spectraMinMaxBand_1.min, spectraMinMaxBand_1.max);
+		double rotationSpeed = linearIntensity + mix.getThreshold().getClamped(iteration) * 180;
 		
 		visibleMusicTowers = musicTowers
 			.stream()
@@ -370,12 +377,21 @@ public class Track {
 			Placement a = getPlacement(new Index(musicTower.iteration(), 0), true, 0);
 			if (musicTower instanceof TubeTower) a.position().xAdd((((int) f) % 2 == 0) ? -50 : 50).zAdd(-50);
 			else a.position().yAdd(10);
+			if (musicTower instanceof RotationTower) ((RotationTower) musicTower).rotation(rotationSpeed);
 			
 			// a.direction(Vector.Z);
-			musicTower.intensity(linearIntensity, time);
+			musicTower.intensity(linearIntensity);
 			musicTower.placement(a).color(currentColor);
 		});
 		
+		// TODO remove after testing
+		musicTowers.stream().filter(tower -> tower instanceof RotationTower).findFirst().ifPresent(tower -> {
+			visibleMusicTowers.add(tower);
+			Placement placement = getPlacement(time);
+			placement.position().add(placement.up().multiplied(0.3));
+			tower.color(Color.Blue).scale(0.03).intensity(linearIntensity).placement(placement);
+			((RotationTower) tower).rotation(rotationSpeed);
+		});
 	}
 	
 	private Color getColorAtIndex(int index) {

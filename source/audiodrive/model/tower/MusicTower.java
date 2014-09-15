@@ -15,7 +15,7 @@ public abstract class MusicTower {
 	
 	public abstract void render();
 	
-	public abstract MusicTower intensity(double intensity, double time);
+	public abstract MusicTower intensity(double intensity);
 	
 	public MusicTower scale(double scale) {
 		this.scale = scale;

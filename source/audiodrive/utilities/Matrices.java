@@ -133,7 +133,9 @@ public class Matrices {
 	 * 
 	 * @param matrix rotation matrix
 	 * @return rotation angle, in radians
+	 * @deprecated can't determine unambiguous Euler angles from a rotation matrix
 	 */
+	@Deprecated
 	public static double rotationAroundXAxis(double[][] matrix) {
 		double x = Math.atan2(matrix[2][1], matrix[2][2]);
 		if (x == -0.0) return 0.0;
@@ -163,7 +165,9 @@ public class Matrices {
 	 * 
 	 * @param matrix rotation matrix
 	 * @return rotation angle, in radians
+	 * @deprecated can't determine unambiguous Euler angles from a rotation matrix
 	 */
+	@Deprecated
 	public static double rotationAroundYAxis(double[][] matrix) {
 		double m21 = matrix[2][1];
 		double m22 = matrix[2][2];
@@ -195,7 +199,9 @@ public class Matrices {
 	 * 
 	 * @param matrix rotation matrix
 	 * @return rotation angle, in radians
+	 * @deprecated can't determine unambiguous Euler angles from a rotation matrix
 	 */
+	@Deprecated
 	public static double rotationAroundZAxis(double[][] matrix) {
 		double z = Math.atan2(matrix[1][0], matrix[0][0]);
 		if (z == -0.0) return 0.0;
@@ -360,9 +366,9 @@ public class Matrices {
 	}
 	
 	/**
-	 * determines the rotation around x-axis of a given matrix
+	 * calculates the determinant of a given matrix
 	 * 
-	 * @param matrix rotation matrix
+	 * @param matrix the matrix
 	 * @return the matrix's determinant
 	 * @author Dr. Nicholas Duchon
 	 */

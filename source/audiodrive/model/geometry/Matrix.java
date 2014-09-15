@@ -146,18 +146,6 @@ public class Matrix {
 		return multiplied(new Matrix().rotation(angle, vector));
 	}
 	
-	public double getRotationAroundXAxis() {
-		return Math.toDegrees(Matrices.rotationAroundXAxis(M));
-	}
-	
-	public double getRotationAroundYAxis() {
-		return Math.toDegrees(Matrices.rotationAroundYAxis(M));
-	}
-	
-	public double getRotationAroundZAxis() {
-		return Math.toDegrees(Matrices.rotationAroundZAxis(M));
-	}
-	
 	public Matrix alignment(Vector direction, Vector up) {
 		identity();
 		Vector z = direction.normalized();
