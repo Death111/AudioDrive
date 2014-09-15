@@ -1,5 +1,7 @@
 package audiodrive.audio;
 
+import java.util.*;
+
 /**
  * Can be used to retrieve the min, max and middle value of a single band
  * 
@@ -8,26 +10,31 @@ package audiodrive.audio;
  */
 public class SpectraMinMax {
 	
-	public double max = Double.MIN_VALUE;
-	public double min = Double.MAX_VALUE;
-	public double middle = 0;
-	public int band;
-	
-	public SpectraMinMax(AnalyzedChannel channel, int band) {
-		this.band = band;
-		double middle = 0;
+	public static List<MinMax> getMinMax(AnalyzedChannel channel) {
+		final List<float[]> spectra = channel.getSpectra();
+		List<MinMax> minMax = new ArrayList<>(spectra.get(0).length);
 		
-		final int size = channel.getSpectra().size();
-		for (int i = 0; i < size; i++) {
-			final float[] spectrum = channel.getSpectrum(i);
-			float f = spectrum[band];
-			middle += f;
-			if (f > max) max = f;
-			else if (f < min) min = f;
+		final int size = spectra.get(0).length;
+		
+		// loop through all bands
+		for (int band = 0; band < size; band++) {
+			double min = Double.MAX_VALUE;
+			double max = Double.MIN_VALUE;
+			double middle = Double.MAX_VALUE;
+			// loop through all spectra
+			for (int spectrumNumber = 0; spectrumNumber < spectra.size(); spectrumNumber++) {
+				float[] currentSpectrum = spectra.get(spectrumNumber);
+				float f = currentSpectrum[band];
+				middle += f;
+				if (f > max) max = f;
+				else if (f < min) min = f;
+			}
+			
+			middle /= size;
+			minMax.add(new MinMax(min, max, middle));
 		}
 		
-		middle /= size;
-		this.middle = middle;
+		return minMax;
 	}
 	
 }

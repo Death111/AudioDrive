@@ -11,7 +11,6 @@ public abstract class MusicTower {
 	protected Placement placement;
 	protected int iteration;
 	protected double intensity;
-	protected double lastTime = -1;
 	
 	public abstract void render();
 	

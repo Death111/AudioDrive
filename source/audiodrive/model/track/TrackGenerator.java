@@ -1,23 +1,19 @@
 package audiodrive.model.track;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 import audiodrive.AudioDrive;
-import audiodrive.audio.AnalyzedAudio;
-import audiodrive.audio.AnalyzedChannel;
+import audiodrive.audio.*;
 import audiodrive.model.geometry.Vector;
-import audiodrive.model.tower.MusicTower;
-import audiodrive.model.tower.RotationTower;
-import audiodrive.model.tower.TubeTower;
+import audiodrive.model.tower.*;
 import audiodrive.utilities.Log;
 
 public class TrackGenerator {
-
+	
 	private double deltaX = 0.2;
 	private double deltaY = 2.0;
 	private double deltaZ = 1.0;
-
+	
 	public Track generate(AnalyzedAudio audio) {
 		int smoothing = Math.max(10, AudioDrive.Settings.getInteger("smoothing"));
 		AnalyzedChannel mixed = audio.getMix();
@@ -48,32 +44,27 @@ public class TrackGenerator {
 				blocks.add(new Block(true, iteration, rail));
 			} else {
 				rail = determineRail(leftPeak, rightPeak, 0.1);
-				if (rail != null)
-					blocks.add(new Block(false, iteration, rail));
+				if (rail != null) blocks.add(new Block(false, iteration, rail));
 			}
 		}
 		Log.debug(blocks.size() + " blocks");
-
+		
 		int spacing = 600;
 		List<MusicTower> musicTowers = new ArrayList<>();
 		for (int iteration = 0; iteration < iterationCount; iteration += spacing) {
-			if (Math.random() > .75)
-				musicTowers.add(new RotationTower(iteration));
-			else
-				musicTowers.add(new TubeTower(iteration));
-
+			if (Math.random() > .75) musicTowers.add(new RotationTower(iteration));
+			else musicTowers.add(new TubeTower(iteration));
+			
 		}
 		Log.debug(musicTowers.size() + " musicTowers");
 		return new Track(audio, vectorinates, blocks, musicTowers, smoothing);
 	}
-
+	
 	private Integer determineRail(double left, double right, double threshold) {
 		boolean leftSide = left > threshold;
 		boolean rightSide = right > threshold;
-		if (leftSide && rightSide)
-			return 0;
-		if (leftSide || rightSide)
-			return leftSide ? -1 : 1;
+		if (leftSide && rightSide) return 0;
+		if (leftSide || rightSide) return leftSide ? -1 : 1;
 		return null;
 	}
 }

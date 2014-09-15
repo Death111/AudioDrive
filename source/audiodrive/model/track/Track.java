@@ -13,10 +13,7 @@ import org.newdawn.slick.opengl.Texture;
 import org.newdawn.slick.opengl.TextureLoader;
 
 import audiodrive.AudioDrive;
-import audiodrive.audio.AnalyzationData;
-import audiodrive.audio.AnalyzedAudio;
-import audiodrive.audio.AnalyzedChannel;
-import audiodrive.audio.SpectraMinMax;
+import audiodrive.audio.*;
 import audiodrive.model.Ring;
 import audiodrive.model.buffer.VertexBuffer;
 import audiodrive.model.geometry.Color;
@@ -28,6 +25,7 @@ import audiodrive.model.geometry.Vertex;
 import audiodrive.model.geometry.transform.Placement;
 import audiodrive.model.tower.MusicTower;
 import audiodrive.model.tower.RotationTower;
+import audiodrive.model.tower.SpectraTower;
 import audiodrive.model.tower.TubeTower;
 import audiodrive.model.track.interpolation.CatmullRom;
 import audiodrive.ui.GL;
@@ -77,7 +75,7 @@ public class Track {
 	private Color fallingBorderColor = AudioDrive.Settings.getColor("fallingBorderColor");
 	private boolean staticObstacleColor = AudioDrive.Settings.getBoolean("staticObstacleColor");
 	private List<MusicTower> musicTowers;
-	final SpectraMinMax spectraMinMaxBand_1;
+	final List<MinMax> spectraMinMax;
 	
 	private Index index;
 	
@@ -95,7 +93,7 @@ public class Track {
 		numberOfCollectables = (int) blocks.stream().filter(Block::isCollectable).count();
 		numberOfObstacles = blocks.size() - numberOfCollectables;
 		build();
-		spectraMinMaxBand_1 = new SpectraMinMax(audio.getMix(), 1);
+		spectraMinMax = SpectraMinMax.getMinMax(audio.getMix());
 	}
 	
 	private void build() {
@@ -364,16 +362,17 @@ public class Track {
 		}
 		
 		final float[] spectrum2 = mix.getSpectrum(iteration);
-		final float current = spectrum2[spectraMinMaxBand_1.band];
-		final double linearIntensity = Arithmetic.linearScale(current, 0.1, 1.0, spectraMinMaxBand_1.min, spectraMinMaxBand_1.max);
+		final float current = spectrum2[1];
+		final MinMax minMax = spectraMinMax.get(1);
+		final double linearIntensity = Arithmetic.linearScale(current, 0.1, 1.0, minMax.min, minMax.max);
 		double rotationSpeed = linearIntensity + mix.getThreshold().getClamped(iteration) * 180;
-		
+
 		visibleMusicTowers = musicTowers
 			.stream()
 			.filter(musicTower -> musicTower.iteration() > index.integer - 10 && musicTower.iteration() < index.integer + 900)
 			.collect(Collectors.toList());
 		visibleMusicTowers.forEach(musicTower -> {
-			final float f = mix.getSpectrum(musicTower.iteration())[spectraMinMaxBand_1.band];
+			final float f = mix.getSpectrum(musicTower.iteration())[1];
 			Placement a = getPlacement(new Index(musicTower.iteration(), 0), true, 0);
 			if (musicTower instanceof TubeTower) a.position().xAdd((((int) f) % 2 == 0) ? -50 : 50).zAdd(-50);
 			else a.position().yAdd(10);
@@ -392,7 +391,34 @@ public class Track {
 			tower.color(Color.Blue).scale(0.03).intensity(linearIntensity).placement(placement);
 			((RotationTower) tower).rotation(rotationSpeed);
 		});
+		if (spectra == null) {
+			spectra = new SpectraTower(iteration);
+		}
+		
+		spectra.color(currentColor);
+		final Placement placement = getPlacement(time + 2);
+		placement.position().yAdd(-10).xAdd(-30);
+		placement.direction(Vector.Z);
+		spectra.placement(placement);
+		int amount = 30;
+		double[] itensities = new double[amount];
+		int[] bands = new int[amount];
+		
+		final int steps = audio.getBandCount() / amount;
+		for (int i = 0; i < amount; i++) {
+			bands[i] = steps * i;
+		}
+		
+		for (int i = 0; i < amount; i++) {
+			MinMax a = spectraMinMax.get(bands[i]);
+			itensities[i] = Arithmetic.linearScale(spectrum2[bands[i]], 0.1, 1.0, a.min, a.max);
+		}
+		spectra.intensity(itensities);
+		visibleMusicTowers.add(spectra);
+		
 	}
+	
+	SpectraTower spectra;
 	
 	private Color getColorAtIndex(int index) {
 		// TODO no hax :D
