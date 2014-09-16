@@ -73,9 +73,10 @@ public class GameScene extends Scene {
 		glEnable(GL_NORMALIZE);
 		glEnable(GL_LIGHT0);
 		glLight(GL_LIGHT0, GL_DIFFUSE, Buffers.create(1f, 1f, 1f, 1f));
-		glLight(GL_LIGHT0, GL_AMBIENT, Buffers.create(.5f, .5f, .5f, 1f));
-		glEnable(GL_COLOR_MATERIAL);
+		final float ambientAmount = .3f;
+		glLight(GL_LIGHT0, GL_AMBIENT, Buffers.create(ambientAmount, ambientAmount, ambientAmount, 1f));
 		glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
+		glEnable(GL_COLOR_MATERIAL);
 		glShadeModel(GL_SMOOTH);
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 		glEnable(GL_BLEND);
