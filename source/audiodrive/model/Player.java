@@ -96,7 +96,7 @@ public class Player {
 		} else {
 			return false;
 		}
-		model.rotation().z(Arithmetic.smooth(-tiltAngle, tiltAngle, tiltProgress));
+		model.rotation().z(Arithmetic.smooth(tiltAngle, -tiltAngle, tiltProgress));
 		return true;
 	}
 	

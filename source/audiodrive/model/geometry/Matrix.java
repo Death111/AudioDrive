@@ -108,12 +108,12 @@ public class Matrix {
 	/**
 	 * Sets the matrix to a rotation matrix with the specified rotation angles.
 	 * 
-	 * @param aroundX rotation angle around x-axis, in degrees
-	 * @param aroundY rotation angle around y-axis, in degrees
-	 * @param aroundZ rotation angle around z-axis, in degrees
+	 * @param x rotation angle around x-axis, in degrees
+	 * @param y rotation angle around y-axis, in degrees
+	 * @param z rotation angle around z-axis, in degrees
 	 */
-	public Matrix rotation(double aroundX, double aroundY, double aroundZ) {
-		return identity().insert(Matrices.rotation(Math.toRadians(aroundX), Math.toRadians(aroundY), Math.toRadians(aroundZ)));
+	public Matrix rotation(double x, double y, double z) {
+		return identity().insert(Matrices.rotation(Math.toRadians(x), Math.toRadians(y), Math.toRadians(z)));
 	}
 	
 	/**

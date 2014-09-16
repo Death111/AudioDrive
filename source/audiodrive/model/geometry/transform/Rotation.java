@@ -88,7 +88,7 @@ public class Rotation extends Transformation {
 		this.x = x;
 		this.y = y;
 		this.z = z;
-		matrix.set(matrix);
+		matrix.rotation(x, y, z);
 		return this;
 	}
 	
@@ -155,7 +155,7 @@ public class Rotation extends Transformation {
 	}
 	
 	private void markAsMultiplex() {
-		x = Double.NaN;
+		x = y = z = Double.NaN;
 	}
 	
 	/**

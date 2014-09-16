@@ -365,7 +365,7 @@ public class Track {
 		final float current = spectrum2[1];
 		final MinMax minMax = spectraMinMax.get(1);
 		final double linearIntensity = Arithmetic.linearScale(current, 0.1, 1.0, minMax.min, minMax.max);
-		double rotationSpeed = linearIntensity + mix.getThreshold().getClamped(iteration) * 180;
+		double rotationSpeed = mix.getThreshold().getClamped(iteration) * 360;
 
 		visibleMusicTowers = musicTowers
 			.stream()
