@@ -19,12 +19,7 @@ import audiodrive.audio.MinMax;
 import audiodrive.audio.SpectraMinMax;
 import audiodrive.model.Ring;
 import audiodrive.model.buffer.VertexBuffer;
-import audiodrive.model.geometry.Color;
-import audiodrive.model.geometry.CuboidStripRenderer;
-import audiodrive.model.geometry.ReflectionPlane;
-import audiodrive.model.geometry.TextureCoordinate;
-import audiodrive.model.geometry.Vector;
-import audiodrive.model.geometry.Vertex;
+import audiodrive.model.geometry.*;
 import audiodrive.model.geometry.transform.Placement;
 import audiodrive.model.tower.MusicTower;
 import audiodrive.model.tower.RotationTower;
@@ -205,7 +200,7 @@ public class Track {
 		final int size = border.size();
 		
 		// Add front
-		Vector v1_lastVector = border.get(0);
+		Vector v1_lastVector = border.get(3);
 		{
 			final Vector v2 = border.get(2);
 			final Vector v3 = border.get(3);
@@ -252,7 +247,7 @@ public class Track {
 		{
 			final Vector v2 = border.get(0);
 			final Vector v3 = border.get(2);
-			Vertex vertex = getVertex(v1_lastVector, v3, v2, false);
+			Vertex vertex = getVertex(border.get(3), v3, v2, false);
 			v1_lastVector = v2;
 			vertexList.add(vertex.clone().position(v2));
 			vertexList.add(vertex.clone().position(v3));
