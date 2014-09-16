@@ -42,6 +42,8 @@ public class GameScene extends Scene {
 	private GameOverlay overlay;
 	
 	private double time;
+	private double playerSpeed = AudioDrive.Settings.getDouble("playerSpeed");
+	private double mouseSpeed = AudioDrive.Settings.getDouble("mouseSpeed");
 	
 	public void enter(Track track) {
 		this.track = track;
@@ -170,10 +172,10 @@ public class GameScene extends Scene {
 			translation.add(0, -0.01, 0);
 			break;
 		case Keyboard.KEY_RIGHT:
-			movePlayer(0.1);
+			player.move(8 * playerSpeed * Scene.deltaTime());
 			break;
 		case Keyboard.KEY_LEFT:
-			movePlayer(-0.1);
+			player.move(-8 * playerSpeed * Scene.deltaTime());
 			break;
 		default:
 			break;
@@ -208,18 +210,12 @@ public class GameScene extends Scene {
 	
 	@Override
 	public void mouseMoved(int x, int y, int dx, int dy) {
-		movePlayer(dx * 0.002);
-	}
-	
-	private void movePlayer(double x) {
-		if (!playback.isRunning()) return;
-		double newX = player.model().translation().x() - x; // FIXME why negative?
-		double maxX = track.width() / 3;
-		player.model().translation().x(Math.max(-maxX, Math.min(maxX, newX)));
+		player.move(dx * 0.002 * mouseSpeed);
 	}
 	
 	@Override
-	public void mouseDragged(int button, int mouseX, int mouseY, int dx, int dy) {
+	public void mouseDragged(int button, int x, int y, int dx, int dy) {
+		player.move(dx * 0.002 * mouseSpeed);
 		double horizontal = dx * -0.1;
 		double vertical = dy * 0.1;
 		switch (button) {

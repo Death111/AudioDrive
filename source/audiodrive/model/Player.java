@@ -9,6 +9,7 @@ import audiodrive.model.track.Track;
 import audiodrive.ui.components.Camera;
 import audiodrive.ui.effects.ParticleEffects;
 import audiodrive.ui.scenes.GameScene;
+import audiodrive.ui.scenes.GameScene.State;
 import audiodrive.utilities.Arithmetic;
 import audiodrive.utilities.Log;
 
@@ -68,6 +69,13 @@ public class Player {
 		checkCollisions();
 	}
 	
+	public void move(double x) {
+		if (scene.getState() != State.Running) return;
+		double newX = model.translation().x() - x; // FIXME why negative?
+		double maxX = track.width() / 3;
+		model.translation().x(Math.max(-maxX, Math.min(maxX, newX)));
+	}
+	
 	private void checkCollisions() {
 		int iteration = track.getIndex(scene.playtime()).integer;
 		track.getBlocks().stream().filter(block -> !block.isDestroyed() && block.iteration() == iteration).forEach(this::interact);
@@ -80,11 +88,11 @@ public class Player {
 			double rate = tiltRate;
 			if (moved > 0) { // right
 				if (tiltProgress < 0.5) rate *= 2.0;
-				tiltProgress += elapsed * rate;
+				tiltProgress += rate * 0.01;
 				if (tiltProgress > 1.0) tiltProgress = 1.0;
 			} else { // left
 				if (tiltProgress > 0.5) rate *= 2.0;
-				tiltProgress -= elapsed * rate;
+				tiltProgress -= rate * 0.01;
 				if (tiltProgress < 0.0) tiltProgress = 0.0;
 			}
 			tiltTime = scene.playtime();

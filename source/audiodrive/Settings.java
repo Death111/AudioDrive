@@ -37,6 +37,8 @@ public class Settings {
 		set("staticObstacleColor", "true");
 		set("framerate", "0");
 		set("vsync", "true");
+		set("mouseSpeed", "1.0");
+		set("playerSpeed", "1.0");
 		try {
 			properties.load(new FileInputStream(filename));
 		} catch (IOException exception) {
