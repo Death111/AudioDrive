@@ -29,15 +29,15 @@ public class Arithmetic {
 		return clamp(value, 0.0, 1.0);
 	}
 	
-	public static double clamp(double value, double min, double max) {
-		if (value < min) return min;
-		if (value > max) return max;
+	public static double clamp(double value, double minimum, double maximum) {
+		if (value < minimum) return minimum;
+		if (value > maximum) return maximum;
 		return value;
 	}
 	
-	public static int clamp(int value, int min, int max) {
-		if (value < min) return min;
-		if (value > max) return max;
+	public static int clamp(int value, int minimum, int maximum) {
+		if (value < minimum) return minimum;
+		if (value > maximum) return maximum;
 		return value;
 	}
 	
@@ -47,8 +47,11 @@ public class Arithmetic {
 		return to * fraction + from * (1.0 - fraction);
 	}
 	
-	public static double linearScale(double current, final double minDest, final double maxDest, final double minSource, final double maxSource) {
-		return (maxDest - minDest) * (current - minSource) / (maxSource - minSource) + minDest;
+	public static double scaleLinear(double value, double from, double to, double minimum, double maximum) {
+		return from + (to - from) * (value - minimum) / (maximum - minimum);
 	}
 	
+	public static double scaleLogarithmic(double value, double from, double to, double minimum, double maximum) {
+		return Math.sqrt(scaleLinear(value, from, to, minimum, maximum));
+	}
 }

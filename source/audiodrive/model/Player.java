@@ -175,7 +175,7 @@ public class Player {
 	}
 	
 	public Player zoom(double zoom) {
-		this.zoom = Arithmetic.clamp(zoom, 1.0, 3.0);
+		this.zoom = Arithmetic.clamp(zoom, 1.0, 300.0);
 		return this;
 	}
 	

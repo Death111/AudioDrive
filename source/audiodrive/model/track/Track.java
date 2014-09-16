@@ -28,7 +28,7 @@ import audiodrive.model.geometry.Vertex;
 import audiodrive.model.geometry.transform.Placement;
 import audiodrive.model.tower.MusicTower;
 import audiodrive.model.tower.RotationTower;
-import audiodrive.model.tower.SpectraTower;
+import audiodrive.model.tower.SpectralTower;
 import audiodrive.model.tower.TubeTower;
 import audiodrive.model.track.interpolation.CatmullRom;
 import audiodrive.ui.GL;
@@ -82,11 +82,10 @@ public class Track {
 	
 	private Index index;
 	
-	public Track(AnalyzedAudio audio, List<Vector> vectorinates, List<Block> blocks, List<MusicTower> musicTowers, int smoothing) {
+	public Track(AnalyzedAudio audio, List<Vector> vectorinates, List<Block> blocks, int smoothing) {
 		this.audio = audio;
 		this.vectorinates = vectorinates;
 		this.blocks = blocks;
-		this.musicTowers = musicTowers;
 		this.smoothing = smoothing;
 		try {
 			trackTexture = TextureLoader.getTexture("PNG", new FileInputStream(new File(TRACK_TEXTURE)));
@@ -101,7 +100,19 @@ public class Track {
 	
 	private void build() {
 		calculateSpline();
+		generateTowers();
 		splineArea2Buffer = new VertexBuffer(splineArea2).mode(GL_QUAD_STRIP).useColor(true).useTexture(true);
+	}
+	
+	private void generateTowers() {
+		int spacing = 300;
+		musicTowers = new ArrayList<>();
+		for (int iteration = 0; iteration < audio.getIterationCount(); iteration += spacing) {
+			float peak = audio.getMix().getThreshold().getClamped(iteration);
+			if (peak > 0.7) musicTowers.add(new TubeTower(iteration));
+			else if (peak > 0.3) musicTowers.add(new SpectralTower(iteration));
+			else musicTowers.add(new RotationTower(iteration));
+		}
 	}
 	
 	private void calculateSpline() {
@@ -281,7 +292,7 @@ public class Track {
 	}
 	
 	private Color getColor(double t) {
-		return Color.Lerp(risingBorderColor, fallingBorderColor, (float) Arithmetic.linearScale(t, 0, 1, -.7f, .7f));
+		return Color.Lerp(risingBorderColor, fallingBorderColor, (float) Arithmetic.scaleLinear(t, 0, 1, -.7f, .7f));
 	}
 	
 	private int textureIndex = 0;
@@ -359,10 +370,10 @@ public class Track {
 			if (flux > 0.2) visibleRings.add(new Ring(ringColor, placement).scale(ringScale));
 		}
 		
-		final float[] spectrum2 = mix.getSpectrum(iteration);
-		final float current = spectrum2[1];
-		final MinMax minMax = spectraMinMax.get(1);
-		final double linearIntensity = Arithmetic.linearScale(current, 0.1, 1.0, minMax.min, minMax.max);
+		float[] spectrum2 = mix.getSpectrum(iteration);
+		float current = spectrum2[1];
+		MinMax minMax = spectraMinMax.get(1);
+		double linearIntensity = Arithmetic.scaleLinear(current, 0.1, 1.0, minMax.min, minMax.max);
 		double rotationSpeed = mix.getThreshold().getClamped(iteration) * 360;
 		
 		visibleMusicTowers = musicTowers
@@ -370,53 +381,27 @@ public class Track {
 			.filter(musicTower -> musicTower.iteration() > index.integer - 10 && musicTower.iteration() < index.integer + 900)
 			.collect(Collectors.toList());
 		visibleMusicTowers.forEach(musicTower -> {
-			final float f = mix.getSpectrum(musicTower.iteration())[1];
+			float f = mix.getSpectrum(musicTower.iteration())[1];
 			Placement a = getPlacement(new Index(musicTower.iteration(), 0), true, 0);
-			if (musicTower instanceof TubeTower) a.position().xAdd((((int) f) % 2 == 0) ? -50 : 50).zAdd(-50);
-			else a.position().yAdd(10);
-			if (musicTower instanceof RotationTower) ((RotationTower) musicTower).rotation(rotationSpeed);
-			
+			if (musicTower instanceof RotationTower) {
+				((RotationTower) musicTower).rotation(rotationSpeed);
+				a.position().yAdd(10);
+			} else {
+				a.position().xAdd((((int) f) % 2 == 0) ? -50 : 50).zAdd(-50);
+			}
 			// a.direction(Vector.Z);
-			musicTower.intensity(linearIntensity);
+			if (!(musicTower instanceof SpectralTower)) musicTower.intensity(linearIntensity);
 			musicTower.placement(a).color(currentColor);
 		});
 		
-		// TODO remove after testing
-		musicTowers.stream().filter(tower -> tower instanceof RotationTower).findFirst().ifPresent(tower -> {
-			visibleMusicTowers.add(tower);
-			Placement placement = getPlacement(time);
-			placement.position().add(placement.up().multiplied(0.3));
-			tower.color(Color.Blue).scale(0.03).intensity(linearIntensity).placement(placement);
-			((RotationTower) tower).rotation(rotationSpeed);
-		});
-		if (spectra == null) {
-			spectra = new SpectraTower(iteration);
+		int combine = 15;
+		double maxIntensity = spectraMinMax.stream().mapToDouble(v -> v.max).max().orElse(0);
+		double[] intensities = new double[audio.getBandCount() / combine + 1];
+		for (int i = 0; i < audio.getBandCount(); i++) {
+			intensities[i / combine] += Arithmetic.scaleLogarithmic(spectrum2[i], 0.0, 1.0 / combine, 0, maxIntensity);
 		}
-		
-		spectra.color(currentColor);
-		final Placement placement = getPlacement(time + 2);
-		placement.position().yAdd(-10).xAdd(-30);
-		placement.direction(Vector.Z);
-		spectra.placement(placement);
-		int amount = 30;
-		double[] itensities = new double[amount];
-		int[] bands = new int[amount];
-		
-		final int steps = audio.getBandCount() / amount;
-		for (int i = 0; i < amount; i++) {
-			bands[i] = steps * i;
-		}
-		
-		for (int i = 0; i < amount; i++) {
-			MinMax a = spectraMinMax.get(bands[i]);
-			itensities[i] = Arithmetic.linearScale(spectrum2[bands[i]], 0.1, 1.0, a.min, a.max);
-		}
-		spectra.intensity(itensities);
-		visibleMusicTowers.add(spectra);
-		
+		SpectralTower.spectrum(intensities);
 	}
-	
-	SpectraTower spectra;
 	
 	private Color getColorAtIndex(int index) {
 		// TODO no hax :D

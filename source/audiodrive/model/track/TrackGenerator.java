@@ -1,11 +1,12 @@
 package audiodrive.model.track;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 import audiodrive.AudioDrive;
-import audiodrive.audio.*;
+import audiodrive.audio.AnalyzedAudio;
+import audiodrive.audio.AnalyzedChannel;
 import audiodrive.model.geometry.Vector;
-import audiodrive.model.tower.*;
 import audiodrive.utilities.Log;
 
 public class TrackGenerator {
@@ -23,7 +24,7 @@ public class TrackGenerator {
 		double x = 0;
 		double y = 0;
 		double z = 0;
-		final int iterationCount = audio.getIterationCount();
+		int iterationCount = audio.getIterationCount();
 		for (int iteration = 0; iteration < iterationCount; iteration++) {
 			if (iteration % smoothing == 0) {
 				vectorinates.add(new Vector(x, y, z));
@@ -48,16 +49,7 @@ public class TrackGenerator {
 			}
 		}
 		Log.debug(blocks.size() + " blocks");
-		
-		int spacing = 600;
-		List<MusicTower> musicTowers = new ArrayList<>();
-		for (int iteration = 0; iteration < iterationCount; iteration += spacing) {
-			if (Math.random() > .75) musicTowers.add(new RotationTower(iteration));
-			else musicTowers.add(new TubeTower(iteration));
-			
-		}
-		Log.debug(musicTowers.size() + " musicTowers");
-		return new Track(audio, vectorinates, blocks, musicTowers, smoothing);
+		return new Track(audio, vectorinates, blocks, smoothing);
 	}
 	
 	private Integer determineRail(double left, double right, double threshold) {
