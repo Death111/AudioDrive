@@ -60,6 +60,11 @@ public class AudioFile extends File {
 		}
 	}
 	
+	public Playback play(double volume) {
+		if (volume == 1.0) return play();
+		return new Playback(this).setVolume(volume).start();
+	}
+	
 	public Playback play() {
 		return new Playback(this).start();
 	}

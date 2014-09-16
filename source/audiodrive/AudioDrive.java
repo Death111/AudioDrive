@@ -17,11 +17,12 @@ public class AudioDrive {
 	public static void main(String[] args) {
 		Log.info("AudioDrive");
 		Settings.load();
+		Window.setTitle("AudioDrive");
 		Window.setBorderless(true);
 		Window.setFullscreen(true);
-		if (Settings.getBoolean("useSecondaryMonitor")) Window.useSecondaryMonitor();
-		Window.setFramerate(Settings.getInteger("framerate"));
-		Window.setVSyncEnabled(Settings.getBoolean("vsync"));
+		if (Settings.getBoolean("window.useSecondaryMonitor")) Window.useSecondaryMonitor();
+		Window.setFramerate(Settings.getInteger("window.framerate"));
+		Window.setVSyncEnabled(Settings.getBoolean("window.vsync"));
 		Window.open(Scene.get(TitleScene.class));
 	}
 	

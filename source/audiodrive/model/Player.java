@@ -53,10 +53,12 @@ public class Player {
 	private double oldX = 0.0;
 	private double tiltTime;
 	
+	private double volume = AudioDrive.Settings.getDouble("sound.volume");
+	
 	public Player(GameScene scene) {
 		this.scene = scene;
 		track = scene.getTrack();
-		double difficulty = Arithmetic.clamp(AudioDrive.Settings.getDouble("difficulty"));
+		double difficulty = Arithmetic.clamp(AudioDrive.Settings.getDouble("game.difficulty"));
 		hitpoints = Math.max(1, (int) (track.getNumberOfObstacles() * (1 - difficulty)));
 		Log.debug("track \"" + track.getAudio().getFile().getName() + "\"");
 		Log.debug("difficulty " + difficulty);
@@ -168,12 +170,12 @@ public class Player {
 	
 	private void collide(Block block) {
 		if (block.isCollectable()) {
-			CollectSound.play();
+			CollectSound.play(volume);
 			collected++;
 			Log.trace("collected %1s", block);
 			ParticleEffects.createParticles(block.color(), scene.playtime());
 		} else {
-			CollideSound.play();
+			CollideSound.play(volume);
 			collided++;
 			Log.trace("collided with %1s", block);
 		}

@@ -12,8 +12,8 @@ import audiodrive.model.loader.ModelLoader;
 
 public class Block {
 	
-	public static final Color CollectableColor = AudioDrive.Settings.getColor("collectableColor");
-	public static final Color ObstacleColor = AudioDrive.Settings.getColor("obstacleColor");
+	public static final Color CollectableColor = AudioDrive.Settings.getColor("color.collectable");
+	public static final Color ObstacleColor = AudioDrive.Settings.getColor("color.obstacle");
 	public static final Model Model = ModelLoader.loadSingleModel("models/obstacle/obstacle").scale(0.1);
 	public static final Texture Reflected = ModelLoader.getTexture("models/obstacle/obstacle-reflection.png");
 	

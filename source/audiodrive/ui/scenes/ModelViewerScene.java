@@ -38,7 +38,7 @@ public class ModelViewerScene extends Scene {
 	@Override
 	protected void entering() {
 		list = Files.list("models/player", ".obj", true);
-		File modelFile = list.stream().filter(file -> file.getName().endsWith(AudioDrive.Settings.get("model") + ".obj")).findFirst().orElse(list.get(0));
+		File modelFile = list.stream().filter(file -> file.getName().endsWith(AudioDrive.Settings.get("player.model") + ".obj")).findFirst().orElse(list.get(0));
 		loadModel(list.indexOf(modelFile));
 		double y = -0.25;
 		flatPlane = new ReflectionPlane(new Vector(-1, y, 1), new Vector(1, y, 1), new Vector(1, y, -1), new Vector(-1, y, -1));
@@ -157,7 +157,7 @@ public class ModelViewerScene extends Scene {
 			back();
 			break;
 		case Keyboard.KEY_RETURN:
-			AudioDrive.Settings.set("model", model.getName());
+			AudioDrive.Settings.set("player.model", model.getName());
 			Log.debug("selected model " + model.getName());
 			back();
 			break;

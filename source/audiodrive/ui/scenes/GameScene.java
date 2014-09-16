@@ -42,8 +42,9 @@ public class GameScene extends Scene {
 	private GameOverlay overlay;
 	
 	private double time;
-	private double playerSpeed = AudioDrive.Settings.getDouble("playerSpeed");
-	private double mouseSpeed = AudioDrive.Settings.getDouble("mouseSpeed");
+	private double keyboardSpeed;
+	private double mouseSpeed;
+	private double volume;
 	
 	public void enter(Track track) {
 		this.track = track;
@@ -53,12 +54,15 @@ public class GameScene extends Scene {
 	@Override
 	protected void entering() {
 		Log.info("starting game...");
+		keyboardSpeed = AudioDrive.Settings.getDouble("input.keyboard.speed");
+		mouseSpeed = AudioDrive.Settings.getDouble("input.mouse.speed");
+		volume = AudioDrive.Settings.getDouble("sound.volume");
 		state = State.Paused;
-		File model = Files.find("models/player", AudioDrive.Settings.get("model") + ".obj").orElse(Files.list("models/player", ".obj", true).get(0));
+		File model = Files.find("models/player", AudioDrive.Settings.get("player.model") + ".obj").orElse(Files.list("models/player", ".obj", true).get(0));
 		player = new Player(this).model(ModelLoader.loadSingleModel(model.getPath()));
 		player.model().scale(0.05);
 		overlay = new GameOverlay(this);
-		playback = new Playback(track.getAudio().getFile());
+		playback = new Playback(track.getAudio().getFile()).setVolume(AudioDrive.Settings.getDouble("music.volume"));
 		rotation.reset();
 		translation.reset();
 		time = 0;
@@ -103,7 +107,7 @@ public class GameScene extends Scene {
 		if (state == oldState) return;
 		if (state == State.Destroyed) {
 			playback.stop();
-			new AudioFile("sounds/Destroyed.mp3").play();
+			new AudioFile("sounds/Destroyed.mp3").play(volume);
 		}
 	}
 	
@@ -173,10 +177,10 @@ public class GameScene extends Scene {
 			translation.add(0, -0.01, 0);
 			break;
 		case Keyboard.KEY_RIGHT:
-			player.move(8 * playerSpeed * Scene.deltaTime());
+			player.move(8 * keyboardSpeed * Scene.deltaTime());
 			break;
 		case Keyboard.KEY_LEFT:
-			player.move(-8 * playerSpeed * Scene.deltaTime());
+			player.move(-8 * keyboardSpeed * Scene.deltaTime());
 			break;
 		case Keyboard.KEY_PRIOR:
 			player.zoomOut(10.0 * Scene.deltaTime());
@@ -197,7 +201,8 @@ public class GameScene extends Scene {
 			playback.toggle();
 			break;
 		case Keyboard.KEY_ESCAPE:
-			back();
+			if (state == State.Running) playback.pause();
+			else back();
 			break;
 		case Keyboard.KEY_HOME:
 			translation.reset();

@@ -28,10 +28,10 @@ public class Playback {
 	
 	/** Starts or restarts the playback. Also opens the necessary resources. */
 	public Playback start() {
-		if (initialized()) {
+		initialize();
+		if (isRunning()) {
 			restart = true;
 		} else {
-			initialize();
 			stop = false;
 			thread.start();
 		}
@@ -164,10 +164,11 @@ public class Playback {
 	 */
 	private void initialize() {
 		if (initialized()) return;
+		open();
 		thread = new Thread() {
 			@Override
 			public void run() {
-				open();
+				line.start();
 				while (true) {
 					synchronized (this) {
 						if (stop || restart) break;
@@ -202,7 +203,6 @@ public class Playback {
 			line = AudioSystem.getSourceDataLine(stream.getFormat());
 			buffer = new byte[1024 * stream.getFormat().getFrameSize()];
 			line.open();
-			line.start();
 		} catch (LineUnavailableException exception) {
 			throw new RuntimeException(exception);
 		}

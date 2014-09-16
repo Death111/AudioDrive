@@ -39,6 +39,8 @@ public class MenuScene extends Scene implements ItemListener {
 	private AudioFile hoverAudio;
 	private AudioFile selectAudio;
 	
+	private double volume;
+	
 	public void enter(AnalyzedAudio audio) {
 		this.audio = audio;
 		hierarchy().clear();
@@ -47,6 +49,7 @@ public class MenuScene extends Scene implements ItemListener {
 	
 	@Override
 	public void entering() {
+		volume = AudioDrive.Settings.getDouble("interface.volume");
 		Log.trace("Entering MenueScene");
 		
 		menu = new Menu(100, 200, 400, 600, 25);
@@ -131,7 +134,7 @@ public class MenuScene extends Scene implements ItemListener {
 	@Override
 	public void onHover(Item item, boolean hover) {
 		if (hover) {
-			hoverAudio.play();
+			hoverAudio.play(volume);
 		}
 	}
 	
@@ -140,7 +143,7 @@ public class MenuScene extends Scene implements ItemListener {
 		if (!select) {
 			return;
 		}
-		selectAudio.play();
+		selectAudio.play(volume);
 		if (item == visualizeMenuItem) {
 			if (audio == null) {
 				Scene.get(AudioSelectionScene.class).enter();

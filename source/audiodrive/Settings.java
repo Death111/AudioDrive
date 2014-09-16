@@ -22,23 +22,26 @@ public class Settings {
 	public void load() {
 		Log.info("Loading settings...");
 		new File("music").mkdir();
-		set("directory", "music");
-		set("model", "xwing");
-		set("useSecondaryMonitor", "false");
-		set("useItemBoxes", "false");
-		set("risingBorderColor", "0.1,0.1,0.1,1");
-		set("fallingBorderColor", "1,1,1,1");
-		set("collectableColor", "0,0,1,1");
-		set("obstacleColor", "0.5,0.5,0.5,1");
-		set("difficulty", "0.5");
-		set("smoothing", "15");
-		set("analyzationWindow", "20");
-		set("analyzationThreshold", "1.8");
-		set("staticObstacleColor", "true");
-		set("framerate", "0");
-		set("vsync", "true");
-		set("mouseSpeed", "1.0");
-		set("playerSpeed", "1.0");
+		set("audio.analyzation.threshold", "1.8");
+		set("audio.analyzation.window", "20");
+		set("color.collectable", "0,0,1,1");
+		set("color.collectable.static", "true");
+		set("color.intense", "1,1,1,1");
+		set("color.obstacle", "0.5,0.5,0.5,1");
+		set("color.relaxed", "0.1,0.1,0.1,1");
+		set("game.difficulty", "0.5");
+		set("input.mouse.speed", "1.0");
+		set("input.keyboard.speed", "1.0");
+		set("interface.useItemBoxes", "false");
+		set("interface.volume", "1.0");
+		set("music.directory", "music");
+		set("music.volume", "1.0");
+		set("player.model", "xwing");
+		set("sound.volume", "1.0");
+		set("track.smoothing", "15");
+		set("window.framerate", "0");
+		set("window.useSecondaryMonitor", "false");
+		set("window.vsync", "true");
 		try {
 			properties.load(new FileInputStream(filename));
 		} catch (IOException exception) {

@@ -57,8 +57,12 @@ public class AudioSelectionScene extends Scene implements ItemListener {
 	// Item which was selected
 	private Item item = null;
 	
+	private double volume;
+	
 	@Override
 	public void entering() {
+		volume = AudioDrive.Settings.getDouble("interface.volume");
+		
 		Camera.overlay(getWidth(), getHeight());
 		overlay = new Overlay().shader(new ShaderProgram("shaders/default.vs", "shaders/title.fs"));
 		
@@ -83,7 +87,7 @@ public class AudioSelectionScene extends Scene implements ItemListener {
 		selectedFileText = new Text().setFont(AudioDrive.Font).setPosition(20, itemMenu.getHeight() + 200).setSize(30);
 		
 		// Setup start node
-		updateItemExplorer(new File(AudioDrive.Settings.get("directory")));
+		updateItemExplorer(new File(AudioDrive.Settings.get("music.directory")));
 		
 		FileChooserItem defaultFCI = new FileChooserItem("default", true, this);
 		rootMenu.addItem(defaultFCI);
@@ -111,7 +115,7 @@ public class AudioSelectionScene extends Scene implements ItemListener {
 	 */
 	private void updateItemExplorer(File rootFile) {
 		currentFolderText.setText("Current folder: " + rootFile.getAbsolutePath());
-		AudioDrive.Settings.set("directory", rootFile.getPath());
+		AudioDrive.Settings.set("audio.directory", rootFile.getPath());
 		final File[] listFiles = rootFile.listFiles();
 		itemMap.clear();
 		itemMenu.removeAllItems();
@@ -229,7 +233,7 @@ public class AudioSelectionScene extends Scene implements ItemListener {
 	@Override
 	public void onHover(Item item, boolean hover) {
 		if (hover) {
-			hoverAudio.play();
+			hoverAudio.play(volume);
 		}
 	}
 	
@@ -238,7 +242,7 @@ public class AudioSelectionScene extends Scene implements ItemListener {
 		if (!select) {
 			return;
 		}
-		selectAudio.play();
+		selectAudio.play(volume);
 		
 		if (item == continueMenuItem) {
 			if (selectedFile != null) {

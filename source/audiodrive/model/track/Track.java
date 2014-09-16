@@ -76,9 +76,9 @@ public class Track {
 	private List<Vertex> rightVertexList;
 	private VertexBuffer rightBorderVertexBuffer;
 	
-	private Color risingBorderColor = AudioDrive.Settings.getColor("risingBorderColor");
-	private Color fallingBorderColor = AudioDrive.Settings.getColor("fallingBorderColor");
-	private boolean staticObstacleColor = AudioDrive.Settings.getBoolean("staticObstacleColor");
+	private Color relaxedColor = AudioDrive.Settings.getColor("color.relaxed");
+	private Color intenseColor = AudioDrive.Settings.getColor("color.intense");
+	private boolean staticCollectableColor = AudioDrive.Settings.getBoolean("color.collectable.static");
 	private List<MusicTower> musicTowers;
 	private List<MinMax> spectraMinMax;
 	
@@ -296,7 +296,7 @@ public class Track {
 	}
 	
 	private Color getColor(double t) {
-		return Color.Lerp(risingBorderColor, fallingBorderColor, (float) Arithmetic.scaleLinear(t, 0, 1, -.7f, .7f));
+		return Color.Lerp(relaxedColor, intenseColor, (float) Arithmetic.scaleLinear(t, 0, 1, -.7f, .7f));
 	}
 	
 	private int textureIndex = 0;
@@ -360,7 +360,7 @@ public class Track {
 			double position = block.iteration() - (block.iteration() - index.integer) / 2.0;
 			block.placement(getPlacement(new Index((int) position, position - (int) position), true, block.rail()));
 			block.placement().direction().negate(); // flip direction for logo
-			if (!staticObstacleColor && block.isCollectable()) block.color(currentColor);
+			if (!staticCollectableColor && block.isCollectable()) block.color(currentColor);
 		});
 		
 		AnalyzedChannel mix = audio.getMix();

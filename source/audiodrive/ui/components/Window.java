@@ -66,6 +66,10 @@ public class Window {
 		scene.enter();
 	}
 	
+	public static void setTitle(String title) {
+		Display.setTitle(title);
+	}
+	
 	public static void setFramerate(int framerate) {
 		Window.framerate = framerate;
 	}

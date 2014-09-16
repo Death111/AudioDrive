@@ -24,8 +24,8 @@ public class AudioAnalyzer {
 	private float thresholdMultiplier;
 	
 	public AudioAnalyzer() {
-		thresholdWindowSize = Arithmetic.clamp(AudioDrive.Settings.getInteger("analyzationWindow"), 5, 1000);
-		thresholdMultiplier = (float) Arithmetic.clamp(AudioDrive.Settings.getDouble("analyzationThreshold"), 0.5, 5.0);
+		thresholdWindowSize = Arithmetic.clamp(AudioDrive.Settings.getInteger("audio.analyzation.window"), 5, 1000);
+		thresholdMultiplier = (float) Arithmetic.clamp(AudioDrive.Settings.getDouble("audio.analyzation.threshold"), 0.5, 5.0);
 	}
 	
 	/**
