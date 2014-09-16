@@ -73,13 +73,14 @@ public class GameScene extends Scene {
 		glEnable(GL_NORMALIZE);
 		glEnable(GL_LIGHT0);
 		glLight(GL_LIGHT0, GL_DIFFUSE, Buffers.create(1f, 1f, 1f, 1f));
+		glLight(GL_LIGHT0, GL_AMBIENT, Buffers.create(.5f, .5f, .5f, 1f));
 		glEnable(GL_COLOR_MATERIAL);
-		glColorMaterial(GL_FRONT, GL_DIFFUSE);
+		glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
 		glShadeModel(GL_SMOOTH);
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		// glEnable(GL_LIGHTING);
+		glEnable(GL_LIGHTING);
 		Mouse.setGrabbed(true);
 	}
 	
