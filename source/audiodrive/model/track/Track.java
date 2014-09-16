@@ -13,7 +13,10 @@ import org.newdawn.slick.opengl.Texture;
 import org.newdawn.slick.opengl.TextureLoader;
 
 import audiodrive.AudioDrive;
-import audiodrive.audio.*;
+import audiodrive.audio.AnalyzedAudio;
+import audiodrive.audio.AnalyzedChannel;
+import audiodrive.audio.MinMax;
+import audiodrive.audio.SpectraMinMax;
 import audiodrive.model.Ring;
 import audiodrive.model.buffer.VertexBuffer;
 import audiodrive.model.geometry.Color;
@@ -336,12 +339,7 @@ public class Track {
 		
 		int iteration = (int) (audio.getIterationRate() * time);
 		if (iteration >= audio.getIterationCount()) iteration = audio.getIterationCount() - 1;
-		final AnalyzedChannel mix = audio.getMix();
-		float spectrum = mix.getPeaks().get(iteration);
-		final AnalyzationData spectralSum = mix.getSpectralSum();
-		final double linearScale = Arithmetic.linearScale(spectrum, 2, 3, spectralSum.minimum, spectralSum.maximum);
-		
-		final Color currentColor = getColorAtIndex(index.integer);
+		Color currentColor = getColorAtIndex(index.integer);
 		visibleBlocks = blocks.stream().filter(block -> block.iteration() > minimum && block.iteration() < maximum).collect(Collectors.toList());
 		visibleBlocks.forEach(block -> {
 			double position = block.iteration() - (block.iteration() - index.integer) / 2.0;
@@ -350,15 +348,15 @@ public class Track {
 			if (!staticObstacleColor && block.isCollectable()) block.color(currentColor);
 		});
 		
-		AnalyzationData peaks = mix.getPeaks();
+		AnalyzedChannel mix = audio.getMix();
+		double ringScale = 5 - 3 * mix.getThreshold().getClamped(iteration);
 		visibleRings = new ArrayList<>();
 		for (int i = minimum; i < maximum; i++) {
-			float peak = peaks.get(i);
+			float flux = mix.getSpectralFlux().getClamped(i);
 			final Color ringColor = getColorAtIndex(i);
 			Placement placement = getPlacement(new Index(i, 0.5), true, 0);
 			placement.direction().negate();
-			if (peak > 0) visibleRings.add(new Ring(ringColor, placement).scale(linearScale));
-			
+			if (flux > 0.2) visibleRings.add(new Ring(ringColor, placement).scale(ringScale));
 		}
 		
 		final float[] spectrum2 = mix.getSpectrum(iteration);
@@ -366,7 +364,7 @@ public class Track {
 		final MinMax minMax = spectraMinMax.get(1);
 		final double linearIntensity = Arithmetic.linearScale(current, 0.1, 1.0, minMax.min, minMax.max);
 		double rotationSpeed = mix.getThreshold().getClamped(iteration) * 360;
-
+		
 		visibleMusicTowers = musicTowers
 			.stream()
 			.filter(musicTower -> musicTower.iteration() > index.integer - 10 && musicTower.iteration() < index.integer + 900)
