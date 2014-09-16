@@ -7,6 +7,7 @@ import audiodrive.model.loader.Model;
 import audiodrive.model.track.Block;
 import audiodrive.model.track.Track;
 import audiodrive.ui.components.Camera;
+import audiodrive.ui.components.Scene;
 import audiodrive.ui.effects.ParticleEffects;
 import audiodrive.ui.scenes.GameScene;
 import audiodrive.ui.scenes.GameScene.State;
@@ -33,7 +34,12 @@ public class Player {
 	private double eyeDistance = 2.0;
 	private double lookShifting = 0.3;
 	private double eyeShifting = 0.5;
+	
 	private double zoom = 1.0;
+	private double zoomTarget = 1.0;
+	private double zoomMinimum = 1.0;
+	private double zoomMaximum = 5.0;
+	private double zoomSpeed = 1.0;
 	
 	private double jumpHeight = 0.05;
 	private double jumpRate = 1.5;
@@ -59,6 +65,10 @@ public class Player {
 		Log.debug("hitpoints " + hitpoints);
 	}
 	
+	public void update() {
+		zoom(true);
+	}
+	
 	public void update(double elapsed) {
 		model.placement(track.getPlacement(scene.playtime()));
 		double newX = model.translation().x();
@@ -76,9 +86,23 @@ public class Player {
 		model.translation().x(Math.max(-maxX, Math.min(maxX, newX)));
 	}
 	
-	private void checkCollisions() {
-		int iteration = track.getIndex(scene.playtime()).integer;
-		track.getBlocks().stream().filter(block -> !block.isDestroyed() && block.iteration() == iteration).forEach(this::interact);
+	private boolean zoom(boolean smooth) {
+		if (zoom == zoomTarget) {
+			return false;
+		}
+		double delta;
+		if (smooth) {
+			double fraction = Arithmetic.scaleLinear(Math.abs(zoomTarget - zoom), 0.1, 1, 0, zoomMaximum - zoomMinimum);
+			delta = Arithmetic.smooth(0, Scene.deltaTime() * 10 * zoomSpeed, fraction);
+		} else {
+			delta = Scene.deltaTime() * 2.0 * zoomSpeed;
+		}
+		if (zoomTarget - zoom > 0) {
+			zoom = Math.min(zoomTarget, zoom + delta);
+		} else {
+			zoom = Math.max(zoomTarget, zoom - delta);
+		}
+		return true;
 	}
 	
 	private boolean tilt(double elapsed, double moved) {
@@ -126,6 +150,11 @@ public class Player {
 		}
 		model.translation().y(Arithmetic.smooth(0, jumpHeight, jumpProgress));
 		return true;
+	}
+	
+	private void checkCollisions() {
+		int iteration = track.getIndex(scene.playtime()).integer;
+		track.getBlocks().stream().filter(block -> !block.isDestroyed() && block.iteration() == iteration).forEach(this::interact);
 	}
 	
 	public void render() {
@@ -182,8 +211,23 @@ public class Player {
 		return damage;
 	}
 	
+	public Player zoomIn(double delta) {
+		zoomTo(zoomTarget - delta);
+		return this;
+	}
+	
+	public Player zoomOut(double delta) {
+		zoomTo(zoomTarget + delta);
+		return this;
+	}
+	
+	public Player zoomTo(double zoom) {
+		zoomTarget = Arithmetic.clamp(zoom, zoomMinimum, zoomMaximum);
+		return this;
+	}
+	
 	public Player zoom(double zoom) {
-		this.zoom = Arithmetic.clamp(zoom, 1.0, 300.0);
+		this.zoom = zoomTarget = Arithmetic.clamp(zoom, zoomMinimum, zoomMaximum);
 		return this;
 	}
 	

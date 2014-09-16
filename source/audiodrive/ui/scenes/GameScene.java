@@ -87,6 +87,7 @@ public class GameScene extends Scene {
 	protected void update(double elapsed) {
 		updateState();
 		overlay.update();
+		player.update();
 		if (state != State.Running) return;
 		time = playback.getTime();
 		track.update(playback.getTime());
@@ -177,6 +178,12 @@ public class GameScene extends Scene {
 		case Keyboard.KEY_LEFT:
 			player.move(-8 * playerSpeed * Scene.deltaTime());
 			break;
+		case Keyboard.KEY_PRIOR:
+			player.zoomOut(10.0 * Scene.deltaTime());
+			break;
+		case Keyboard.KEY_NEXT:
+			player.zoomIn(10.0 * Scene.deltaTime());
+			break;
 		default:
 			break;
 		}
@@ -232,7 +239,7 @@ public class GameScene extends Scene {
 	
 	@Override
 	public void mouseWheelRotated(int rotation, int x, int y) {
-		player.zoom(player.zoom() + rotation * 0.001);
+		player.zoomOut(rotation * 0.01);
 	}
 	
 }
