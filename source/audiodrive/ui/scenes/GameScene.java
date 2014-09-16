@@ -22,6 +22,7 @@ import audiodrive.model.track.Track;
 import audiodrive.ui.GL;
 import audiodrive.ui.components.Camera;
 import audiodrive.ui.components.Scene;
+import audiodrive.ui.components.Window;
 import audiodrive.ui.scenes.overlays.GameOverlay;
 import audiodrive.utilities.Buffers;
 import audiodrive.utilities.Files;
@@ -205,6 +206,9 @@ public class GameScene extends Scene {
 			break;
 		case Keyboard.KEY_P:
 			overlay.togglePeaks();
+			break;
+		case Keyboard.KEY_V:
+			Window.toggleVSync();
 			break;
 		default:
 			break;

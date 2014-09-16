@@ -35,6 +35,8 @@ public class Settings {
 		set("analyzationWindow", "20");
 		set("analyzationThreshold", "1.8");
 		set("staticObstacleColor", "true");
+		set("framerate", "0");
+		set("vsync", "true");
 		try {
 			properties.load(new FileInputStream(filename));
 		} catch (IOException exception) {

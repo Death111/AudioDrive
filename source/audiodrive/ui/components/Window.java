@@ -26,7 +26,7 @@ public class Window {
 	private static boolean fullscreen;
 	private static boolean borderless;
 	private static boolean vSync;
-	private static int framerate = 100;
+	private static int framerate = 0;
 	
 	static {
 		System.setProperty("org.lwjgl.input.Mouse.allowNegativeMouseCoords", "true");
