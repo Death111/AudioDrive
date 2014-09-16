@@ -2,6 +2,10 @@ package audiodrive.ui;
 
 import static org.lwjgl.opengl.GL11.*;
 
+import java.nio.FloatBuffer;
+
+import audiodrive.utilities.Buffers;
+
 public class GL {
 	
 	/** Private constructor to prevent instantiation. */
@@ -23,6 +27,12 @@ public class GL {
 	
 	public static void popAttributes() {
 		glPopAttrib();
+	}
+	
+	public static float getDepth(int x, int y) {
+		FloatBuffer buffer = Buffers.createFloatBuffer(1);
+		glReadPixels(x, y, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, buffer);
+		return buffer.get(0);
 	}
 	
 }

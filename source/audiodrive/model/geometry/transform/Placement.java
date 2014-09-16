@@ -4,7 +4,7 @@ import static org.lwjgl.opengl.GL11.*;
 import audiodrive.model.geometry.Matrix;
 import audiodrive.model.geometry.Vector;
 
-public class Placement extends Transformation {
+public class Placement extends Transformation implements Cloneable {
 	
 	public static final Placement Default = new Placement();
 	
@@ -40,9 +40,9 @@ public class Placement extends Transformation {
 		return direction;
 	}
 	
-	public Placement up(Vector normal) {
+	public Placement up(Vector up) {
 		assertModifiable();
-		up.set(normal);
+		this.up.set(up);
 		update();
 		return this;
 	}
@@ -91,6 +91,11 @@ public class Placement extends Transformation {
 	
 	public boolean isDefault() {
 		return equals(Default);
+	}
+	
+	@Override
+	public Placement clone() {
+		return new Placement().position(position).direction(direction).up(up);
 	}
 	
 	@Override

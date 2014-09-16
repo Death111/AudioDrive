@@ -3,8 +3,6 @@ package audiodrive.ui.scenes;
 import static org.lwjgl.opengl.GL11.*;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
@@ -13,7 +11,6 @@ import audiodrive.AudioDrive;
 import audiodrive.audio.AudioFile;
 import audiodrive.audio.Playback;
 import audiodrive.model.Player;
-import audiodrive.model.geometry.ReflectionPlane;
 import audiodrive.model.geometry.Vector;
 import audiodrive.model.geometry.transform.Rotation;
 import audiodrive.model.geometry.transform.Translation;
@@ -37,7 +34,6 @@ public class GameScene extends Scene {
 	private State state;
 	private Track track;
 	private Player player;
-	private List<ReflectionPlane> reflectionPlanes = new ArrayList<>(2);
 	
 	private Rotation rotation = new Rotation();
 	private Translation translation = new Translation();
@@ -64,9 +60,9 @@ public class GameScene extends Scene {
 		rotation.reset();
 		translation.reset();
 		time = 0;
+		track.player(player);
 		player.update(0);
 		track.update(0);
-		updateReflection();
 		Camera.perspective(45, getWidth(), getHeight(), 0.1, 10000);
 		GL.pushAttributes();
 		glEnable(GL_CULL_FACE);
@@ -93,7 +89,6 @@ public class GameScene extends Scene {
 		time = playback.getTime();
 		track.update(playback.getTime());
 		player.update(elapsed);
-		updateReflection();
 	}
 	
 	private void updateState() {
@@ -109,11 +104,6 @@ public class GameScene extends Scene {
 		}
 	}
 	
-	private void updateReflection() {
-		reflectionPlanes.clear();
-		reflectionPlanes.addAll(track.getReflectionPlanes(playback.getTime()));
-	}
-	
 	@Override
 	protected void render() {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -124,7 +114,6 @@ public class GameScene extends Scene {
 		translation.apply();
 		// rotation.apply();
 		
-		reflectionPlanes.stream().forEach(plane -> plane.reflect(player.model()));
 		track.render();
 		player.render();
 		

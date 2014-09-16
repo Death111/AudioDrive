@@ -17,10 +17,17 @@ import audiodrive.audio.AnalyzedAudio;
 import audiodrive.audio.AnalyzedChannel;
 import audiodrive.audio.MinMax;
 import audiodrive.audio.SpectraMinMax;
+import audiodrive.model.Player;
 import audiodrive.model.Ring;
 import audiodrive.model.buffer.VertexBuffer;
-import audiodrive.model.geometry.*;
+import audiodrive.model.geometry.Color;
+import audiodrive.model.geometry.CuboidStripRenderer;
+import audiodrive.model.geometry.TextureCoordinate;
+import audiodrive.model.geometry.Vector;
+import audiodrive.model.geometry.Vertex;
 import audiodrive.model.geometry.transform.Placement;
+import audiodrive.model.geometry.transform.Rotation;
+import audiodrive.model.loader.Model;
 import audiodrive.model.tower.MusicTower;
 import audiodrive.model.tower.RotationTower;
 import audiodrive.model.tower.SpectralTower;
@@ -73,7 +80,9 @@ public class Track {
 	private Color fallingBorderColor = AudioDrive.Settings.getColor("fallingBorderColor");
 	private boolean staticObstacleColor = AudioDrive.Settings.getBoolean("staticObstacleColor");
 	private List<MusicTower> musicTowers;
-	final List<MinMax> spectraMinMax;
+	private List<MinMax> spectraMinMax;
+	
+	private Player player;
 	
 	private Index index;
 	
@@ -328,8 +337,8 @@ public class Track {
 		leftVertex.textureCoordinate = leftTexture;
 		rightVertex.textureCoordinate = rightTexture;
 		
-		leftVertex.color = new Color(1, 1, 1, .5);
-		rightVertex.color = new Color(1, 1, 1, .5);
+		leftVertex.color = new Color(1, 1, 1, .8);
+		rightVertex.color = new Color(1, 1, 1, .8);
 		
 		splineArea2.add(leftVertex);
 		splineArea2.add(rightVertex);
@@ -420,10 +429,11 @@ public class Track {
 			glLineWidth(2.0f);
 			glDisable(GL_CULL_FACE);
 			splineAreaBuffer.draw();
+			glEnable(GL_CULL_FACE);
 		}
 		
-		glEnable(GL_CULL_FACE);
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		drawReflections();
 		// Draw track
 		if (trackTexture != null) {
 			glEnable(GL_TEXTURE_2D);
@@ -435,15 +445,14 @@ public class Track {
 			glDisable(GL_TEXTURE_2D);
 		}
 		GL.pushAttributes();
-		glDisable(GL_CULL_FACE);
-		glDisable(GL_LIGHTING);
+		// glDisable(GL_LIGHTING);
+		glCullFace(GL_FRONT);
 		splineArea2Buffer.useColor(false);
 		Color.Black.gl();
 		splineArea2Buffer.draw();
 		splineArea2Buffer.useColor(true);
 		GL.popAttributes();
 		// Draw obstacles
-		glEnable(GL_CULL_FACE);
 		
 		visibleMusicTowers.forEach(MusicTower::render);
 		visibleBlocks.forEach(Block::render);
@@ -455,6 +464,56 @@ public class Track {
 		
 		// drawBorderNormals(leftVertexList);
 		// drawBorderNormals(rightVertexList);
+	}
+	
+	private void drawReflections() {
+		glClear(GL_STENCIL_BUFFER_BIT);
+		// write reflection surface to stencil buffer
+		glColorMask(false, false, false, false);
+		glDisable(GL_DEPTH_TEST);
+		glEnable(GL_STENCIL_TEST);
+		glStencilFunc(GL_ALWAYS, 1, 0xffffffff);
+		glStencilOp(GL_REPLACE, GL_REPLACE, GL_REPLACE);
+		splineArea2Buffer.draw();
+		// TODO find better solution
+		// write down-shifted track-area to depth buffer to avoid reflections of hidden objects
+		glEnable(GL_DEPTH_TEST);
+		glDisable(GL_STENCIL_TEST);
+		glTranslated(0, -2 * flightHeight, 0);
+		splineArea2Buffer.draw();
+		glTranslated(0, 2 * flightHeight, 0);
+		// render objects according to stencil buffer
+		glColorMask(true, true, true, true);
+		glEnable(GL_STENCIL_TEST);
+		glStencilFunc(GL_EQUAL, 1, 0xffffffff);
+		glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
+		Model model = player.model();
+		// draw block reflections
+		int range = smoothing * 5;
+		Rotation flip = new Rotation().z(180);
+		Texture originalTexture = Block.Model.getTexture();
+		Block.Model.setTexture(Block.Reflected);
+		blocks.stream().filter(block -> block.iteration() > index.integer - range && block.iteration() < index.integer + range).forEach(block -> {
+			Placement placement = block.placement();
+			Placement originalPlacement = placement.clone();
+			placement.position(placement.position().plus(placement.up().multiplied(-2 * flightHeight)));
+			Block.Model.transformations().add(flip);
+			block.render();
+			Block.Model.transformations().remove(flip);
+			block.placement(originalPlacement);
+		});;
+		Block.Model.setTexture(originalTexture);
+		// draw player reflection
+		Placement placement = model.placement();
+		Placement originalPlacement = placement.clone();
+		placement.position(placement.position().plus(placement.up().multiplied(-2 * flightHeight)));
+		model.rotation().invert();
+		model.transformations().add(flip);
+		model.render();
+		model.transformations().remove(flip);
+		model.rotation().invert();
+		model.placement(originalPlacement);
+		glDisable(GL_STENCIL_TEST);
 	}
 	
 	private void drawBorderNormals(List<Vertex> vertexList) {
@@ -501,28 +560,6 @@ public class Track {
 		return placement;
 	}
 	
-	public List<ReflectionPlane> getReflectionPlanes(double time) {
-		List<ReflectionPlane> planes = new ArrayList<>();
-		Index index = getIndex(time);
-		planes.add(getPlane(index.integer));
-		ReflectionPlane plane = getPlane(index.integer - 1);
-		if (plane != null) planes.add(plane);
-		// if (index.fraction < 0.5) Get.optional(getPlane(index.integer -
-		// 1)).ifPresent(planes::add);
-		// else Get.optional(getPlane(index.integer +
-		// 1)).ifPresent(planes::add);
-		return planes;
-	}
-	
-	private ReflectionPlane getPlane(int index) {
-		if (index < 0 || index * 2 > splineArea.size() - 4) return null;
-		Vector a = splineArea.get(index * 2);
-		Vector b = splineArea.get(index * 2 + 1);
-		Vector c = splineArea.get(index * 2 + 3);
-		Vector d = splineArea.get(index * 2 + 2);
-		return new ReflectionPlane(a, b, c, d);
-	}
-	
 	public AnalyzedAudio getAudio() {
 		return audio;
 	}
@@ -553,6 +590,11 @@ public class Track {
 	
 	public double railWidth() {
 		return width / numberOfRails;
+	}
+	
+	public Track player(Player player) {
+		this.player = player;
+		return this;
 	}
 	
 	public Range getRailRange(int rail) {

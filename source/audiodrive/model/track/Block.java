@@ -2,6 +2,8 @@ package audiodrive.model.track;
 
 import java.util.concurrent.atomic.AtomicLong;
 
+import org.newdawn.slick.opengl.Texture;
+
 import audiodrive.AudioDrive;
 import audiodrive.model.geometry.Color;
 import audiodrive.model.geometry.transform.Placement;
@@ -10,9 +12,10 @@ import audiodrive.model.loader.ModelLoader;
 
 public class Block {
 	
-	private static final Color CollectableColor = AudioDrive.Settings.getColor("collectableColor");
-	private static final Color ObstacleColor = AudioDrive.Settings.getColor("obstacleColor");
-	private static final Model Model = ModelLoader.loadSingleModel("models/obstacle/obstacle").scale(0.1);
+	public static final Color CollectableColor = AudioDrive.Settings.getColor("collectableColor");
+	public static final Color ObstacleColor = AudioDrive.Settings.getColor("obstacleColor");
+	public static final Model Model = ModelLoader.loadSingleModel("models/obstacle/obstacle").scale(0.1);
+	public static final Texture Reflected = ModelLoader.getTexture("models/obstacle/obstacle-reflection.png");
 	
 	private static AtomicLong ID = new AtomicLong();
 	
