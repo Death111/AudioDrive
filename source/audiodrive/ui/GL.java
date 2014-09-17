@@ -4,6 +4,7 @@ import static org.lwjgl.opengl.GL11.*;
 
 import java.nio.FloatBuffer;
 
+import audiodrive.model.geometry.Vector;
 import audiodrive.utilities.Buffers;
 
 public class GL {
@@ -33,6 +34,14 @@ public class GL {
 		FloatBuffer buffer = Buffers.createFloatBuffer(1);
 		glReadPixels(x, y, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, buffer);
 		return buffer.get(0);
+	}
+	
+	public static void rotate(double angle, Vector axis) {
+		glRotated(angle, axis.x(), axis.y(), axis.z());
+	}
+	
+	public static void translate(Vector vector) {
+		glTranslated(vector.x(), vector.y(), vector.z());
 	}
 	
 }

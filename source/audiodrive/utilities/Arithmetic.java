@@ -21,6 +21,11 @@ public class Arithmetic {
 		return value;
 	}
 	
+	public static double significance(double value, double epsilon) {
+		if (Math.abs(value) < epsilon) return 0;
+		return value;
+	}
+	
 	public static double fraction(double value) {
 		return value - (int) value;
 	}

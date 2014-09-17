@@ -154,9 +154,14 @@ public class Player {
 		return true;
 	}
 	
+	private double lastCollisionCheck;
+	
 	private void checkCollisions() {
-		int iteration = track.getIndex(scene.playtime()).integer;
-		track.getBlocks().stream().filter(block -> !block.isDestroyed() && block.iteration() == iteration).forEach(this::interact);
+		int offset = (int) (track.indexRate() / 15);
+		int maximum = track.index().integer + offset;
+		int minimum = track.index().integer - offset - (int) (track.indexRate() * (scene.playtime() - lastCollisionCheck));
+		track.getBlocks().stream().filter(block -> !block.isDestroyed() && (block.iteration() > minimum && block.iteration() < maximum)).forEach(this::interact);
+		lastCollisionCheck = scene.playtime();
 	}
 	
 	public void render() {
@@ -173,7 +178,7 @@ public class Player {
 			CollectSound.play(volume);
 			collected++;
 			Log.trace("collected %1s", block);
-			ParticleEffects.createParticles(block.color(), scene.playtime());
+			ParticleEffects.createParticles(block.color());
 		} else {
 			CollideSound.play(volume);
 			collided++;

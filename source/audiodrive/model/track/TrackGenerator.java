@@ -37,7 +37,8 @@ public class TrackGenerator {
 		}
 		Log.debug(vectorinates.size() + " vectorinates");
 		List<Block> blocks = new ArrayList<>();
-		for (int iteration = 0; iteration < iterationCount; iteration++) {
+		int offset = (int) audio.getIterationRate() / 4;
+		for (int iteration = offset; iteration < iterationCount - offset; iteration++) {
 			float leftPeak = left.getPeaks().getClamped(iteration);
 			float rightPeak = right.getPeaks().getClamped(iteration);
 			Integer rail = determineRail(leftPeak, rightPeak, 0.2);

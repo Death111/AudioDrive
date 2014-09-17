@@ -21,23 +21,20 @@ import audiodrive.ui.components.Camera;
 import audiodrive.ui.components.Scene;
 import audiodrive.ui.components.Window;
 import audiodrive.ui.scenes.overlays.GameOverlay;
-import audiodrive.utilities.Buffers;
-import audiodrive.utilities.CameraPath;
-import audiodrive.utilities.Files;
-import audiodrive.utilities.Log;
+import audiodrive.utilities.*;
 
 public class GameScene extends Scene {
 	
 	public static enum State {
-		Running, Paused, Ended, Destroyed
+		Running, Paused, Resuming, Ended, Destroyed
 	}
 	
 	private State state;
 	private Track track;
 	private Player player;
 	
-	private Rotation rotation = new Rotation();
 	private Translation translation = new Translation();
+	private double rotation = 0;
 	
 	private Playback playback;
 	private GameOverlay overlay;
@@ -69,12 +66,12 @@ public class GameScene extends Scene {
 		player.model().scale(0.05);
 		overlay = new GameOverlay(this);
 		playback = new Playback(track.getAudio().getFile()).setVolume(AudioDrive.Settings.getDouble("music.volume"));
-		rotation.reset();
 		translation.reset();
+		rotation = 0;
 		time = 0;
 		track.player(player);
-		player.update(0);
 		track.update(0);
+		player.update(0);
 		Camera.perspective(45, getWidth(), getHeight(), 0.1, 10000);
 		GL.pushAttributes();
 		glEnable(GL_CULL_FACE);
@@ -97,31 +94,49 @@ public class GameScene extends Scene {
 		endCameraPath = new CameraPath("camera/idle.camera", false); // TODO change end camera animation
 		
 		player.camera();
-		startCameraPath.setOffsets(Camera.eye().clone(), Camera.at().clone());
+		startCameraPath.setOffsets(Camera.eye().clone(), Camera.position().clone());
 		startCameraPath.camera();
 	}
 	
 	@Override
 	protected void update(double elapsed) {
-		updateState();
+		updateRotation(elapsed);
+		checkState();
 		overlay.update();
 		player.update();
 		if (state != State.Running) return;
 		time = playback.getTime();
-		track.update(playback.getTime());
+		track.update(playtime());
 		player.update(elapsed);
 	}
 	
-	private void updateState() {
-		State oldState = state;
-		if (player.damage() >= 100) state = State.Destroyed;
-		else if (track.index().integer == track.lastIndex()) state = State.Ended;
-		else if (!playback.isRunning()) state = State.Paused;
-		else state = State.Running;
-		if (state == oldState) return;
-		if (state == State.Destroyed) {
+	private void updateRotation(double elapsed) {
+		if (state == State.Paused || state == State.Ended) {
+			rotation += 15 * elapsed;
+		} else if (state == State.Resuming) {
+			rotation = Rotation.unify180(rotation);
+			rotation -= Arithmetic.smooth(15 * rotation, 1, Math.abs(rotation) / 360) * elapsed;
+			rotation = Arithmetic.significance(rotation, 0.1);
+		}
+	}
+	
+	private void checkState() {
+		if (state == State.Resuming && rotation == 0) {
+			state = State.Running;
+			if (playback.isPaused()) playback.resume();
+			else playback.start();
+			return;
+		}
+		if (state != State.Running) return;
+		if (player.damage() >= 100) {
+			state = State.Destroyed;
 			playback.stop();
 			new AudioFile("sounds/Destroyed.mp3").play(volume);
+			return;
+		}
+		if (track.index().integer == track.lastIndex()) {
+			state = State.Ended;
+			return;
 		}
 	}
 	
@@ -137,27 +152,31 @@ public class GameScene extends Scene {
 			if (!startCameraPath.isFinished()) {
 				startCameraPath.camera();
 			} else {
-				playback.toggle();
 				playStartAnimation = false;
 			}
 		} else {
 			if (getState() == State.Paused) {
 				// if is pause use pause camera
 				if (pauseCameraPath.isFinished()) {
-					pauseCameraPath.setOffsets(Camera.eye().clone(), Camera.at().clone());
+					pauseCameraPath.setOffsets(Camera.eye().clone(), Camera.position().clone());
 				}
 				pauseCameraPath.camera();
 			} else if (getState() == State.Ended) {
 				// if is pause use pause camera
 				if (endCameraPath.isFinished()) {
-					endCameraPath.setOffsets(Camera.eye().clone(), Camera.at().clone());
+					endCameraPath.setOffsets(Camera.eye().clone(), Camera.position().clone());
 				}
 				endCameraPath.camera();
 			}
 		}
 		
 		translation.apply();
-		// rotation.apply();
+		
+		Vector position = player.model().position().plus(player.model().translation().vector());
+		Translation translation = new Translation().set(position);
+		translation.apply();
+		GL.rotate(rotation, player.model().up());
+		translation.invert().apply();
 		
 		track.render();
 		player.render();
@@ -215,21 +234,31 @@ public class GameScene extends Scene {
 			translation.add(0, -0.01, 0);
 			break;
 		case Keyboard.KEY_RIGHT:
-			player.move(8 * keyboardSpeed * Scene.deltaTime());
+			if (state == State.Paused) rotation -= 90 * deltaTime();
+			else player.move(8 * keyboardSpeed * Scene.deltaTime());
 			break;
 		case Keyboard.KEY_LEFT:
-			player.move(-8 * keyboardSpeed * Scene.deltaTime());
+			if (state == State.Paused) rotation += 90 * deltaTime();
+			else player.move(-8 * keyboardSpeed * Scene.deltaTime());
 			break;
-		case Keyboard.KEY_PRIOR:
-			player.zoomOut(10.0 * Scene.deltaTime());
-			break;
-		case Keyboard.KEY_NEXT:
+		case Keyboard.KEY_UP:
 			player.zoomIn(10.0 * Scene.deltaTime());
+			break;
+		case Keyboard.KEY_DOWN:
+			player.zoomOut(10.0 * Scene.deltaTime());
 			break;
 		default:
 			break;
 		}
-		this.translation.vector().add(rotation.rotate(translation));
+	}
+	
+	public void pause() {
+		if (state == State.Running || state == State.Resuming) {
+			playback.pause();
+			state = State.Paused;
+		} else if (state == State.Paused) {
+			state = State.Resuming;
+		}
 	}
 	
 	@Override
@@ -237,15 +266,14 @@ public class GameScene extends Scene {
 		switch (key) {
 		case Keyboard.KEY_PAUSE:
 			// Only toggle if not in start camera movement
-			if (!playStartAnimation) playback.toggle();
+			if (!playStartAnimation) pause();
 			break;
 		case Keyboard.KEY_ESCAPE:
-			if (state == State.Running) playback.pause();
+			if (state == State.Running) pause();
 			else back();
 			break;
 		case Keyboard.KEY_HOME:
 			translation.reset();
-			rotation.reset();
 			player.zoom(1.0);
 			break;
 		case Keyboard.KEY_P:
@@ -267,18 +295,6 @@ public class GameScene extends Scene {
 	@Override
 	public void mouseDragged(int button, int x, int y, int dx, int dy) {
 		player.move(dx * 0.002 * mouseSpeed);
-		double horizontal = dx * -0.1;
-		double vertical = dy * 0.1;
-		switch (button) {
-		case 0:
-			rotation.xAdd(vertical).yAdd(horizontal);
-			break;
-		case 1:
-			rotation.zAdd(horizontal);
-			break;
-		default:
-			break;
-		}
 	}
 	
 	@Override

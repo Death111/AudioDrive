@@ -40,7 +40,7 @@ public class Playback {
 	
 	/** Resumes the playback if it's not stopped already. */
 	public Playback resume() {
-		if (!isPaused()) throw new RuntimeException("Can't resume the playback if it's not paused.");
+		if (!isPaused()) return this;
 		synchronized (thread) {
 			pause = false;
 			thread.notify();
@@ -50,7 +50,7 @@ public class Playback {
 	
 	/** Pauses the playback if it's not stopped already. */
 	public Playback pause() {
-		if (!isRunning()) throw new RuntimeException("Can't pause the playback if it's not running.");
+		if (!isRunning()) return this;
 		pause = true;
 		return this;
 	}
@@ -73,7 +73,7 @@ public class Playback {
 	/** Stops the playback. Also closes the resources. */
 	public Playback stop() {
 		stop = true;
-		if(pause) resume();
+		if (pause) resume();
 		return this;
 	}
 	
