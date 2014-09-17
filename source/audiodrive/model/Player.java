@@ -178,7 +178,7 @@ public class Player {
 			CollectSound.play(volume);
 			collected++;
 			Log.trace("collected %1s", block);
-			ParticleEffects.createParticles(block.color(), scene.playtime());
+			ParticleEffects.createParticles(block.color());
 		} else {
 			CollideSound.play(volume);
 			collided++;

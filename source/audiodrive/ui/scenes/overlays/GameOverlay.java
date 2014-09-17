@@ -56,6 +56,7 @@ public class GameOverlay extends Overlay {
 	
 	public void update() {
 		trackOverview.updatePlayerPosition(scene.getTrack().index());
+		// specialEffects.visible(scene.getState() != State.Paused);
 		text("time").setText(Format.seconds(scene.playtime()));
 		text("points").setText(String.format("Points: %d / %d (%.0f%%)", player.points(), collectables, 100.0 * player.points() / collectables));
 		text("damage").setText("Damage: " + player.collided() + " / " + player.hitpoints() + " (" + player.damage() + "%)");
@@ -72,6 +73,9 @@ public class GameOverlay extends Overlay {
 		case Paused:
 			notification.setText("Paused").setColor(Color.TransparentBlue);
 			break;
+		case Resuming:
+			notification.setText("Resuming...").setColor(Color.TransparentBlue);
+			break;
 		default:
 			break;
 		}
@@ -83,7 +87,7 @@ public class GameOverlay extends Overlay {
 		Camera.overlay(width, height);
 		super.render();
 		trackOverview.render();
-		specialEffects.render(scene.playtime());
+		specialEffects.render();
 		
 		if (text("notification").isVisible()) drawNotificationBackground();
 		texts.values().forEach(Text::render);

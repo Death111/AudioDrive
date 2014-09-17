@@ -6,8 +6,8 @@ import audiodrive.model.geometry.Vector;
 
 public class Camera {
 	
+	private static Vector position = new Vector();
 	private static Vector eye = new Vector();
-	private static Vector at = new Vector();
 	private static Vector up = new Vector();
 	
 	static {
@@ -19,12 +19,12 @@ public class Camera {
 		throw new IllegalStateException("This class shall not be instantiated.");
 	}
 	
-	public static Vector eye() {
-		return eye;
+	public static Vector position() {
+		return position;
 	}
 	
-	public static Vector at() {
-		return at;
+	public static Vector eye() {
+		return eye;
 	}
 	
 	public static Vector up() {
@@ -34,7 +34,7 @@ public class Camera {
 	public static void reset() {
 		orthograpic(-1, -1, 2, 2, 0, 2);
 		eye.set(0, 0, 1);
-		at.set(0, 0, 0);
+		position.set(0, 0, 0);
 		up.set(0, 1, 0);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glEnable(GL_BLEND);
@@ -74,13 +74,13 @@ public class Camera {
 	}
 	
 	public static void lookAt(Vector position, Vector up) {
-		Camera.at.set(position);
+		Camera.position.set(position);
 		Camera.up.set(up);
 		update();
 	}
 	
 	public static void lookAt(Vector position) {
-		Camera.at.set(position);
+		Camera.position.set(position);
 		update();
 	}
 	
@@ -99,7 +99,16 @@ public class Camera {
 	
 	private static void update() {
 		glLoadIdentity();
-		gluLookAt((float) eye.x(), (float) eye.y(), (float) eye.z(), (float) at.x(), (float) at.y(), (float) at.z(), (float) up.x(), (float) up.y(), (float) up.z());
+		gluLookAt(
+			(float) eye.x(),
+			(float) eye.y(),
+			(float) eye.z(),
+			(float) position.x(),
+			(float) position.y(),
+			(float) position.z(),
+			(float) up.x(),
+			(float) up.y(),
+			(float) up.z());
 	}
 	
 	public static void projection(Runnable runnable) {

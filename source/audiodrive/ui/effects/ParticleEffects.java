@@ -1,6 +1,7 @@
 package audiodrive.ui.effects;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.lwjgl.opengl.Display;
@@ -13,6 +14,7 @@ import audiodrive.model.geometry.Vector;
 import audiodrive.model.geometry.Vertex;
 import audiodrive.model.loader.Model;
 import audiodrive.model.loader.ModelLoader;
+import audiodrive.ui.components.Scene;
 
 public class ParticleEffects {
 	
@@ -23,7 +25,9 @@ public class ParticleEffects {
 	private static int particleCount = 10;
 	
 	private static List<Model> models = null;
-	private static List<ParticleInstance> particles = new ArrayList<>();
+	private static List<ParticleWave> particles = new ArrayList<>();
+	
+	private boolean visible = true;
 	
 	public ParticleEffects() {
 		particleTexture = ModelLoader.getTexture("models/particles/particles.png");
@@ -78,7 +82,7 @@ public class ParticleEffects {
 	 * @param color
 	 * @param time
 	 */
-	public static void createParticles(Color color, double time) {
+	public static void createParticles(Color color) {
 		
 		final ArrayList<Particle> particleList = new ArrayList<Particle>(particleCount);
 		final int x = (int) (Math.random() * Display.getWidth());
@@ -93,24 +97,30 @@ public class ParticleEffects {
 			particleList.add(particle);
 		}
 		
-		final ParticleInstance particleInstanz = new ParticleInstance(particleList, time);
-		particles.add(particleInstanz);
+		final ParticleWave wave = new ParticleWave(particleList);
+		particles.add(wave);
 	}
 	
-	public void render(double time) {
-		List<ParticleInstance> toDelete = new ArrayList<ParticleInstance>(0);
-		
+	public void render() {
+		if (!visible) return;
+		Iterator<ParticleWave> iterator = particles.iterator();
 		// TODO somehow draw behind the track
-		for (ParticleInstance particleInstanz : particles) {
-			particleInstanz.render(time);
-			// Check if needed to delete particle
-			if (particleInstanz.lifeTime < particleInstanz.elapsedTime) {
-				toDelete.add(particleInstanz);
-			}
+		while (iterator.hasNext()) {
+			ParticleWave particle = iterator.next();
+			if (particle.lifeTime < particle.elapsedTime) iterator.remove();
+			else particle.render();
 		}
-		
-		particles.removeAll(toDelete);
 	}
+	
+	public ParticleEffects visible(boolean visible) {
+		this.visible = visible;
+		return this;
+	}
+	
+	public boolean visible() {
+		return visible;
+	}
+	
 }
 
 class Particle {
@@ -177,19 +187,19 @@ class Particle {
 	}
 }
 
-class ParticleInstance {
+class ParticleWave {
 	List<Particle> particles;
 	double startTime;
 	double lifeTime = 2;
 	double elapsedTime;
 	
-	public ParticleInstance(List<Particle> particles, double startTime) {
-		this.startTime = startTime;
+	public ParticleWave(List<Particle> particles) {
+		startTime = Scene.time();
 		this.particles = particles;
 	}
 	
-	public void render(double time) {
-		this.elapsedTime = time - startTime;
+	public void render() {
+		elapsedTime = Scene.time() - startTime;
 		final double d = (1f / lifeTime); // multiplicator for alpha fading
 		for (Particle particle : particles) {
 			final double factor = particle.speed * elapsedTime;
