@@ -1,13 +1,10 @@
 package audiodrive.ui.scenes;
 
-import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL11.GL_COLOR_BUFFER_BIT;
+import static org.lwjgl.opengl.GL11.glClear;
 
 import java.io.File;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import javax.swing.filechooser.FileSystemView;
 
@@ -115,7 +112,7 @@ public class AudioSelectionScene extends Scene implements ItemListener {
 	 */
 	private void updateItemExplorer(File rootFile) {
 		currentFolderText.setText("Current folder: " + rootFile.getAbsolutePath());
-		AudioDrive.Settings.set("audio.directory", rootFile.getPath());
+		AudioDrive.Settings.set("music.directory", rootFile.getPath());
 		final File[] listFiles = rootFile.listFiles();
 		itemMap.clear();
 		itemMenu.removeAllItems();
