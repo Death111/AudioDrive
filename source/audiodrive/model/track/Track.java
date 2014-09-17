@@ -454,13 +454,14 @@ public class Track {
 		
 		visibleMusicTowers.forEach(MusicTower::render);
 		visibleBlocks.forEach(Block::render);
-		glDisable(GL_CULL_FACE);
-		visibleRings.forEach(Ring::render);
-		glEnable(GL_CULL_FACE);
 		
 		// Draw borders
 		leftBorderVertexBuffer.draw();
 		rightBorderVertexBuffer.draw();
+		
+		glDisable(GL_CULL_FACE);
+		visibleRings.forEach(Ring::render);
+		glEnable(GL_CULL_FACE);
 		
 		// drawBorderNormals(leftVertexList);
 		// drawBorderNormals(rightVertexList);
