@@ -386,12 +386,13 @@ public class Track {
 			Placement a = getPlacement(new Index(musicTower.iteration(), 0), true, 0);
 			if (musicTower instanceof RotationTower) {
 				((RotationTower) musicTower).rotation(rotationSpeed);
-				a.position().yAdd(10);
+				a.position().yAdd(15);
 			} else {
 				a.position().xAdd((((int) f) % 2 == 0) ? -50 : 50).zAdd(-50);
 			}
 			// a.direction(Vector.Z);
-			if (!(musicTower instanceof SpectralTower)) musicTower.intensity(linearIntensity);
+			if (musicTower instanceof TubeTower) musicTower.intensity(linearIntensity);
+			else if (musicTower instanceof RotationTower) musicTower.intensity(Math.min(linearIntensity + 0.5, 1));
 			musicTower.placement(a).color(currentColor);
 		});
 		
