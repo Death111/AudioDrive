@@ -364,21 +364,22 @@ public class Track {
 		});
 		
 		AnalyzedChannel mix = audio.getMix();
-		double ringScale = 5 - 3 * mix.getThreshold().getClamped(iteration);
+		double additionalRingScale = 0.5 * mix.getPeaks().getClamped(iteration);
 		visibleRings = new ArrayList<>();
 		for (int i = minimum; i < maximum; i++) {
-			float flux = mix.getSpectralFlux().getClamped(i);
+			double baseRingScale = 5 - 3 * mix.getThreshold().getClamped(i);
+			float peak = mix.getPeaks().getClamped(i);
 			final Color ringColor = getColorAtIndex(i);
 			Placement placement = getPlacement(new Index(i, 0.5), true, 0);
 			placement.direction().negate();
-			if (flux > 0.2) visibleRings.add(new Ring(ringColor, placement).scale(ringScale));
+			if (peak > 0) visibleRings.add(new Ring(ringColor, placement).scale(baseRingScale + additionalRingScale));
 		}
 		
 		float[] spectrum2 = mix.getSpectrum(iteration);
 		float current = spectrum2[1];
 		MinMax minMax = spectraMinMax.get(1);
-		double linearIntensity = Arithmetic.scaleLinear(current, 0.1, 1.0, minMax.min, minMax.max);
-		double rotationSpeed = mix.getThreshold().getClamped(iteration) * 360;
+		double linearIntensity = Arithmetic.scaleLinear(current, 0.5, 1.0, minMax.min, minMax.max);
+		double rotationSpeed = mix.getSpectralSum().getClamped(iteration) * 360;
 		
 		visibleMusicTowers = musicTowers
 			.stream()
