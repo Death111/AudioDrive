@@ -86,9 +86,22 @@ public class AudioSelectionScene extends Scene implements ItemListener {
 		// Setup start node
 		updateItemExplorer(new File(AudioDrive.Settings.get("music.directory")));
 		
-		FileChooserItem defaultFCI = new FileChooserItem("default", true, this);
-		rootMenu.addItem(defaultFCI);
-		rootMap.put(defaultFCI, new File("music"));
+		// Adding default item do list
+		final File defaultFile = new File("music");
+		if (defaultFile.exists()) {
+			FileChooserItem defaultFCI = new FileChooserItem("default", true, this);
+			rootMenu.addItem(defaultFCI);
+			rootMap.put(defaultFCI, defaultFile);
+		}
+		
+		// Adding 'My Music' to list
+		final File myMusicFile = new File(System.getProperty("user.home") + "\\music");
+		if (myMusicFile.exists()) {
+			FileChooserItem myMusicFCI = new FileChooserItem("My Music", true, this);
+			rootMenu.addItem(myMusicFCI);
+			rootMap.put(myMusicFCI, myMusicFile);
+		}
+		// Adding all roots to list
 		for (File file : File.listRoots()) {
 			final boolean directory = file.isDirectory();
 			if (!directory) {
