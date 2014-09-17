@@ -22,6 +22,7 @@ import audiodrive.ui.components.Scene;
 import audiodrive.ui.components.Window;
 import audiodrive.ui.scenes.overlays.GameOverlay;
 import audiodrive.utilities.Buffers;
+import audiodrive.utilities.CameraPath;
 import audiodrive.utilities.Files;
 import audiodrive.utilities.Log;
 
@@ -40,6 +41,11 @@ public class GameScene extends Scene {
 	
 	private Playback playback;
 	private GameOverlay overlay;
+	
+	private CameraPath startCameraPath;
+	private CameraPath pauseCameraPath;
+	private CameraPath endCameraPath;
+	private boolean playStartAnimation = true;
 	
 	private double time;
 	private double keyboardSpeed;
@@ -85,6 +91,14 @@ public class GameScene extends Scene {
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glEnable(GL_LIGHTING);
 		Mouse.setGrabbed(true);
+		playStartAnimation = true;
+		startCameraPath = new CameraPath("camera/start.camera", false);
+		pauseCameraPath = new CameraPath("camera/idle.camera", false);
+		endCameraPath = new CameraPath("camera/idle.camera", false); // TODO change end camera animation
+		
+		player.camera();
+		startCameraPath.setOffsets(Camera.eye().clone(), Camera.at().clone());
+		startCameraPath.camera();
 	}
 	
 	@Override
@@ -116,7 +130,31 @@ public class GameScene extends Scene {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		
 		Camera.perspective(45, getWidth(), getHeight(), 0.1, 10000);
+		
 		player.camera();
+		
+		if (playStartAnimation) {
+			if (!startCameraPath.isFinished()) {
+				startCameraPath.camera();
+			} else {
+				playback.toggle();
+				playStartAnimation = false;
+			}
+		} else {
+			if (getState() == State.Paused) {
+				// if is pause use pause camera
+				if (pauseCameraPath.isFinished()) {
+					pauseCameraPath.setOffsets(Camera.eye().clone(), Camera.at().clone());
+				}
+				pauseCameraPath.camera();
+			} else if (getState() == State.Ended) {
+				// if is pause use pause camera
+				if (endCameraPath.isFinished()) {
+					endCameraPath.setOffsets(Camera.eye().clone(), Camera.at().clone());
+				}
+				endCameraPath.camera();
+			}
+		}
 		
 		translation.apply();
 		// rotation.apply();
@@ -198,7 +236,8 @@ public class GameScene extends Scene {
 	public void keyReleased(int key, char character) {
 		switch (key) {
 		case Keyboard.KEY_PAUSE:
-			playback.toggle();
+			// Only toggle if not in start camera movement
+			if (!playStartAnimation) playback.toggle();
 			break;
 		case Keyboard.KEY_ESCAPE:
 			if (state == State.Running) playback.pause();
