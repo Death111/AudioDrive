@@ -73,6 +73,7 @@ public class Playback {
 	/** Stops the playback. Also closes the resources. */
 	public Playback stop() {
 		stop = true;
+		if(pause) resume();
 		return this;
 	}
 	
@@ -194,6 +195,7 @@ public class Playback {
 				ended();
 			};
 		};
+		thread.setName("Playback Thread");
 	}
 	
 	private void open() {

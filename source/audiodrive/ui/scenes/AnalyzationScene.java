@@ -33,11 +33,13 @@ public class AnalyzationScene extends Scene {
 		shader = new ShaderProgram("shaders/default.vs", "shaders/analyzation.fs");
 		Camera.overlay(getWidth(), getHeight());
 		analyzer = new AudioAnalyzer();
-		new Thread(() -> {
+		Thread thread = new Thread(() -> {
 			Log.info("analyzing audio...");
 			analyzer.analyze(file);
 			Log.info("analyzation complete");
-		}).start();
+		});
+		thread.setName("Analyzation Thread");
+		thread.start();
 	}
 	
 	@Override
