@@ -20,11 +20,7 @@ import audiodrive.audio.SpectraMinMax;
 import audiodrive.model.Player;
 import audiodrive.model.Ring;
 import audiodrive.model.buffer.VertexBuffer;
-import audiodrive.model.geometry.Color;
-import audiodrive.model.geometry.CuboidStripRenderer;
-import audiodrive.model.geometry.TextureCoordinate;
-import audiodrive.model.geometry.Vector;
-import audiodrive.model.geometry.Vertex;
+import audiodrive.model.geometry.*;
 import audiodrive.model.geometry.transform.Placement;
 import audiodrive.model.geometry.transform.Rotation;
 import audiodrive.model.loader.Model;
@@ -111,7 +107,7 @@ public class Track {
 	private void generateTowers() {
 		int spacing = 300;
 		musicTowers = new ArrayList<>();
-		for (int iteration = 0; iteration < audio.getIterationCount(); iteration += spacing) {
+		for (int iteration = spacing; iteration < audio.getIterationCount(); iteration += spacing) {
 			float peak = audio.getMix().getThreshold().getClamped(iteration);
 			if (peak > 0.7) musicTowers.add(new TubeTower(iteration));
 			else if (peak > 0.3) musicTowers.add(new SpectralTower(iteration));
@@ -378,7 +374,7 @@ public class Track {
 		float[] spectrum2 = mix.getSpectrum(iteration);
 		float current = spectrum2[1];
 		MinMax minMax = spectraMinMax.get(1);
-		double linearIntensity = Arithmetic.scaleLinear(current, 0.5, 1.0, minMax.min, minMax.max);
+		double linearIntensity = Arithmetic.scaleLinear(current, 0.1, 1.0, minMax.min, minMax.max);
 		double rotationSpeed = mix.getSpectralSum().getClamped(iteration) * 360;
 		
 		visibleMusicTowers = musicTowers
