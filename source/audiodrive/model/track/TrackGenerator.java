@@ -38,15 +38,18 @@ public class TrackGenerator {
 		Log.debug(vectorinates.size() + " vectorinates");
 		List<Block> blocks = new ArrayList<>();
 		int offset = (int) audio.getIterationRate() / 4;
+		Block last = null;
 		for (int iteration = offset; iteration < iterationCount - offset; iteration++) {
 			float leftPeak = left.getPeaks().getClamped(iteration);
 			float rightPeak = right.getPeaks().getClamped(iteration);
 			Integer rail = determineRail(leftPeak, rightPeak, 0.2);
 			if (rail != null) {
-				blocks.add(new Block(true, iteration, rail));
+				blocks.add(last = new Block(true, iteration, rail));
 			} else {
 				rail = determineRail(leftPeak, rightPeak, 0.1);
-				if (rail != null) blocks.add(new Block(false, iteration, rail));
+				if (rail == null) continue;
+				boolean collectable = (last != null) ? (iteration - last.iteration() < 2 && last.rail() == rail) : false;
+				if (rail != null) blocks.add(new Block(collectable, iteration, rail));
 			}
 		}
 		Log.debug(blocks.size() + " blocks");
