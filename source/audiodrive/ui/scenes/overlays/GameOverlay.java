@@ -62,7 +62,7 @@ public class GameOverlay extends Overlay {
 		text("damage").setText("Damage: " + player.collided() + " / " + player.hitpoints() + " (" + player.damage() + "%)");
 		text("collected").setText(String.format("Collected: %.1f%%", 100.0 * player.collected() / collectables));
 		text("collided").setText(String.format("Collided: %.1f%%", 100.0 * player.collided() / obstacles));
-		Text notification = text("notification").setVisible(scene.getState() != State.Running);
+		Text notification = text("notification").setVisible(scene.getState() != State.Running && scene.getState() != State.Animating);
 		switch (scene.getState()) {
 		case Destroyed:
 			notification.setText("Destroyed").setColor(Color.TransparentRed);

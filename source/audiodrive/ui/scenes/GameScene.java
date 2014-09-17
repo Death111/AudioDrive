@@ -21,12 +21,16 @@ import audiodrive.ui.components.Camera;
 import audiodrive.ui.components.Scene;
 import audiodrive.ui.components.Window;
 import audiodrive.ui.scenes.overlays.GameOverlay;
-import audiodrive.utilities.*;
+import audiodrive.utilities.Arithmetic;
+import audiodrive.utilities.Buffers;
+import audiodrive.utilities.CameraPath;
+import audiodrive.utilities.Files;
+import audiodrive.utilities.Log;
 
 public class GameScene extends Scene {
 	
 	public static enum State {
-		Running, Paused, Resuming, Ended, Destroyed
+		Animating, Running, Paused, Resuming, Ended, Destroyed
 	}
 	
 	private State state;
@@ -40,9 +44,6 @@ public class GameScene extends Scene {
 	private GameOverlay overlay;
 	
 	private CameraPath startCameraPath;
-	private CameraPath pauseCameraPath;
-	private CameraPath endCameraPath;
-	private boolean playStartAnimation = true;
 	
 	private double time;
 	private double keyboardSpeed;
@@ -60,7 +61,6 @@ public class GameScene extends Scene {
 		keyboardSpeed = AudioDrive.Settings.getDouble("input.keyboard.speed");
 		mouseSpeed = AudioDrive.Settings.getDouble("input.mouse.speed");
 		volume = AudioDrive.Settings.getDouble("sound.volume");
-		state = State.Paused;
 		File model = Files.find("models/player", AudioDrive.Settings.get("player.model") + ".obj").orElse(Files.list("models/player", ".obj", true).get(0));
 		player = new Player(this).model(ModelLoader.loadSingleModel(model.getPath()));
 		player.model().scale(0.05);
@@ -88,20 +88,17 @@ public class GameScene extends Scene {
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glEnable(GL_LIGHTING);
 		Mouse.setGrabbed(true);
-		playStartAnimation = true;
-		startCameraPath = new CameraPath("camera/start.camera", false);
-		pauseCameraPath = new CameraPath("camera/idle.camera", false);
-		endCameraPath = new CameraPath("camera/idle.camera", false); // TODO change end camera animation
-		
 		player.camera();
+		startCameraPath = new CameraPath("camera/start.camera", false);
 		startCameraPath.setOffsets(Camera.eye().clone(), Camera.position().clone());
 		startCameraPath.camera();
+		state = State.Animating;
 	}
 	
 	@Override
 	protected void update(double elapsed) {
-		updateRotation(elapsed);
 		checkState();
+		updateRotation(elapsed);
 		overlay.update();
 		player.update();
 		if (state != State.Running) return;
@@ -110,17 +107,14 @@ public class GameScene extends Scene {
 		player.update(elapsed);
 	}
 	
-	private void updateRotation(double elapsed) {
-		if (state == State.Paused || state == State.Ended) {
-			rotation += 15 * elapsed;
-		} else if (state == State.Resuming) {
-			rotation = Rotation.unify180(rotation);
-			rotation -= Arithmetic.smooth(15 * rotation, 1, Math.abs(rotation) / 360) * elapsed;
-			rotation = Arithmetic.significance(rotation, 0.1);
-		}
-	}
-	
 	private void checkState() {
+		if (state == State.Animating) {
+			if (startCameraPath.isFinished()) {
+				state = State.Running;
+				playback.start();
+			}
+			return;
+		}
 		if (state == State.Resuming && rotation == 0) {
 			state = State.Running;
 			if (playback.isPaused()) playback.resume();
@@ -140,35 +134,23 @@ public class GameScene extends Scene {
 		}
 	}
 	
+	private void updateRotation(double elapsed) {
+		if (state == State.Paused || state == State.Ended) {
+			rotation += 15 * elapsed;
+		} else if (state == State.Resuming) {
+			rotation = Rotation.unify180(rotation);
+			rotation -= Arithmetic.smooth(15 * rotation, 1, Math.abs(rotation) / 360) * elapsed;
+			rotation = Arithmetic.significance(rotation, 0.1);
+		}
+	}
+	
 	@Override
 	protected void render() {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		
 		Camera.perspective(45, getWidth(), getHeight(), 0.1, 10000);
-		
-		player.camera();
-		
-		if (playStartAnimation) {
-			if (!startCameraPath.isFinished()) {
-				startCameraPath.camera();
-			} else {
-				playStartAnimation = false;
-			}
-		} else {
-			if (getState() == State.Paused) {
-				// if is pause use pause camera
-				if (pauseCameraPath.isFinished()) {
-					pauseCameraPath.setOffsets(Camera.eye().clone(), Camera.position().clone());
-				}
-				pauseCameraPath.camera();
-			} else if (getState() == State.Ended) {
-				// if is pause use pause camera
-				if (endCameraPath.isFinished()) {
-					endCameraPath.setOffsets(Camera.eye().clone(), Camera.position().clone());
-				}
-				endCameraPath.camera();
-			}
-		}
+		if (state == State.Animating) startCameraPath.camera();
+		else player.camera();
 		
 		translation.apply();
 		
@@ -180,7 +162,6 @@ public class GameScene extends Scene {
 		
 		track.render();
 		player.render();
-		
 		overlay.render();
 	}
 	
@@ -265,8 +246,7 @@ public class GameScene extends Scene {
 	public void keyReleased(int key, char character) {
 		switch (key) {
 		case Keyboard.KEY_PAUSE:
-			// Only toggle if not in start camera movement
-			if (!playStartAnimation) pause();
+			if (state != State.Animating) pause();
 			break;
 		case Keyboard.KEY_ESCAPE:
 			if (state == State.Running) pause();
