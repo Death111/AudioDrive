@@ -349,8 +349,8 @@ public class Track {
 		int preview = 250;
 		int review = 10;
 		index = getIndex(time);
-		int minimum = Math.max(index.integer - review, 5);
-		int maximum = Math.min(index.integer + preview, spline.size() - 2);
+		int minimum = Math.max(index.integer - review, 0);
+		int maximum = Math.min(index.integer + preview, lastIndex());
 		
 		int iteration = (int) (audio.getIterationRate() * time);
 		if (iteration >= audio.getIterationCount()) iteration = audio.getIterationCount() - 1;
@@ -538,8 +538,12 @@ public class Track {
 		return spline.size() - 2;
 	}
 	
+	public double indexRate() {
+		return spline.size() / audio.getDuration();
+	}
+	
 	public Index getIndex(double time) {
-		double index = time * spline.size() / audio.getDuration();
+		double index = time * indexRate();
 		if (index >= spline.size() - 1) index = spline.size() - 2;
 		int integer = (int) index;
 		double fraction = index - integer;

@@ -67,8 +67,8 @@ public class GameScene extends Scene {
 		translation.reset();
 		time = 0;
 		track.player(player);
-		player.update(0);
 		track.update(0);
+		player.update(0);
 		Camera.perspective(45, getWidth(), getHeight(), 0.1, 10000);
 		GL.pushAttributes();
 		glEnable(GL_CULL_FACE);
