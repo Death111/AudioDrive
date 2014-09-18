@@ -14,6 +14,7 @@ import audiodrive.model.geometry.Vector;
 import audiodrive.model.geometry.Vertex;
 import audiodrive.model.loader.Model;
 import audiodrive.model.loader.ModelLoader;
+import audiodrive.model.track.Block;
 import audiodrive.ui.components.Scene;
 
 public class ParticleEffects {
@@ -79,17 +80,17 @@ public class ParticleEffects {
 	/**
 	 * Creates a particle instance with the given color
 	 * 
-	 * @param color
+	 * @param block.color()
 	 * @param time
 	 */
-	public static void createParticles(Color color) {
+	public static void createParticles(Block block) {
 		
 		final ArrayList<Particle> particleList = new ArrayList<Particle>(particleCount);
-		final int x = (int) (Math.random() * Display.getWidth());
+		final int x = (int) (Display.getWidth() / 2 + Display.getWidth() / 3 * block.rail());
 		final Vector startPosition = new Vector(x, -50, 0);
 		for (int i = 0; i < particleCount; i++) {
 			Particle particle = new Particle();
-			particle.color = Color.generateRandomColor(color);
+			particle.color = Color.generateRandomColor(block.color());
 			particle.model = models.get(i % models.size());
 			particle.startPosition = startPosition;
 			particle.speed = Display.getWidth() * (float) (1f + Math.random());
