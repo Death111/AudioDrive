@@ -90,8 +90,7 @@ public class GameScene extends Scene {
 		Mouse.setGrabbed(true);
 		player.camera();
 		startCameraPath = new CameraPath("camera/start.camera", false);
-		startCameraPath.setOffsets(Camera.eye().clone(), Camera.position().clone());
-		startCameraPath.camera();
+		startCameraPath.setOffsets(Camera.eye(), Camera.position()); // TODO Nico, is switching eye and position intended?
 		state = State.Animating;
 	}
 	
@@ -135,7 +134,7 @@ public class GameScene extends Scene {
 	}
 	
 	private void updateRotation(double elapsed) {
-		if (state == State.Paused || state == State.Ended) {
+		if (rotateable()) {
 			rotation += 15 * elapsed;
 		} else if (state == State.Resuming) {
 			rotation = Rotation.unify180(rotation);
@@ -192,6 +191,10 @@ public class GameScene extends Scene {
 		return time;
 	}
 	
+	public boolean rotateable() {
+		return state == State.Paused || state == State.Destroyed || state == State.Ended;
+	}
+	
 	@Override
 	public void keyPressed(int key, char character) {
 		Vector translation = new Vector();
@@ -215,11 +218,11 @@ public class GameScene extends Scene {
 			translation.add(0, -0.01, 0);
 			break;
 		case Keyboard.KEY_RIGHT:
-			if (state == State.Paused) rotation -= 90 * deltaTime();
+			if (rotateable()) rotation -= 90 * deltaTime();
 			else player.move(8 * keyboardSpeed * Scene.deltaTime());
 			break;
 		case Keyboard.KEY_LEFT:
-			if (state == State.Paused) rotation += 90 * deltaTime();
+			if (rotateable()) rotation += 90 * deltaTime();
 			else player.move(-8 * keyboardSpeed * Scene.deltaTime());
 			break;
 		case Keyboard.KEY_UP:
@@ -250,6 +253,7 @@ public class GameScene extends Scene {
 			break;
 		case Keyboard.KEY_ESCAPE:
 			if (state == State.Running) pause();
+			else if (state == State.Animating) startCameraPath.skip();
 			else back();
 			break;
 		case Keyboard.KEY_HOME:

@@ -1,6 +1,11 @@
 package audiodrive.utilities;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.DataInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -8,16 +13,19 @@ import audiodrive.Resources;
 import audiodrive.model.geometry.Matrix;
 import audiodrive.model.geometry.Vector;
 import audiodrive.ui.components.Camera;
+import audiodrive.ui.components.Scene;
 
 public class CameraPath {
 	
-	private double unitsPerSecond;
+	private double duration;
+	private double frameRate;
+	private int frameCount;
 	private int sourceWidth;
 	private int sourceHeight;
 	private int sourcePixelAspectRatio;
 	private int compPixelAspectRatio;
+	private boolean reverse = false;
 	
-	private int frameCount;
 	private List<Vector> positions = null;
 	private List<Vector> pointOfInterests = null;
 	private List<Vector> orientations = null;
@@ -25,13 +33,13 @@ public class CameraPath {
 	private Vector offsetLookAt;
 	private Vector offsetPosition;
 	
-	double start = Double.NaN;
+	double time;
 	
 	/**
 	 * Creates a camera path from the given filename
 	 * 
 	 * @param filePath Path to camera file
-	 * @param startsWithFirst if true will subtract all coordinates with the first vector, otherwise with the last
+	 * @param reverse if true, play the animation backwards
 	 */
 	public CameraPath(String filePath, boolean startsWithFirst) {
 		final File file = Resources.getFile(filePath);
@@ -63,19 +71,19 @@ public class CameraPath {
 				
 				switch (tokens[1]) {
 				case "Units Per Second":
-					this.unitsPerSecond = Double.parseDouble(tokens[2]);
+					frameRate = Double.parseDouble(tokens[2]);
 					break;
 				case "Source Width":
-					this.sourceWidth = Integer.parseInt(tokens[2]);
+					sourceWidth = Integer.parseInt(tokens[2]);
 					break;
 				case "Source Height":
-					this.sourceHeight = Integer.parseInt(tokens[2]);
+					sourceHeight = Integer.parseInt(tokens[2]);
 					break;
 				case "Source Pixel Aspect Ratio":
-					this.sourcePixelAspectRatio = Integer.parseInt(tokens[2]);
+					sourcePixelAspectRatio = Integer.parseInt(tokens[2]);
 					break;
 				case "Comp Pixel Aspect Ratio":
-					this.compPixelAspectRatio = Integer.parseInt(tokens[2]);
+					compPixelAspectRatio = Integer.parseInt(tokens[2]);
 					break;
 				}
 				
@@ -104,17 +112,20 @@ public class CameraPath {
 		}
 		
 		frameCount = Math.min(positions.size(), pointOfInterests.size());
+		duration = frameCount / frameRate;
+		
 		int index = (startsWithFirst) ? 0 : frameCount - 1;
 		resetToFirst(positions, index);
 		resetToFirst(pointOfInterests, index);
 		
-		Log.debug("Loaded cameraPath('%s'): %s fps, %s frames.", filePath, unitsPerSecond, frameCount);
+		Log.debug("Loaded cameraPath('%s'): %s fps, %s frames, %.1f seconds.", filePath, frameRate, frameCount, duration);
 		
+		reset();
 	}
 	
 	public CameraPath setOffsets(Vector offsetPosition, Vector offsetLookAt) {
-		this.offsetLookAt = offsetLookAt;
-		this.offsetPosition = offsetPosition;
+		this.offsetPosition = offsetPosition.clone();
+		this.offsetLookAt = offsetLookAt.clone();
 		return this;
 	}
 	
@@ -122,31 +133,29 @@ public class CameraPath {
 	 * Call to set camera appropriate to current frame-position
 	 */
 	public void camera() {
-		Vector cameraPosition = null;
-		Vector cameraLookAt = null;
+		if (isFinished()) return;
+		time += Scene.deltaTime();
 		
-		if (isFinished()) {
-			start = System.currentTimeMillis() / 1000.0;
-		}
-		
-		final double d = System.currentTimeMillis() / 1000.0 - start;
-		int index = (int) (d * unitsPerSecond);
-		if (index >= frameCount) {
-			cameraPosition = positions.get(frameCount - 1).clone();
-			cameraLookAt = pointOfInterests.get(frameCount - 1).clone();
-			start = Double.NaN;
-		} else {
-			cameraPosition = positions.get(index).clone();
-			cameraLookAt = pointOfInterests.get(index).clone();
-		}
+		int index = Arithmetic.clamp((int) Math.round(time * frameRate), 0, frameCount - 1);
+		if (reverse) index = frameCount - 1 - index;
+		Vector cameraPosition = positions.get(index);
+		Vector cameraLookAt = pointOfInterests.get(index);
 		
 		final Vector up = Vector.Y;// TODO calculate up vector
-		Camera.position(cameraPosition.add(offsetPosition));
-		Camera.lookAt(cameraLookAt.add(offsetLookAt), up);
+		Camera.position(offsetPosition.plus(cameraPosition));
+		Camera.lookAt(offsetLookAt.plus(cameraLookAt), up);
 	}
 	
 	public boolean isFinished() {
-		return Double.isNaN(start);
+		return time >= duration;
+	}
+	
+	public void skip() {
+		time = duration - 0.8;
+	}
+	
+	public void reset() {
+		time = 0;
 	}
 	
 	private void resetToFirst(List<Vector> list, int offsetIndex) {
