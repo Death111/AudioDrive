@@ -348,21 +348,20 @@ public class Track {
 	}
 	
 	public void update(double time) {
-		int preview = 250;
-		int review = 10;
+		int preview = 150;
+		int review = 100;
 		index = getIndex(time);
 		int minimum = Math.max(index.integer - review, 0);
 		int maximum = Math.min(index.integer + preview, lastIndex());
 		
 		int iteration = (int) (audio.getIterationRate() * time);
 		if (iteration >= audio.getIterationCount()) iteration = audio.getIterationCount() - 1;
-		final int finalIndex = index.integer;
 		Color currentColor = getColorAtIndex(index.integer);
 		visibleBlocks = blocks.stream().filter(block -> block.iteration() > minimum && block.iteration() < maximum).collect(Collectors.toList());
 		visibleBlocks.forEach(block -> {
 			double position = block.iteration() - (block.iteration() - index.integer) / 2.0;
 			block.placement(getPlacement(new Index((int) position, position - (int) position), true, block.rail()));
-			block.update(finalIndex);
+			block.update(index.integer);
 			if (!staticCollectableColor && block.isCollectable()) block.color(currentColor);
 		});
 		
