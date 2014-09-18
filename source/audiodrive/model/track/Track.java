@@ -20,7 +20,11 @@ import audiodrive.audio.SpectraMinMax;
 import audiodrive.model.Player;
 import audiodrive.model.Ring;
 import audiodrive.model.buffer.VertexBuffer;
-import audiodrive.model.geometry.*;
+import audiodrive.model.geometry.Color;
+import audiodrive.model.geometry.CuboidStripRenderer;
+import audiodrive.model.geometry.TextureCoordinate;
+import audiodrive.model.geometry.Vector;
+import audiodrive.model.geometry.Vertex;
 import audiodrive.model.geometry.transform.Placement;
 import audiodrive.model.geometry.transform.Rotation;
 import audiodrive.model.loader.Model;
@@ -350,12 +354,13 @@ public class Track {
 		
 		int iteration = (int) (audio.getIterationRate() * time);
 		if (iteration >= audio.getIterationCount()) iteration = audio.getIterationCount() - 1;
+		final int finalIndex = index.integer;
 		Color currentColor = getColorAtIndex(index.integer);
 		visibleBlocks = blocks.stream().filter(block -> block.iteration() > minimum && block.iteration() < maximum).collect(Collectors.toList());
 		visibleBlocks.forEach(block -> {
 			double position = block.iteration() - (block.iteration() - index.integer) / 2.0;
 			block.placement(getPlacement(new Index((int) position, position - (int) position), true, block.rail()));
-			block.placement().direction().negate(); // flip direction for logo
+			block.update(finalIndex);
 			if (!staticCollectableColor && block.isCollectable()) block.color(currentColor);
 		});
 		
@@ -492,18 +497,18 @@ public class Track {
 		// draw block reflections
 		int range = smoothing * 5;
 		Rotation flip = new Rotation().z(180);
-		Texture originalTexture = Block.Model.getTexture();
-		Block.Model.setTexture(Block.Reflected);
 		blocks.stream().filter(block -> block.iteration() > index.integer - range && block.iteration() < index.integer + range).forEach(block -> {
+			Texture originalTexture = block.model().getTexture();
+			block.model().setTexture(Block.Reflected);
 			Placement placement = block.placement();
 			Placement originalPlacement = placement.clone();
 			placement.position(placement.position().plus(placement.up().multiplied(-2 * flightHeight)));
-			Block.Model.transformations().add(flip);
+			block.model().transformations().add(flip);
 			block.render();
-			Block.Model.transformations().remove(flip);
+			block.model().transformations().remove(flip);
 			block.placement(originalPlacement);
+			block.model().setTexture(originalTexture);
 		});;
-		Block.Model.setTexture(originalTexture);
 		// draw player reflection
 		Placement placement = model.placement();
 		Placement originalPlacement = placement.clone();
