@@ -42,6 +42,7 @@ public class Settings {
 		set("window.framerate", "0");
 		set("window.useSecondaryMonitor", "false");
 		set("window.vsync", "true");
+		set("window.antiAliasing", "4"); // Under Windows, specifying samples != 0 will enable the ARB pixel format selection path, which could trigger a crash.
 		try {
 			properties.load(new FileInputStream(filename));
 		} catch (IOException exception) {

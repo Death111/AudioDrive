@@ -12,6 +12,7 @@ import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.PixelFormat;
 
+import audiodrive.AudioDrive;
 import audiodrive.ui.control.Input;
 
 public class Window {
@@ -21,7 +22,7 @@ public class Window {
 		throw new IllegalStateException("This class shall not be instantiated.");
 	}
 	
-	private static PixelFormat pixelFormat = new PixelFormat(0, 16, 1);
+	private static PixelFormat pixelFormat = new PixelFormat(0, 16, 1, AudioDrive.Settings.getInteger("window.antiAliasing"));
 	private static boolean open;
 	private static boolean fullscreen;
 	private static boolean borderless;
