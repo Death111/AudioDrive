@@ -90,7 +90,7 @@ public class GameScene extends Scene {
 		Mouse.setGrabbed(true);
 		player.camera();
 		startCameraPath = new CameraPath("camera/start.camera", false);
-		startCameraPath.setOffsets(Camera.eye(), Camera.position()); // TODO Nico, is switching eye and position intended?
+		startCameraPath.setOffsets(Camera.position(), Camera.at());
 		state = State.Animating;
 	}
 	
