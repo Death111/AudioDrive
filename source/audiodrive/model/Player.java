@@ -2,6 +2,7 @@ package audiodrive.model;
 
 import audiodrive.AudioDrive;
 import audiodrive.audio.AudioFile;
+import audiodrive.model.geometry.Color;
 import audiodrive.model.geometry.Vector;
 import audiodrive.model.loader.Model;
 import audiodrive.model.track.Block;
@@ -67,6 +68,7 @@ public class Player {
 	}
 	
 	public void update() {
+		if (damage >= 100) model.wireframe(true).color(Color.TransparentRed);
 		zoom(true);
 	}
 	

@@ -19,6 +19,7 @@ public class Model extends Node {
 	private List<Face> faces;
 	private Color color = Color.White;
 	private Texture texture = null;
+	private boolean wireframe;
 	
 	private VertexBuffer vertexBuffer;
 	
@@ -37,17 +38,28 @@ public class Model extends Node {
 	
 	@Override
 	public void draw() {
-		if (texture != null) {
+		if (texture != null && !wireframe) {
 			glEnable(GL_TEXTURE_2D);
 			glBindTexture(GL_TEXTURE_2D, texture.getTextureID());
 		}
 		color.gl();
+		glPolygonMode(GL_FRONT_AND_BACK, wireframe ? GL_LINE : GL_FILL);
 		vertexBuffer.draw();
-		if (texture != null) {
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		if (texture != null && !wireframe) {
 			glBindTexture(GL_TEXTURE_2D, 0);
 			glDisable(GL_TEXTURE_2D);
 		}
 		
+	}
+	
+	public Model wireframe(boolean wireframe) {
+		this.wireframe = wireframe;
+		return this;
+	}
+	
+	public boolean wireframe() {
+		return wireframe;
 	}
 	
 	public Model align(Vector direction, Vector up) {
