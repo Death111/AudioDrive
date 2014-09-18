@@ -20,7 +20,11 @@ import audiodrive.audio.SpectraMinMax;
 import audiodrive.model.Player;
 import audiodrive.model.Ring;
 import audiodrive.model.buffer.VertexBuffer;
-import audiodrive.model.geometry.*;
+import audiodrive.model.geometry.Color;
+import audiodrive.model.geometry.CuboidStripRenderer;
+import audiodrive.model.geometry.TextureCoordinate;
+import audiodrive.model.geometry.Vector;
+import audiodrive.model.geometry.Vertex;
 import audiodrive.model.geometry.transform.Placement;
 import audiodrive.model.geometry.transform.Rotation;
 import audiodrive.model.loader.Model;
@@ -54,6 +58,7 @@ public class Track {
 	private double borderHeight = 0.2;
 	private double borderWidth = 0.2;
 	private double flightHeight = 0.2;
+	private double ringPulseScale = 1.0;
 	
 	private int numberOfRails = 3;
 	private int numberOfCollectables;
@@ -79,7 +84,6 @@ public class Track {
 	private List<MinMax> spectraMinMax;
 	
 	private Player player;
-	
 	private Index index;
 	
 	public Track(AnalyzedAudio audio, List<Vector> vectorinates, List<Block> blocks, int smoothing) {
@@ -360,15 +364,14 @@ public class Track {
 		});
 		
 		AnalyzedChannel mix = audio.getMix();
-		double additionalRingScale = 0.5 * mix.getPeaks().getClamped(iteration);
 		visibleRings = new ArrayList<>();
+		double pulse = Arithmetic.smooth(0, 2, mix.getPeaks().getClamped(iteration));
 		for (int i = minimum; i < maximum; i++) {
-			double baseRingScale = 5 - 3 * mix.getThreshold().getClamped(i);
-			float peak = mix.getPeaks().getClamped(i);
-			final Color ringColor = getColorAtIndex(i);
+			if (mix.getPeaks().getClamped(i) == 0) continue;
+			double ringScale = 5 - 3 * mix.getThreshold().getClamped(i);
+			Color ringColor = getColorAtIndex(i);
 			Placement placement = getPlacement(new Index(i, 0.5), true, 0);
-			placement.direction().negate();
-			if (peak > 0) visibleRings.add(new Ring(ringColor, placement).scale(baseRingScale + additionalRingScale));
+			visibleRings.add(new Ring(ringColor, placement).scale(ringScale).pulse(pulse));
 		}
 		
 		float[] spectrum2 = mix.getSpectrum(iteration);

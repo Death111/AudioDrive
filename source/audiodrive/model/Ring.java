@@ -5,6 +5,8 @@ import static org.lwjgl.opengl.GL11.glDepthMask;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.newdawn.slick.opengl.Texture;
+
 import audiodrive.model.geometry.Color;
 import audiodrive.model.geometry.Face;
 import audiodrive.model.geometry.TextureCoordinate;
@@ -13,21 +15,15 @@ import audiodrive.model.geometry.Vertex;
 import audiodrive.model.geometry.transform.Placement;
 import audiodrive.model.loader.Model;
 import audiodrive.model.loader.ModelLoader;
-import audiodrive.utilities.Log;
+import audiodrive.utilities.Arithmetic;
 
 public class Ring {
 	
-	private static double scale = 2;
-	private static Model model;
-	private Color color;
-	private Placement placement;
+	public static final Texture Default = ModelLoader.getTexture("models/ring/ring.png");
+	public static final Texture Pulse = ModelLoader.getTexture("models/ring/ring-pulse.png");
+	private static final Model Model = createModel();
 	
-	public Ring(Color color, Placement placement) {
-		this.color = color;
-		this.placement = placement;
-		
-		if (model != null) return;
-		// Create a plane
+	private static Model createModel() {
 		List<Face> faces = new ArrayList<Face>();
 		
 		Vertex v1 = new Vertex().position(new Vector(-1, 1, 0)).normal(Vector.Z).textureCoordinate(new TextureCoordinate(0, 1));
@@ -41,22 +37,40 @@ public class Ring {
 		faces.add(f1);
 		faces.add(f2);
 		
-		model = new Model("ring", faces);
-		try {
-			model.setTexture(ModelLoader.getTexture("models/ring/ring.png"));
-		} catch (Exception e) {
-			Log.error(e.toString());
-		}
+		Model model = new Model("ring", faces);
+		model.setTexture(Default);
+		return model;
+	}
+	
+	private Color color;
+	private Placement placement;
+	private double scale = 2;
+	private double pulse;
+	
+	public Ring(Color color, Placement placement) {
+		this.color = color;
+		this.placement = placement;
 	}
 	
 	public void render() {
 		glDepthMask(false); // disable depth
-		model.placement(placement).color(color).scale(scale).render();
+		Model.setTexture(Default);
+		Model.placement(placement).color(color).scale(scale + scale * 0.15 * pulse).render();
+		if (pulse > 0) {
+			Model.setTexture(Pulse);
+			Model.color(color.alpha(pulse)).render();
+		}
 		glDepthMask(true); // enable depth
+	}
+	
+	public Ring pulse(double pulse) {
+		this.pulse = Arithmetic.clamp(pulse);
+		return this;
 	}
 	
 	public Ring scale(double scale) {
 		this.scale = scale;
 		return this;
 	}
+	
 }
