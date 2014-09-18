@@ -1,6 +1,6 @@
 package audiodrive.model.geometry.transform;
 
-import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL11.glRotated;
 import audiodrive.model.geometry.Matrix;
 import audiodrive.model.geometry.Vector;
 
@@ -132,7 +132,7 @@ public class Rotation extends Transformation {
 	public void apply() {
 		if (ignorable()) return;
 		if (isMultiplex()) {
-			glMultMatrix(matrix.toDoubleBuffer());
+			matrix.glMultiply();
 		} else {
 			if (x != 0) glRotated(x, 1, 0, 0);
 			else if (y != 0) glRotated(y, 0, 1, 0);

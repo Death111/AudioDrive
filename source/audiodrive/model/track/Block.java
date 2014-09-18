@@ -16,6 +16,7 @@ public class Block {
 	public static final Color CollectableColor = AudioDrive.Settings.getColor("color.collectable");
 	public static final Color ObstacleColor = AudioDrive.Settings.getColor("color.obstacle");
 	private static final List<Model> Models = ModelLoader.loadModels("models/obstacle/obstacle_lod");
+	public static final Texture Texture = ModelLoader.getTexture("models/obstacle/obstacle_lod.png");
 	public static final Texture Reflected = ModelLoader.getTexture("models/obstacle/obstacle-reflection.png");
 	
 	private static AtomicLong ID = new AtomicLong();

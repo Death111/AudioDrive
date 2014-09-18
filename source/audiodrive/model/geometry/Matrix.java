@@ -1,5 +1,7 @@
 package audiodrive.model.geometry;
 
+import static org.lwjgl.opengl.GL11.*;
+
 import java.nio.DoubleBuffer;
 import java.util.Arrays;
 import java.util.stream.Stream;
@@ -21,6 +23,13 @@ public class Matrix {
 	
 	public double get(int m, int n) {
 		return M[m][n];
+	}
+	
+	public Matrix set(DoubleBuffer buffer) {
+		for (int i = 0; i < buffer.limit(); i++) {
+			M[i / 4][i % 4] = buffer.get(i);
+		}
+		return this;
 	}
 	
 	public Matrix set(double[][] matrix) {
@@ -173,8 +182,27 @@ public class Matrix {
 		return new Matrix().set(Matrices.invert(M));
 	}
 	
+	public Matrix transpose() {
+		set(Matrices.transpose(M));
+		return this;
+	}
+	
+	public Matrix transposed() {
+		return new Matrix().set(Matrices.transpose(M));
+	}
+	
 	public double determinant() {
 		return Matrices.determinant(M);
+	}
+	
+	public Matrix glLoad() {
+		glLoadMatrix(transposed().toDoubleBuffer());
+		return this;
+	}
+	
+	public Matrix glMultiply() {
+		glMultMatrix(transposed().toDoubleBuffer());
+		return this;
 	}
 	
 	@Override

@@ -29,6 +29,9 @@ import audiodrive.utilities.Log;
 
 public class GameScene extends Scene {
 	
+	public static final double Near = 0.1;
+	public static final double Far = 100000;
+	
 	public static enum State {
 		Animating, Running, Paused, Resuming, Ended, Destroyed
 	}
@@ -72,7 +75,7 @@ public class GameScene extends Scene {
 		track.player(player);
 		track.update(0);
 		player.update(0);
-		Camera.perspective(45, getWidth(), getHeight(), 0.1, 10000);
+		Camera.perspective(45, getWidth(), getHeight(), Near, Far);
 		GL.pushAttributes();
 		glEnable(GL_CULL_FACE);
 		glEnable(GL_NORMALIZE);
@@ -147,7 +150,7 @@ public class GameScene extends Scene {
 	protected void render() {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		
-		Camera.perspective(45, getWidth(), getHeight(), 0.1, 10000);
+		Camera.perspective(45, getWidth(), getHeight(), Near, Far);
 		if (state == State.Animating) startCameraPath.camera();
 		else player.camera();
 		

@@ -46,8 +46,10 @@ public class Ring {
 	private Placement placement;
 	private double scale = 2;
 	private double pulse;
+	private int iteration;
 	
-	public Ring(Color color, Placement placement) {
+	public Ring(int iteration, Color color, Placement placement) {
+		this.iteration = iteration;
 		this.color = color;
 		this.placement = placement;
 	}
@@ -61,6 +63,14 @@ public class Ring {
 			Model.color(color.alpha(pulse)).render();
 		}
 		glDepthMask(true); // enable depth
+	}
+	
+	public int iteration() {
+		return iteration;
+	}
+	
+	public Placement placement() {
+		return placement;
 	}
 	
 	public Ring pulse(double pulse) {

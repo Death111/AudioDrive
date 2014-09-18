@@ -22,6 +22,7 @@ import audiodrive.model.Ring;
 import audiodrive.model.buffer.VertexBuffer;
 import audiodrive.model.geometry.Color;
 import audiodrive.model.geometry.CuboidStripRenderer;
+import audiodrive.model.geometry.Matrix;
 import audiodrive.model.geometry.TextureCoordinate;
 import audiodrive.model.geometry.Vector;
 import audiodrive.model.geometry.Vertex;
@@ -34,6 +35,7 @@ import audiodrive.model.tower.SpectralTower;
 import audiodrive.model.tower.TubeTower;
 import audiodrive.model.track.interpolation.CatmullRom;
 import audiodrive.ui.GL;
+import audiodrive.ui.components.Viewport;
 import audiodrive.utilities.Arithmetic;
 import audiodrive.utilities.Log;
 import audiodrive.utilities.Range;
@@ -372,7 +374,7 @@ public class Track {
 			double ringScale = 5 - 3 * mix.getThreshold().getClamped(i);
 			Color ringColor = getColorAtIndex(i);
 			Placement placement = getPlacement(new Index(i, 0.5), true, 0);
-			visibleRings.add(new Ring(ringColor, placement).scale(ringScale).pulse(pulse));
+			visibleRings.add(new Ring(i, ringColor, placement).scale(ringScale).pulse(pulse));
 		}
 		
 		float[] spectrum2 = mix.getSpectrum(iteration);
@@ -472,42 +474,68 @@ public class Track {
 	}
 	
 	private void drawReflections() {
-		glClear(GL_STENCIL_BUFFER_BIT);
-		// write reflection surface to stencil buffer
+		// write reflection surface to depth buffer
+		glClear(GL_DEPTH_BUFFER_BIT);
 		glColorMask(false, false, false, false);
+		splineArea2Buffer.draw();
+		
+		// filter objects depending on visibility and depth buffer
+		int range = smoothing * 5;
+		Matrix mvpMatrix = GL.modelviewProjectionMatrix();
+		Viewport viewport = GL.viewport();
+		Range depthRange = GL.depthRange();
+		// TODO render depth buffer in texture and use this as look-up to improve performance
+		List<Block> blocks = visibleBlocks.stream().filter(block -> block.iteration() > index.integer - range && block.iteration() < index.integer + range).filter(block -> {
+			Vector screenspaceVector = GL.screenspace(block.placement().position(), mvpMatrix, viewport, depthRange);
+			if (!viewport.contains(screenspaceVector)) return false;
+			double depth = GL.depthBufferValue((int) screenspaceVector.x(), (int) screenspaceVector.y());
+			return screenspaceVector.z() < depth;
+		}).collect(Collectors.toList());
+		List<Ring> rings = visibleRings.stream().filter(ring -> ring.iteration() > index.integer - range && ring.iteration() < index.integer + range).filter(ring -> {
+			Vector screenspaceVector = GL.screenspace(ring.placement().position(), mvpMatrix, viewport, depthRange);
+			if (!viewport.contains(screenspaceVector)) return false;
+			double depth = GL.depthBufferValue((int) screenspaceVector.x(), (int) screenspaceVector.y());
+			return screenspaceVector.z() < depth;
+		}).collect(Collectors.toList());
+		
+		// clear buffers
+		glClear(GL_STENCIL_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		
+		// write reflection surface to stencil buffer
 		glDisable(GL_DEPTH_TEST);
 		glEnable(GL_STENCIL_TEST);
 		glStencilFunc(GL_ALWAYS, 1, 0xffffffff);
 		glStencilOp(GL_REPLACE, GL_REPLACE, GL_REPLACE);
 		splineArea2Buffer.draw();
-		// TODO find better solution
-		// write down-shifted track-area to depth buffer to avoid reflections of hidden objects
-		glEnable(GL_DEPTH_TEST);
-		glDisable(GL_STENCIL_TEST);
-		glTranslated(0, -2 * flightHeight, 0);
-		splineArea2Buffer.draw();
-		glTranslated(0, 2 * flightHeight, 0);
+		
 		// render objects according to stencil buffer
 		glColorMask(true, true, true, true);
 		glEnable(GL_STENCIL_TEST);
 		glStencilFunc(GL_EQUAL, 1, 0xffffffff);
 		glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
 		Model model = player.model();
-		// draw block reflections
-		int range = smoothing * 5;
+		
+		// create rotation to flip objects horizontally
 		Rotation flip = new Rotation().z(180);
-		blocks.stream().filter(block -> block.iteration() > index.integer - range && block.iteration() < index.integer + range).forEach(block -> {
-			Texture originalTexture = block.model().getTexture();
-			block.model().setTexture(Block.Reflected);
+		
+		// draw ring reflections
+		glDisable(GL_CULL_FACE);
+		rings.forEach(Ring::render);
+		glEnable(GL_CULL_FACE);
+		
+		// draw block reflections
+		blocks.forEach(block -> {
 			Placement placement = block.placement();
 			Placement originalPlacement = placement.clone();
 			placement.position(placement.position().plus(placement.up().multiplied(-2 * flightHeight)));
+			block.model().setTexture(Block.Reflected);
 			block.model().transformations().add(flip);
 			block.render();
 			block.model().transformations().remove(flip);
 			block.placement(originalPlacement);
-			block.model().setTexture(originalTexture);
+			block.model().setTexture(Block.Texture);
 		});;
+		
 		// draw player reflection
 		Placement placement = model.placement();
 		Placement originalPlacement = placement.clone();
@@ -518,7 +546,9 @@ public class Track {
 		model.transformations().remove(flip);
 		model.rotation().invert();
 		model.placement(originalPlacement);
+		
 		glDisable(GL_STENCIL_TEST);
+		glEnable(GL_DEPTH_TEST);
 	}
 	
 	private void drawBorderNormals(List<Vertex> vertexList) {

@@ -16,6 +16,10 @@ public class Range {
 		return minimum < value && value < maximum;
 	}
 	
+	public double span() {
+		return maximum - minimum;
+	}
+	
 	@Override
 	public String toString() {
 		return "[" + minimum + ", " + maximum + "]";

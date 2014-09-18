@@ -21,7 +21,7 @@ public class Window {
 		throw new IllegalStateException("This class shall not be instantiated.");
 	}
 	
-	private static PixelFormat pixelFormat = new PixelFormat(0, 8, 1);
+	private static PixelFormat pixelFormat = new PixelFormat(0, 16, 1);
 	private static boolean open;
 	private static boolean fullscreen;
 	private static boolean borderless;
@@ -141,6 +141,10 @@ public class Window {
 	
 	public static int getHeight() {
 		return Display.getHeight();
+	}
+	
+	public static PixelFormat getPixelFormat() {
+		return pixelFormat;
 	}
 	
 	public static void toggleVSync() {
