@@ -2,11 +2,9 @@ package audiodrive.model.tower;
 
 import audiodrive.model.geometry.Color;
 import audiodrive.model.geometry.transform.Placement;
-import audiodrive.model.loader.Model;
 
 public abstract class MusicTower {
 	protected double scale = 2;
-	protected Model model;
 	protected Color color;
 	protected Placement placement;
 	protected int iteration;

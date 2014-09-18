@@ -6,7 +6,7 @@ import audiodrive.ui.components.Scene;
 
 public class SpectralTower extends MusicTower {
 	
-	private static final Model Model = ModelLoader.loadSingleModel("models/musictower3/musictower3");
+	private static final Model model = ModelLoader.loadSingleModel("models/musictower3/musictower3");
 	private static final double Radius = 2.0;
 	private static final double Spacing = 0.5;
 	private static final double Speed = 20;
@@ -45,16 +45,16 @@ public class SpectralTower extends MusicTower {
 	
 	@Override
 	public void render() {
-		Model.placement().set(placement);
+		model.placement().set(placement);
 		for (int i = 0; i < scales.length; i++) {
 			double targetScale = spectrum[i] * Radius;
 			double delta = targetScale - scales[i];
 			scales[i] += delta * Scene.deltaTime() * Speed;
 			double scale = scales[i];
-			Model.scaling().x(scale);
-			Model.scaling().z(scale);
-			Model.placement().position().yAdd(Spacing);
-			Model.color(color.itensity(spectrum[i] * intensity)).render();
+			model.scaling().x(scale);
+			model.scaling().z(scale);
+			model.placement().position().yAdd(Spacing);
+			model.color(color.itensity(spectrum[i] * intensity)).render();
 		}
 	}
 	
