@@ -46,9 +46,8 @@ public class Player {
 	private double jumpProgress = 0.0;
 	private boolean jumpUpwards = true;
 	
-	private double tiltThreshold = 0.001;
-	private double tiltAngle = 25.0;
-	private double tiltRate = 2.0;
+	private double tiltAngle = 20.0;
+	private double tiltRate = 1.0;
 	private double tiltProgress = 0.5;
 	private double oldX = 0.0;
 	private double tiltTime;
@@ -109,23 +108,22 @@ public class Player {
 	
 	private boolean tilt(double elapsed, double moved) {
 		double delta = Math.abs(moved);
-		boolean tilt = delta > tiltThreshold;
-		if (tilt) {
+		if (delta > 0) {
 			double rate = tiltRate;
 			if (moved > 0) { // right
 				if (tiltProgress < 0.5) rate *= 2.0;
-				tiltProgress += rate * 0.01;
+				tiltProgress += rate * delta;
 				if (tiltProgress > 1.0) tiltProgress = 1.0;
 			} else { // left
 				if (tiltProgress > 0.5) rate *= 2.0;
-				tiltProgress -= rate * 0.01;
+				tiltProgress -= rate * delta;
 				if (tiltProgress < 0.0) tiltProgress = 0.0;
 			}
 			tiltTime = scene.playtime();
 		} else if (tiltProgress != 0.5) { // reset
 			if (scene.playtime() - tiltTime < 0.1) return true; // delay
 			double sign = -Math.signum(tiltProgress - 0.5);
-			tiltProgress += sign * elapsed * tiltRate * 0.5;
+			tiltProgress += sign * elapsed * tiltRate;
 			if (sign < 0 && tiltProgress < 0.5 || sign > 0 && tiltProgress > 0.5) tiltProgress = 0.5;
 		} else {
 			return false;
