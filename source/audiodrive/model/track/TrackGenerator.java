@@ -7,6 +7,7 @@ import audiodrive.AudioDrive;
 import audiodrive.audio.AnalyzedAudio;
 import audiodrive.audio.AnalyzedChannel;
 import audiodrive.model.geometry.Vector;
+import audiodrive.utilities.Arithmetic;
 import audiodrive.utilities.Log;
 
 public class TrackGenerator {
@@ -39,28 +40,25 @@ public class TrackGenerator {
 		List<Block> blocks = new ArrayList<>();
 		int offset = (int) audio.getIterationRate() / 4;
 		Block last = null;
+		// set minimum distance between successive blocks to 0.1 seconds
+		int minumumDistance = (int) (audio.getIterationRate() * 0.1);
 		for (int iteration = offset; iteration < iterationCount - offset; iteration++) {
-			float leftPeak = left.getPeaks().getClamped(iteration);
-			float rightPeak = right.getPeaks().getClamped(iteration);
-			Integer rail = determineRail(leftPeak, rightPeak, 0.2);
-			if (rail != null) {
-				blocks.add(last = new Block(true, iteration, rail));
-			} else {
-				rail = determineRail(leftPeak, rightPeak, 0.1);
-				if (rail == null) continue;
-				boolean collectable = (last != null) ? (iteration - last.iteration() < 2 && last.rail() == rail) : false;
-				if (rail != null) blocks.add(new Block(collectable, iteration, rail));
-			}
+			double intensity = mixed.getSpectralSum().getClamped(iteration);
+			double calmness = 1 - intensity;
+			double leftFlux = left.getSpectralFlux().getClamped(iteration);
+			double rightFlux = left.getSpectralFlux().getClamped(iteration);
+			double leftPeak = left.getPeaks().getClamped(iteration);
+			double rightPeak = right.getPeaks().getClamped(iteration);
+			double threshold = 0.2 + calmness * 0.1; // calm music -> fewer blocks
+			if (leftFlux + leftPeak < threshold && rightFlux + leftPeak < threshold) continue;
+			int rail = (int) Math.signum(Arithmetic.significance(leftPeak - rightPeak, 0.01));
+			if (last != null && last.rail() == rail && iteration - last.iteration() < minumumDistance) continue;
+			threshold = 0.3 + calmness * 0.2; // intense music -> more collectables, fewer obstacles
+			boolean collectable = leftFlux > threshold || rightFlux > threshold;
+			blocks.add(last = new Block(collectable, iteration, rail));
 		}
 		Log.debug(blocks.size() + " blocks");
 		return new Track(audio, vectorinates, blocks, smoothing);
 	}
 	
-	private Integer determineRail(double left, double right, double threshold) {
-		boolean leftSide = left > threshold;
-		boolean rightSide = right > threshold;
-		if (leftSide && rightSide) return 0;
-		if (leftSide || rightSide) return leftSide ? -1 : 1;
-		return null;
-	}
 }
