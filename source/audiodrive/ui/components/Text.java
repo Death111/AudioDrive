@@ -1,6 +1,7 @@
 package audiodrive.ui.components;
 
 import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL13.GL_MULTISAMPLE;
 
 import java.awt.Font;
 import java.awt.FontFormatException;
@@ -179,7 +180,10 @@ public class Text {
 	public void render() {
 		if (!visible || text == null) return;
 		glPolygonMode(GL_FRONT, GL_FILL);
+		boolean antialiasing = Window.isAntialiasingEnabled();
+		if (antialiasing) glDisable(GL_MULTISAMPLE);
 		getTrueTypeFont(font).drawString((float) getAlignedX(), (float) getAlignedY(), text, converted(color));
+		if (antialiasing) glEnable(GL_MULTISAMPLE);
 		TextureImpl.bindNone();
 	}
 	

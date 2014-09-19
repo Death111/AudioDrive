@@ -38,7 +38,7 @@ public class Window {
 	private static boolean fullscreen;
 	private static boolean borderless;
 	private static boolean antialiasing;
-	private static boolean vSync = true;
+	private static boolean vSync;
 	private static int framerate = 0;
 	
 	static {
@@ -69,8 +69,6 @@ public class Window {
 		else {
 			bounds.x = Display.getX();
 			bounds.y = Display.getY();
-			if (antialiasing) glEnable(GL_MULTISAMPLE);
-			else glDisable(GL_MULTISAMPLE);
 		}
 	}
 	
@@ -114,8 +112,9 @@ public class Window {
 			throw new RuntimeException(exception);
 		}
 		Camera.reset();
-		setAntialiasingEnabled(antialiasing);
-		setVSyncEnabled(vSync);
+		if (antialiasing) glEnable(GL_MULTISAMPLE);
+		else glDisable(GL_MULTISAMPLE);
+		Display.setVSyncEnabled(vSync);
 		scene.ifPresent(Scene::entering);
 		recreating = false;
 	}
@@ -244,6 +243,10 @@ public class Window {
 	
 	public static void setAntialiasingEnabled(boolean enabled) {
 		antialiasing = enabled;
+		if (Display.isCreated()) {
+			if (antialiasing) glEnable(GL_MULTISAMPLE);
+			else glDisable(GL_MULTISAMPLE);
+		}
 	}
 	
 	public static boolean isAntialiasingEnabled() {
