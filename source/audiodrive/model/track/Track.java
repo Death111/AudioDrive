@@ -47,7 +47,7 @@ public class Track {
 	private final int numberOfRails = 3;
 	private final int numberOfCollectables;
 	private final int numberOfObstacles;
-	private final double iterationRate;
+	private final double indexRate;
 	
 	private List<Block> visibleBlocks;
 	private List<Ring> visibleRings;
@@ -89,7 +89,7 @@ public class Track {
 		this.smoothing = smoothing;
 		numberOfCollectables = (int) blocks.stream().filter(Block::isCollectable).count();
 		numberOfObstacles = blocks.size() - numberOfCollectables;
-		iterationRate = spline.size() / audio.getDuration();
+		indexRate = spline.size() / audio.getDuration();
 		spectraMinMax = SpectraMinMax.getMinMax(audio.getMix());
 		trackTexture = ModelLoader.getTexture(TRACK_TEXTURE);
 		build();
@@ -568,7 +568,7 @@ public class Track {
 	}
 	
 	public double indexRate() {
-		return spline.size() / audio.getDuration();
+		return indexRate;
 	}
 	
 	public Index getIndex(double time) {
