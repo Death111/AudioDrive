@@ -59,7 +59,7 @@ public class MenuScene extends Scene implements ItemListener {
 	@Override
 	public void entering() {
 		volume = AudioDrive.Settings.getDouble("interface.volume");
-		if (!playback.isRunning()) playback.setVolume(volume).start();
+		if (!playback.isRunning()) playback.setVolume(volume).setLooping(true).start();
 		Log.trace("Entering MenueScene");
 		
 		title = new Text("AudioDrive").setFont(AudioDrive.Font).setSize(48).setPosition(100, 80);
@@ -187,7 +187,7 @@ public class MenuScene extends Scene implements ItemListener {
 			}
 			TrackGenerator trackGenerator = new TrackGenerator();
 			track = trackGenerator.generate(audio);
-			playback.stop();
+			playback.setLooping(false);
 			Scene.get(GameScene.class).enter(track);
 			return;
 		}
