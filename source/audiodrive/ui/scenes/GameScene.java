@@ -20,6 +20,7 @@ import audiodrive.ui.GL;
 import audiodrive.ui.components.Camera;
 import audiodrive.ui.components.Scene;
 import audiodrive.ui.components.Window;
+import audiodrive.ui.scenes.overlays.BackgroundOverlay;
 import audiodrive.ui.scenes.overlays.GameOverlay;
 import audiodrive.utilities.Arithmetic;
 import audiodrive.utilities.Buffers;
@@ -44,7 +45,8 @@ public class GameScene extends Scene {
 	private double rotation = 0;
 	
 	private Playback playback;
-	private GameOverlay overlay;
+	private GameOverlay gameOverlay;
+	private BackgroundOverlay backgroundOverlay;
 	
 	private CameraPath startCameraPath;
 	
@@ -71,7 +73,8 @@ public class GameScene extends Scene {
 		File model = Files.find("models/player", AudioDrive.Settings.get("player.model") + ".obj").orElse(Files.list("models/player", ".obj", true).get(0));
 		player = new Player(this).model(ModelLoader.loadSingleModel(model.getPath()));
 		player.model().scale(0.05);
-		overlay = new GameOverlay(this);
+		gameOverlay = new GameOverlay(this);
+		backgroundOverlay = new BackgroundOverlay(this);
 		playback = new Playback(track.getAudio().getFile()).setVolume(AudioDrive.Settings.getDouble("music.volume"));
 		translation.reset();
 		rotation = 0;
@@ -105,7 +108,8 @@ public class GameScene extends Scene {
 	protected void update(double elapsed) {
 		checkState();
 		updateRotation(elapsed);
-		overlay.update();
+		gameOverlay.update();
+		backgroundOverlay.update();
 		player.update();
 		if (state != State.Running) return;
 		time = playback.getTime();
@@ -154,6 +158,8 @@ public class GameScene extends Scene {
 	protected void render() {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		
+		backgroundOverlay.render();
+		
 		Camera.perspective(45, getWidth(), getHeight(), Near, Far);
 		if (state == State.Animating) startCameraPath.camera();
 		else player.camera();
@@ -168,7 +174,7 @@ public class GameScene extends Scene {
 		
 		track.render();
 		player.render();
-		overlay.render();
+		gameOverlay.render();
 	}
 	
 	@Override
@@ -176,7 +182,8 @@ public class GameScene extends Scene {
 		GL.popAttributes();
 		playback.stop();
 		Mouse.setGrabbed(false);
-		overlay = null;
+		gameOverlay = null;
+		backgroundOverlay = null;
 		track = null;
 		player = null;
 	}
@@ -271,7 +278,7 @@ public class GameScene extends Scene {
 			player.zoom(1.0);
 			break;
 		case Keyboard.KEY_P:
-			overlay.togglePeaks();
+			gameOverlay.togglePeaks();
 			break;
 		case Keyboard.KEY_V:
 			Window.toggleVSync();

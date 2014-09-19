@@ -16,7 +16,6 @@ import audiodrive.ui.components.Overlay;
 import audiodrive.ui.components.Scene;
 import audiodrive.ui.components.Text;
 import audiodrive.ui.components.Text.Alignment;
-import audiodrive.ui.effects.ParticleEffects;
 import audiodrive.ui.scenes.GameScene;
 import audiodrive.ui.scenes.GameScene.State;
 import audiodrive.utilities.Format;
@@ -27,7 +26,6 @@ public class GameOverlay extends Overlay {
 	
 	private GameScene scene;
 	private TrackOverview trackOverview;
-	private ParticleEffects specialEffects;
 	private Player player;
 	
 	private int width, height;
@@ -40,7 +38,6 @@ public class GameOverlay extends Overlay {
 		width = scene.getWidth();
 		height = scene.getHeight();
 		player = scene.getPlayer();
-		specialEffects = new ParticleEffects();
 		trackOverview = new TrackOverview(scene.getTrack());
 		text("title").setText(scene.getTrack().getAudio().getName()).setSize(15).setPosition(width * 0.5, height - 10).setAlignment(Alignment.LowerCenter);
 		text("framerate").setSize(10).setPosition(scene.getWidth() - 10, 125).setAlignment(Alignment.UpperRight);
@@ -87,7 +84,6 @@ public class GameOverlay extends Overlay {
 		Camera.overlay(width, height);
 		super.render();
 		trackOverview.render();
-		specialEffects.render();
 		
 		if (text("notification").isVisible()) drawNotificationBackground();
 		texts.values().forEach(Text::render);

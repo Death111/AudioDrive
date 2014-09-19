@@ -105,7 +105,6 @@ public class ParticleEffects {
 	public void render() {
 		if (!visible) return;
 		Iterator<ParticleWave> iterator = particles.iterator();
-		// TODO somehow draw behind the track
 		while (iterator.hasNext()) {
 			ParticleWave particle = iterator.next();
 			if (particle.lifeTime < particle.elapsedTime) iterator.remove();
