@@ -163,6 +163,7 @@ public class ModelSelectionScene extends Scene {
 	
 	@Override
 	public void keyReleased(int key, char character) {
+		super.keyReleased(key, character);
 		switch (key) {
 		case Keyboard.KEY_B:
 			bended = !bended;
@@ -200,7 +201,8 @@ public class ModelSelectionScene extends Scene {
 	}
 	
 	@Override
-	public void mouseDragged(int button, int mouseX, int mouseY, int dx, int dy) {
+	public void mouseDragged(int button, int x, int y, int dx, int dy) {
+		super.mouseDragged(button, x, y, dx, dy);
 		double horizontal = dx * -0.1;
 		double vertical = dy * 0.1;
 		switch (button) {

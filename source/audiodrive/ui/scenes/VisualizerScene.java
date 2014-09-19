@@ -183,6 +183,7 @@ public class VisualizerScene extends Scene {
 	
 	@Override
 	public void keyReleased(int key, char character) {
+		super.keyReleased(key, character);
 		switch (key) {
 		case Keyboard.KEY_ESCAPE:
 			back();

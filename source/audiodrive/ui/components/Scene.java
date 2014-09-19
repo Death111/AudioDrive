@@ -2,11 +2,14 @@ package audiodrive.ui.components;
 
 import static org.lwjgl.opengl.GL11.*;
 
+import java.awt.GraphicsDevice;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
+
+import org.lwjgl.input.Keyboard;
 
 import audiodrive.AudioDrive;
 import audiodrive.ui.control.Input;
@@ -23,6 +26,8 @@ public class Scene implements Input.Observer {
 	private static double time;
 	private static int framerate;
 	private static int frames;
+	
+	protected boolean draggable = true;
 	
 	@SuppressWarnings("unchecked")
 	public static <T extends Scene> T get(Class<T> clazz) {
@@ -170,7 +175,13 @@ public class Scene implements Input.Observer {
 	public void keyPressed(int key, char character) {}
 	
 	@Override
-	public void keyReleased(int key, char character) {}
+	public void keyReleased(int key, char character) {
+		switch (key) {
+		case Keyboard.KEY_TAB:
+			if (draggable) Window.switchMonitor();
+			break;
+		}
+	}
 	
 	@Override
 	public void mouseButtonPressed(int button, int x, int y) {}
@@ -179,7 +190,13 @@ public class Scene implements Input.Observer {
 	public void mouseButtonReleased(int button, int x, int y) {}
 	
 	@Override
-	public void mouseDragged(int button, int x, int y, int dx, int dy) {}
+	public void mouseDragged(int button, int x, int y, int dx, int dy) {
+		if (!draggable) return;
+		GraphicsDevice monitor = Window.getMonitor(x, y);
+		if (!Window.getMonitor().equals(monitor)) {
+			Window.setMonitor(monitor);
+		}
+	}
 	
 	@Override
 	public void mouseMoved(int x, int y, int dx, int dy) {}

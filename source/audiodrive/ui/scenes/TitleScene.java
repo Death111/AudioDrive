@@ -15,11 +15,14 @@ public class TitleScene extends Scene {
 	private Text title;
 	private Overlay overlay;
 	
+	static {
+		new AudioFile("sounds/Title.mp3").play();
+	}
+	
 	@Override
 	public void entering() {
 		title = new Text(AudioDrive.Title).setFont(AudioDrive.Font).setSize(48).setPosition(getWidth() / 2, getHeight() / 2).setAlignment(Alignment.Center);
 		overlay = new Overlay().shader(new ShaderProgram("shaders/default.vs", "shaders/title.fs"));
-		new AudioFile("sounds/Title.mp3").play();
 		Camera.overlay(getWidth(), getHeight());
 	}
 	

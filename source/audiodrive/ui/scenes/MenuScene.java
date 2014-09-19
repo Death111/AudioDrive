@@ -2,8 +2,6 @@ package audiodrive.ui.scenes;
 
 import static org.lwjgl.opengl.GL11.*;
 
-import java.awt.GraphicsDevice;
-
 import org.lwjgl.input.Keyboard;
 
 import audiodrive.AudioDrive;
@@ -102,13 +100,11 @@ public class MenuScene extends Scene implements ItemListener {
 	
 	@Override
 	public void keyReleased(int key, char character) {
+		super.keyReleased(key, character);
 		Log.trace("Key '" + character + "' was realeased,");
 		switch (key) {
 		case Keyboard.KEY_ESCAPE:
 			exit();
-			break;
-		case Keyboard.KEY_TAB:
-			if (track != null) Window.switchMonitor();
 			break;
 		case Keyboard.KEY_V:
 			onSelect(visualizeMenuItem, true);
@@ -124,17 +120,6 @@ public class MenuScene extends Scene implements ItemListener {
 			break;
 		default:
 			break;
-		}
-	}
-	
-	private Track track;
-	
-	@Override
-	public void mouseDragged(int button, int x, int y, int dx, int dy) {
-		if (track != null) return; // TODO add support for monitor switching after playing
-		GraphicsDevice monitor = Window.getMonitor(x, y);
-		if (!Window.getMonitor().equals(monitor)) {
-			Window.setMonitor(monitor);
 		}
 	}
 	
@@ -186,8 +171,9 @@ public class MenuScene extends Scene implements ItemListener {
 				return;
 			}
 			TrackGenerator trackGenerator = new TrackGenerator();
-			track = trackGenerator.generate(audio);
+			Track track = trackGenerator.generate(audio);
 			playback.setLooping(false);
+			draggable = false; // TODO add support for monitor switching after playing
 			Scene.get(GameScene.class).enter(track);
 			return;
 		}

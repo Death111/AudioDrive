@@ -227,6 +227,7 @@ public class AudioSelectionScene extends Scene implements ItemListener {
 	
 	@Override
 	public void keyReleased(int key, char character) {
+		super.keyReleased(key, character);
 		Log.trace("Key '" + character + "' was realeased,");
 		switch (key) {
 		case Keyboard.KEY_ESCAPE:

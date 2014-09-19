@@ -53,6 +53,10 @@ public class GameScene extends Scene {
 	private double mouseSpeed;
 	private double volume;
 	
+	public GameScene() {
+		draggable = false;
+	}
+	
 	public void enter(Track track) {
 		this.track = track;
 		super.enter();
