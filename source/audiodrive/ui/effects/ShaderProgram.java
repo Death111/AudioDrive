@@ -379,10 +379,6 @@ public class ShaderProgram {
 			return getType() + " \"" + filepath + "\":" + System.lineSeparator() + source;
 		}
 		
-		public void delete() {
-			glDeleteShader(id);
-		}
-		
 	}
 	
 	public static class ShaderException extends RuntimeException {

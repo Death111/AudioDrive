@@ -33,7 +33,7 @@ public abstract class Item {
 	protected int width;
 	protected int height;
 	protected boolean filled = true;
-	protected boolean box = AudioDrive.Settings.getBoolean("interface.useItemBoxes");
+	protected boolean box = AudioDrive.Settings.getBoolean("interface.useBoxes");
 	protected List<ItemListener> itemListeners = new ArrayList<ItemListener>();
 	protected Map<State, Colors> colorMapping;
 	

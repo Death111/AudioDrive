@@ -1,10 +1,13 @@
 package audiodrive.ui.scenes;
 
-import static org.lwjgl.opengl.GL11.GL_COLOR_BUFFER_BIT;
-import static org.lwjgl.opengl.GL11.glClear;
+import static org.lwjgl.opengl.GL11.*;
 
 import java.io.File;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import javax.swing.filechooser.FileSystemView;
 
@@ -18,6 +21,7 @@ import audiodrive.ui.components.Camera;
 import audiodrive.ui.components.Overlay;
 import audiodrive.ui.components.Scene;
 import audiodrive.ui.components.Text;
+import audiodrive.ui.components.Text.Alignment;
 import audiodrive.ui.effects.ShaderProgram;
 import audiodrive.ui.menu.Menu;
 import audiodrive.ui.menu.item.FileChooserItem;
@@ -34,26 +38,28 @@ import audiodrive.utilities.Log;
 public class AudioSelectionScene extends Scene implements ItemListener {
 	
 	private static final String PARENT_FILENAME = "..";
+	
 	private Menu itemMenu;
 	private Menu rootMenu;
 	private Menu nextMenu;
-	
-	private Overlay overlay;
 	private MenuItem continueMenuItem;
 	private Map<FileChooserItem, File> itemMap = new HashMap<FileChooserItem, File>();
 	private Map<FileChooserItem, File> rootMap = new HashMap<FileChooserItem, File>();
-	FileSystemView fsv = FileSystemView.getFileSystemView();
+	private FileSystemView fsv = FileSystemView.getFileSystemView();
 	
-	private File selectedFile = null;
 	private Text currentFolderText;
 	private Text selectedFileText;
 	private Text titleText;
+	private Overlay background;
+	
 	private AudioFile hoverAudio;
 	private AudioFile selectAudio;
 	private List<String> supportedFileExtensionList = Arrays.asList("mp3", "wav");
-	// Item which was selected
-	private Item item = null;
 	
+	private File selectedFile = null;
+	private Item selectedItem = null;
+	
+	private boolean silentHovering = true;
 	private double volume;
 	
 	@Override
@@ -61,18 +67,15 @@ public class AudioSelectionScene extends Scene implements ItemListener {
 		volume = AudioDrive.Settings.getDouble("interface.volume");
 		
 		Camera.overlay(getWidth(), getHeight());
-		overlay = new Overlay().shader(new ShaderProgram("shaders/default.vs", "shaders/title.fs"));
+		background = new Overlay().shader(new ShaderProgram("shaders/default.vs", "shaders/title.fs"));
 		
-		titleText = new Text("Choose an AudioFile").setFont(AudioDrive.Font).setSize(48).setPosition(20, 20);
+		titleText = new Text("Select an AudioFile").setFont(AudioDrive.Font).setSize(48).setPosition(20, 20);
+		currentFolderText = new Text().setFont(AudioDrive.Font).setPosition(20, 125).setSize(22).setAlignment(Alignment.Left);
+		selectedFileText = new Text().setFont(AudioDrive.Font).setPosition(20, Display.getHeight() - 100).setSize(22).setAlignment(Alignment.Left);
 		
-		int textHeight = 50;
-		
-		rootMenu = new Menu(20, 200, FileChooserItem.FILECHOOSER_ITEM_WIDTH + 1, Display.getHeight() - 500, 1);
-		itemMenu = new Menu(30 + FileChooserItem.FILECHOOSER_ITEM_WIDTH, 200, Display.getWidth() - FileChooserItem.FILECHOOSER_ITEM_WIDTH - 50, Display.getHeight()
-			- 200
-			- 3
-			* textHeight, 1);
-		nextMenu = new Menu(20, itemMenu.getHeight() + 200 + 50, 400, Display.getHeight() - itemMenu.getHeight() + 200 + 50, 1);
+		rootMenu = new Menu(20, 180, 151, Display.getHeight() - 180, 1);
+		itemMenu = new Menu(30 + 151, 180, Display.getWidth() - 151 - 50, Display.getHeight() - 2 * 180 + currentFolderText.getHeight(), 1);
+		nextMenu = new Menu(20, Display.getHeight() - MenuItem.MENU_ITEM_HEIGHT - 20, Display.getWidth() - 50, MenuItem.MENU_ITEM_HEIGHT + 1, 1);
 		
 		continueMenuItem = new MenuItem("Continue", this);
 		continueMenuItem.colorMapping().put(Item.State.Normal, new Item.Colors(Color.Green, Color.White, Color.TransparentGreen));
@@ -80,16 +83,13 @@ public class AudioSelectionScene extends Scene implements ItemListener {
 		continueMenuItem.setDisabled(true);
 		nextMenu.addItem(continueMenuItem);
 		
-		currentFolderText = new Text().setFont(AudioDrive.Font).setPosition(20, 150).setSize(30);
-		selectedFileText = new Text().setFont(AudioDrive.Font).setPosition(20, itemMenu.getHeight() + 200).setSize(30);
-		
 		// Setup start node
 		updateItemExplorer(new File(AudioDrive.Settings.get("music.directory")));
 		
 		// Adding default item do list
 		final File defaultFile = new File("music");
 		if (defaultFile.exists()) {
-			FileChooserItem defaultFCI = new FileChooserItem("default", true, this);
+			FileChooserItem defaultFCI = new FileChooserItem("default", true, this, 150, FileChooserItem.FILECHOOSER_ITEM_HEIGHT);
 			rootMenu.addItem(defaultFCI);
 			rootMap.put(defaultFCI, defaultFile);
 		}
@@ -97,7 +97,7 @@ public class AudioSelectionScene extends Scene implements ItemListener {
 		// Adding 'My Music' to list
 		final File myMusicFile = new File(System.getProperty("user.home") + "\\music");
 		if (myMusicFile.exists()) {
-			FileChooserItem myMusicFCI = new FileChooserItem("My Music", true, this);
+			FileChooserItem myMusicFCI = new FileChooserItem("My Music", true, this, 150, FileChooserItem.FILECHOOSER_ITEM_HEIGHT);
 			rootMenu.addItem(myMusicFCI);
 			rootMap.put(myMusicFCI, myMusicFile);
 		}
@@ -109,7 +109,7 @@ public class AudioSelectionScene extends Scene implements ItemListener {
 				continue;
 			}
 			String fileName = file.toString();
-			FileChooserItem fci = new FileChooserItem(fileName, directory, this);
+			FileChooserItem fci = new FileChooserItem(fileName, directory, this, 150, FileChooserItem.FILECHOOSER_ITEM_HEIGHT);
 			rootMenu.addItem(fci);
 			rootMap.put(fci, file);
 		}
@@ -159,12 +159,12 @@ public class AudioSelectionScene extends Scene implements ItemListener {
 	@Override
 	public void render() {
 		glClear(GL_COLOR_BUFFER_BIT);
-		overlay.render();
-		if (item != null) {
+		background.render();
+		if (selectedItem != null) {
 			checkItemExplorer(itemMap);
 			checkItemExplorer(rootMap);
 		}
-		item = null;
+		selectedItem = null;
 		rootMenu.render();
 		itemMenu.render();
 		nextMenu.render();
@@ -180,7 +180,7 @@ public class AudioSelectionScene extends Scene implements ItemListener {
 		
 		for (FileChooserItem fileChooserItem : keySet) {
 			
-			if (item == fileChooserItem) {
+			if (selectedItem == fileChooserItem) {
 				final File file = map.get(fileChooserItem);
 				update = true;
 				rootFile = file;
@@ -201,7 +201,7 @@ public class AudioSelectionScene extends Scene implements ItemListener {
 	
 	@Override
 	public void exiting() {
-		overlay = null;
+		background = null;
 		selectedFile = null;
 	}
 	
@@ -242,7 +242,7 @@ public class AudioSelectionScene extends Scene implements ItemListener {
 	
 	@Override
 	public void onHover(Item item, boolean hover) {
-		if (hover) {
+		if (hover && !silentHovering) {
 			hoverAudio.play(volume);
 		}
 	}
@@ -261,7 +261,7 @@ public class AudioSelectionScene extends Scene implements ItemListener {
 				Log.warning("No file selected.");
 			}
 		} else {
-			this.item = item;
+			selectedItem = item;
 		}
 	}
 	

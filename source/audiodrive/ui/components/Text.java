@@ -21,10 +21,14 @@ import audiodrive.model.geometry.Color;
 public class Text {
 	
 	public static final Font DefaultFont = new Font(Font.SANS_SERIF, Font.PLAIN, 15);
-	public static final Map<Font, TrueTypeFont> fonts = new HashMap<>();
+	private static final Map<Font, TrueTypeFont> fonts = new HashMap<>();
 	
 	public static enum Alignment {
 		UpperLeft, UpperCenter, UpperRight, Left, Center, Right, LowerLeft, LowerCenter, LowerRight
+	}
+	
+	public static void destroy() {
+		fonts.clear();
 	}
 	
 	private String text;
@@ -68,8 +72,6 @@ public class Text {
 	
 	public Text setFont(Font font) {
 		this.font = font;
-		if (!fonts.containsKey(font)) fonts.put(font, new TrueTypeFont(font, true));
-		TextureImpl.bindNone();
 		return this;
 	}
 	
@@ -98,11 +100,11 @@ public class Text {
 	
 	public int getWidth() {
 		if (text == null) return 0;
-		return fonts.get(font).getWidth(text);
+		return getTrueTypeFont(font).getWidth(text);
 	}
 	
 	public int getHeight() {
-		return fonts.get(font).getHeight();
+		return getTrueTypeFont(font).getHeight();
 	}
 	
 	public double getX() {
@@ -177,14 +179,27 @@ public class Text {
 	public void render() {
 		if (!visible || text == null) return;
 		glPolygonMode(GL_FRONT, GL_FILL);
-		float[] floats = color.toFloats();
-		fonts.get(font).drawString((float) getAlignedX(), (float) getAlignedY(), text, new org.newdawn.slick.Color(floats[0], floats[1], floats[2], floats[3]));
+		getTrueTypeFont(font).drawString((float) getAlignedX(), (float) getAlignedY(), text, converted(color));
 		TextureImpl.bindNone();
+	}
+	
+	private org.newdawn.slick.Color converted(Color color) {
+		float[] rgba = color.toFloats();
+		return new org.newdawn.slick.Color(rgba[0], rgba[1], rgba[2], rgba[3]);
 	}
 	
 	@Override
 	public String toString() {
 		return text;
+	}
+	
+	public static TrueTypeFont getTrueTypeFont(Font font) {
+		TrueTypeFont trueTypeFont = fonts.get(font);
+		if (trueTypeFont == null) {
+			trueTypeFont = new TrueTypeFont(font, true);
+			fonts.put(font, trueTypeFont);
+		}
+		return trueTypeFont;
 	}
 	
 	public static Font getFont(String name) {

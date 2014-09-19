@@ -172,6 +172,9 @@ public class GameScene extends Scene {
 		GL.popAttributes();
 		playback.stop();
 		Mouse.setGrabbed(false);
+		overlay = null;
+		track = null;
+		player = null;
 	}
 	
 	public Track getTrack() {
@@ -268,6 +271,9 @@ public class GameScene extends Scene {
 			break;
 		case Keyboard.KEY_V:
 			Window.toggleVSync();
+			break;
+		case Keyboard.KEY_A:
+			Window.toggleAntialiasing();
 			break;
 		default:
 			break;

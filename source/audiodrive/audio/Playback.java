@@ -31,7 +31,9 @@ public class Playback {
 		initialize();
 		if (isRunning()) {
 			restart = true;
-		} else {
+		} else if (isPaused()) {
+			resume();
+		} else if (thread == null || !thread.isAlive()) {
 			stop = false;
 			thread.start();
 		}
@@ -73,13 +75,8 @@ public class Playback {
 	/** Stops the playback. Also closes the resources. */
 	public Playback stop() {
 		stop = true;
-		if (pause) resume();
+		if (isPaused()) resume();
 		return this;
-	}
-	
-	/** Indicates, whether the playback should repeat infinitely. */
-	public void setLooping(boolean flag) {
-		loop = flag;
 	}
 	
 	/** Empty callback function, called when playback has ended. */
@@ -104,6 +101,12 @@ public class Playback {
 	 */
 	public boolean isStopped() {
 		return stop || !initialized();
+	}
+	
+	/** Specifies whether the playback should repeat infinitely. */
+	public Playback setLooping(boolean flag) {
+		loop = flag;
+		return this;
 	}
 	
 	/**
@@ -184,14 +187,8 @@ public class Playback {
 					}
 					if (!play()) break;
 				}
-				if (restart || loop) {
-					restart = false;
-					run();
-					return;
-				}
 				if (!stop) line.drain();
 				close();
-				thread = null;
 				ended();
 			};
 		};
@@ -234,9 +231,16 @@ public class Playback {
 		}
 		line.stop();
 		line.close();
+		restart = restart || (loop && !stop);
 		stream = null;
 		buffer = null;
 		line = null;
+		thread = null;
+		stop = true;
+		if (restart) {
+			restart = false;
+			start();
+		}
 	}
 	
 }

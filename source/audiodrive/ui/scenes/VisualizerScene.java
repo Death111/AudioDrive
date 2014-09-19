@@ -45,7 +45,7 @@ public class VisualizerScene extends Scene {
 	@Override
 	protected void entering() {
 		Log.info("visualizing audio...");
-		title = new Text("Visualizing \"" + audio.getFile().getName() + "\"").setFont(AudioDrive.Font).setSize(32).setPosition(10, 10);
+		title = new Text("Visualizing \"" + audio.getFile().getName() + "\"").setFont(AudioDrive.Font).setSize(32).setPosition(20, 20);
 		canvas = new VertexBuffer(Buffers.create(0, 0, 0, getHeight(), getWidth(), getHeight(), getWidth(), 0), 2).mode(GL_QUADS);
 		shader = new ShaderProgram("shaders/default.vs", "shaders/spectrum.fs");
 		

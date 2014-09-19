@@ -2,16 +2,21 @@ package audiodrive.ui.scenes;
 
 import static org.lwjgl.opengl.GL11.*;
 
+import java.awt.GraphicsDevice;
+
 import org.lwjgl.input.Keyboard;
 
 import audiodrive.AudioDrive;
 import audiodrive.audio.AnalyzedAudio;
 import audiodrive.audio.AudioFile;
+import audiodrive.audio.Playback;
 import audiodrive.model.track.Track;
 import audiodrive.model.track.TrackGenerator;
 import audiodrive.ui.components.Camera;
 import audiodrive.ui.components.Overlay;
 import audiodrive.ui.components.Scene;
+import audiodrive.ui.components.Text;
+import audiodrive.ui.components.Window;
 import audiodrive.ui.effects.ShaderProgram;
 import audiodrive.ui.menu.Menu;
 import audiodrive.ui.menu.item.Item;
@@ -26,7 +31,9 @@ import audiodrive.utilities.Log;
  */
 public class MenuScene extends Scene implements ItemListener {
 	
-	private Overlay overlay;
+	private static Playback playback = new Playback(new AudioFile("sounds/Menu.mp3")).setLooping(true);
+	
+	private Text title;
 	private Menu menu;
 	private MenuItem visualizeMenuItem;
 	private MenuItem playMenuItem;
@@ -34,11 +41,13 @@ public class MenuScene extends Scene implements ItemListener {
 	private MenuItem selectModelMenuItem;
 	private MenuItem settingsMenuItem;
 	private MenuItem exitMenuItem;
+	private Overlay background;
 	
 	private AnalyzedAudio audio;
 	private AudioFile hoverAudio;
 	private AudioFile selectAudio;
 	
+	private boolean silentHovering = true;
 	private double volume;
 	
 	public void enter(AnalyzedAudio audio) {
@@ -50,7 +59,10 @@ public class MenuScene extends Scene implements ItemListener {
 	@Override
 	public void entering() {
 		volume = AudioDrive.Settings.getDouble("interface.volume");
+		if (!playback.isRunning()) playback.setVolume(volume).start();
 		Log.trace("Entering MenueScene");
+		
+		title = new Text("AudioDrive").setFont(AudioDrive.Font).setSize(48).setPosition(100, 80);
 		
 		menu = new Menu(100, 200, 400, 600, 25);
 		visualizeMenuItem = new MenuItem("Visualize", this);
@@ -69,21 +81,22 @@ public class MenuScene extends Scene implements ItemListener {
 		hoverAudio = new AudioFile("sounds/Hover.mp3");
 		selectAudio = new AudioFile("sounds/Select.mp3");
 		
-		overlay = new Overlay().shader(new ShaderProgram("shaders/default.vs", "shaders/title.fs"));
+		background = new Overlay().shader(new ShaderProgram("shaders/default.vs", "shaders/title.fs"));
 		Camera.overlay(getWidth(), getHeight());
 	}
 	
 	@Override
 	public void render() {
 		glClear(GL_COLOR_BUFFER_BIT);
-		overlay.render();
+		background.render();
+		title.render();
 		menu.render();
 	}
 	
 	@Override
 	public void exiting() {
-		Log.info("exiting");
-		overlay = null;
+		if (!Window.isRecreating() && getEntering() == null) playback.stop();
+		background = null;
 		menu = null;
 	}
 	
@@ -93,6 +106,9 @@ public class MenuScene extends Scene implements ItemListener {
 		switch (key) {
 		case Keyboard.KEY_ESCAPE:
 			exit();
+			break;
+		case Keyboard.KEY_TAB:
+			if (track != null) Window.switchMonitor();
 			break;
 		case Keyboard.KEY_V:
 			onSelect(visualizeMenuItem, true);
@@ -108,6 +124,17 @@ public class MenuScene extends Scene implements ItemListener {
 			break;
 		default:
 			break;
+		}
+	}
+	
+	private Track track;
+	
+	@Override
+	public void mouseDragged(int button, int x, int y, int dx, int dy) {
+		if (track != null) return; // TODO add support for monitor switching after playing
+		GraphicsDevice monitor = Window.getMonitor(x, y);
+		if (!Window.getMonitor().equals(monitor)) {
+			Window.setMonitor(monitor);
 		}
 	}
 	
@@ -133,7 +160,7 @@ public class MenuScene extends Scene implements ItemListener {
 	
 	@Override
 	public void onHover(Item item, boolean hover) {
-		if (hover) {
+		if (hover && !silentHovering) {
 			hoverAudio.play(volume);
 		}
 	}
@@ -149,6 +176,7 @@ public class MenuScene extends Scene implements ItemListener {
 				Scene.get(AudioSelectionScene.class).enter();
 				return;
 			}
+			playback.stop();
 			Scene.get(VisualizerScene.class).enter(audio);
 			return;
 		}
@@ -158,7 +186,8 @@ public class MenuScene extends Scene implements ItemListener {
 				return;
 			}
 			TrackGenerator trackGenerator = new TrackGenerator();
-			Track track = trackGenerator.generate(audio);
+			track = trackGenerator.generate(audio);
+			playback.stop();
 			Scene.get(GameScene.class).enter(track);
 			return;
 		}
@@ -167,7 +196,7 @@ public class MenuScene extends Scene implements ItemListener {
 			return;
 		}
 		if (item == selectModelMenuItem) {
-			Scene.get(ModelViewerScene.class).enter();
+			Scene.get(ModelSelectionScene.class).enter();
 			return;
 		}
 		if (item == selectAudioMenuItem) {
@@ -179,4 +208,5 @@ public class MenuScene extends Scene implements ItemListener {
 			return;
 		}
 	}
+	
 }

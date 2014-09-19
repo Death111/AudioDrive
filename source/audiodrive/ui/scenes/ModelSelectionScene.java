@@ -6,6 +6,7 @@ import java.io.File;
 import java.util.List;
 
 import org.lwjgl.input.Keyboard;
+import org.lwjgl.input.Mouse;
 
 import audiodrive.AudioDrive;
 import audiodrive.model.geometry.ReflectionPlane;
@@ -16,35 +17,45 @@ import audiodrive.model.loader.ModelLoader;
 import audiodrive.ui.GL;
 import audiodrive.ui.components.Camera;
 import audiodrive.ui.components.Scene;
+import audiodrive.ui.components.Text;
 import audiodrive.ui.components.Window;
 import audiodrive.utilities.Buffers;
 import audiodrive.utilities.Files;
 import audiodrive.utilities.Log;
 
-public class ModelViewerScene extends Scene {
+public class ModelSelectionScene extends Scene {
+	
+	private Text title;
+	
+	private Model model;
+	private List<File> list;
+	private int index;
 	
 	private Rotation rotation = new Rotation();
 	private Vector translate = new Vector();
 	private Vector look = new Vector();
-	private Vector camera = new Vector(0, 0, 2.5);
-	private Model model;
-	private boolean bended = true;
+	private Vector camera = new Vector(0, 1, 2.5);
+	
 	private ReflectionPlane flatPlane;
 	private ReflectionPlane risingPlane;
 	private ReflectionPlane fallingPlane;
-	private List<File> list;
-	private int index;
+	
+	private boolean normals = false;
+	private boolean bended = true;
+	private boolean coordinateSystem = false;
+	
+	private double time;
 	
 	@Override
 	protected void entering() {
+		title = new Text("Select a Player-Model").setFont(AudioDrive.Font).setSize(48).setPosition(20, 20);
 		list = Files.list("models/player", ".obj", true);
 		File modelFile = list.stream().filter(file -> file.getName().endsWith(AudioDrive.Settings.get("player.model") + ".obj")).findFirst().orElse(list.get(0));
 		loadModel(list.indexOf(modelFile));
 		double y = -0.25;
 		flatPlane = new ReflectionPlane(new Vector(-1, y, 1), new Vector(1, y, 1), new Vector(1, y, -1), new Vector(-1, y, -1));
-		risingPlane = new ReflectionPlane(new Vector(-1, 2 * y, 1), new Vector(1, 2 * y, 1), new Vector(1, y, 0), new Vector(-1, y, 0)).renderNormal(true);
-		fallingPlane = new ReflectionPlane(new Vector(-1, y, 0), new Vector(1, y, 0), new Vector(1, 2 * y, -1), new Vector(-1, 2 * y, -1)).renderNormal(true);
-		Camera.perspective(45, getWidth(), getHeight(), 0.001, 1000);
+		risingPlane = new ReflectionPlane(new Vector(-1, 2 * y, 1), new Vector(1, 2 * y, 1), new Vector(1, y, 0), new Vector(-1, y, 0));
+		fallingPlane = new ReflectionPlane(new Vector(-1, y, 0), new Vector(1, y, 0), new Vector(1, 2 * y, -1), new Vector(-1, 2 * y, -1));
 		GL.pushAttributes();
 		glEnable(GL_CULL_FACE);
 		glEnable(GL_NORMALIZE);
@@ -63,22 +74,29 @@ public class ModelViewerScene extends Scene {
 	protected void render() {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		
+		Camera.overlay(getWidth(), getHeight());
+		title.render();
+		
+		Camera.perspective(45, getWidth(), getHeight(), 0.1, 1000);
+		
 		Camera.position(camera);
 		Camera.lookAt(look);
 		
 		glTranslated(translate.x(), translate.y(), translate.z());
 		rotation.apply();
 		
-		drawCoordinateSystem(3);
+		if (!Mouse.isButtonDown(0) && !Mouse.isButtonDown(1) && time() - time > 0.1) rotation.yAdd(1);
+		
+		if (coordinateSystem) drawCoordinateSystem(3);
 		
 		if (bended) {
 			fallingPlane.reflect(model);
-			fallingPlane.render();
+			fallingPlane.renderNormal(normals).render();
 			risingPlane.reflect(model);
-			risingPlane.render();
+			risingPlane.renderNormal(normals).render();
 		} else {
 			flatPlane.reflect(model);
-			flatPlane.render();
+			flatPlane.renderNormal(normals).render();
 		}
 		
 		model.render();
@@ -149,6 +167,12 @@ public class ModelViewerScene extends Scene {
 		case Keyboard.KEY_B:
 			bended = !bended;
 			break;
+		case Keyboard.KEY_C:
+			coordinateSystem = !coordinateSystem;
+			break;
+		case Keyboard.KEY_N:
+			normals = !normals;
+			break;
 		case Keyboard.KEY_HOME:
 			rotation.reset();
 			translate.set(Vector.Null);
@@ -182,9 +206,11 @@ public class ModelViewerScene extends Scene {
 		switch (button) {
 		case 0:
 			rotation.xAdd(vertical).yAdd(horizontal);
+			time = time();
 			break;
 		case 1:
 			rotation.zAdd(horizontal);
+			time = time();
 			break;
 		default:
 			break;

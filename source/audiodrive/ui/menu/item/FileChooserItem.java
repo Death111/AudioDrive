@@ -16,10 +16,20 @@ public class FileChooserItem extends Item {
 	 * @param itemListener
 	 * @param isDirectory
 	 */
-	public FileChooserItem(String text, boolean isDirectory, ItemListener itemListener) {
-		super(text, FILECHOOSER_ITEM_WIDTH, FILECHOOSER_ITEM_HEIGHT);
+	public FileChooserItem(String text, boolean isDirectory, ItemListener itemListener, int width, int heigth) {
+		super(text, width, heigth);
 		this.isDirectory = isDirectory;
 		this.addItemListener(itemListener);
+	}
+	
+	/**
+	 * 
+	 * @param text Text of the item
+	 * @param itemListener
+	 * @param isDirectory
+	 */
+	public FileChooserItem(String text, boolean isDirectory, ItemListener itemListener) {
+		this(text, isDirectory, itemListener, FILECHOOSER_ITEM_WIDTH, FILECHOOSER_ITEM_HEIGHT);
 	}
 	
 	/**

@@ -7,10 +7,9 @@ import audiodrive.utilities.Buffers;
 
 public class Overlay {
 	
-	public static final int Width = Window.getWidth();
-	public static final int Height = Window.getHeight();
-	public static final VertexBuffer Canvas = new VertexBuffer(Buffers.create(0, 0, 0, Height, Width, Height, Width, 0), 2).mode(GL_QUADS);
-	
+	private int width = Window.getWidth();
+	private int height = Window.getHeight();
+	private VertexBuffer canvas = new VertexBuffer(Buffers.create(0, 0, 0, height, width, height, width, 0), 2).mode(GL_QUADS);
 	private ShaderProgram shader;
 	
 	public Overlay shader(ShaderProgram shader) {
@@ -26,14 +25,14 @@ public class Overlay {
 		if (shader != null) {
 			shader.bind();
 			setup(shader);
-			Canvas.draw();
+			canvas.draw();
 			shader.unbind();
 		}
 	}
 	
 	protected void setup(ShaderProgram shader) {
 		shader.uniform("time").set(Scene.time());
-		shader.uniform("resolution").set((float) Width, (float) Height);
+		shader.uniform("resolution").set((float) width, (float) height);
 	}
 	
 }

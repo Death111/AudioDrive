@@ -8,8 +8,6 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.lwjgl.opengl.Display;
-
 import audiodrive.AudioDrive;
 import audiodrive.ui.control.Input;
 
@@ -18,6 +16,7 @@ public class Scene implements Input.Observer {
 	private static Map<Class<? extends Scene>, Scene> scenes = new HashMap<>();
 	private static Set<Scene> hierarchy = new LinkedHashSet<>();
 	private static Scene active;
+	private static Scene entering;
 	private static long frameTimestamp;
 	private static double secondTimestamp;
 	private static double deltaTime;
@@ -64,6 +63,10 @@ public class Scene implements Input.Observer {
 		return active;
 	}
 	
+	public static Scene getEntering() {
+		return entering;
+	}
+	
 	public static int getFramerate() {
 		return framerate;
 	}
@@ -72,11 +75,13 @@ public class Scene implements Input.Observer {
 	
 	public final void enter() {
 		if (active == this) return;
+		entering = this;
 		if (active != null) active.exit(false);
 		active = this;
 		Input.addObserver(this);
 		hierarchy.add(this);
 		entering();
+		entering = null;
 		frameTimestamp = System.nanoTime();
 	}
 	
@@ -149,11 +154,11 @@ public class Scene implements Input.Observer {
 	}
 	
 	public int getWidth() {
-		return Display.getWidth();
+		return Window.getWidth();
 	}
 	
 	public int getHeight() {
-		return Display.getHeight();
+		return Window.getHeight();
 	}
 	
 	@Override
