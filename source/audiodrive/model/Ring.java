@@ -83,4 +83,8 @@ public class Ring {
 		return this;
 	}
 	
+	public double width() {
+		return scale + scale * 0.15 * pulse;
+	}
+	
 }

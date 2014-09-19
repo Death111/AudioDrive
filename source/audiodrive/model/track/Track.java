@@ -485,16 +485,22 @@ public class Track {
 		Range depthRange = GL.depthRange();
 		// TODO render depth buffer in texture and use this as look-up to improve performance
 		List<Block> blocks = visibleBlocks.stream().filter(block -> block.iteration() > index.integer - range && block.iteration() < index.integer + range).filter(block -> {
-			Vector screenspaceVector = GL.screenspace(block.placement().position(), mvpMatrix, viewport, depthRange);
-			if (!viewport.contains(screenspaceVector)) return false;
-			double depth = GL.depthBufferValue((int) screenspaceVector.x(), (int) screenspaceVector.y());
-			return screenspaceVector.z() < depth;
+			Vector side = block.placement().side().multiplied(block.width());
+			Vector screenspaceVectorLeft = GL.screenspace(block.placement().position().plus(side), mvpMatrix, viewport, depthRange);
+			Vector screenspaceVectorRight = GL.screenspace(block.placement().position().plus(side.negated()), mvpMatrix, viewport, depthRange);
+			if (!viewport.contains(screenspaceVectorLeft) && !viewport.contains(screenspaceVectorRight)) return false;
+			double depthLeft = GL.depthBufferValue((int) screenspaceVectorLeft.x(), (int) screenspaceVectorLeft.y());
+			double depthRight = GL.depthBufferValue((int) screenspaceVectorRight.x(), (int) screenspaceVectorRight.y());
+			return screenspaceVectorLeft.z() < depthLeft || screenspaceVectorRight.z() < depthRight;
 		}).collect(Collectors.toList());
 		List<Ring> rings = visibleRings.stream().filter(ring -> ring.iteration() > index.integer - range && ring.iteration() < index.integer + range).filter(ring -> {
-			Vector screenspaceVector = GL.screenspace(ring.placement().position(), mvpMatrix, viewport, depthRange);
-			if (!viewport.contains(screenspaceVector)) return false;
-			double depth = GL.depthBufferValue((int) screenspaceVector.x(), (int) screenspaceVector.y());
-			return screenspaceVector.z() < depth;
+			Vector side = ring.placement().side().multiplied(ring.width());
+			Vector screenspaceVectorLeft = GL.screenspace(ring.placement().position().plus(side), mvpMatrix, viewport, depthRange);
+			Vector screenspaceVectorRight = GL.screenspace(ring.placement().position().plus(side.negated()), mvpMatrix, viewport, depthRange);
+			if (!viewport.contains(screenspaceVectorLeft) && !viewport.contains(screenspaceVectorRight)) return false;
+			double depthLeft = GL.depthBufferValue((int) screenspaceVectorLeft.x(), (int) screenspaceVectorLeft.y());
+			double depthRight = GL.depthBufferValue((int) screenspaceVectorRight.x(), (int) screenspaceVectorRight.y());
+			return screenspaceVectorLeft.z() < depthLeft || screenspaceVectorRight.z() < depthRight;
 		}).collect(Collectors.toList());
 		
 		// clear buffers
@@ -516,6 +522,7 @@ public class Track {
 		
 		// create rotation to flip objects horizontally
 		Rotation flip = new Rotation().z(180);
+		glEnable(GL_DEPTH_TEST);
 		
 		// draw ring reflections
 		glDisable(GL_CULL_FACE);
@@ -547,7 +554,6 @@ public class Track {
 		model.placement(originalPlacement);
 		
 		glDisable(GL_STENCIL_TEST);
-		glEnable(GL_DEPTH_TEST);
 	}
 	
 	private void drawBorderNormals(List<Vertex> vertexList) {

@@ -100,6 +100,10 @@ public class Block {
 		destroyed = true;
 	}
 	
+	public double width() {
+		return 0.8;
+	}
+	
 	@Override
 	public String toString() {
 		return "Block " + id;
