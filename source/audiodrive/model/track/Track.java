@@ -2,15 +2,11 @@ package audiodrive.model.track;
 
 import static org.lwjgl.opengl.GL11.*;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.newdawn.slick.opengl.Texture;
-import org.newdawn.slick.opengl.TextureLoader;
 
 import audiodrive.AudioDrive;
 import audiodrive.audio.AnalyzedAudio;
@@ -29,42 +25,40 @@ import audiodrive.model.geometry.Vertex;
 import audiodrive.model.geometry.transform.Placement;
 import audiodrive.model.geometry.transform.Rotation;
 import audiodrive.model.loader.Model;
+import audiodrive.model.loader.ModelLoader;
 import audiodrive.model.tower.MusicTower;
 import audiodrive.model.tower.RotationTower;
 import audiodrive.model.tower.SpectralTower;
 import audiodrive.model.tower.TubeTower;
-import audiodrive.model.track.interpolation.CatmullRom;
 import audiodrive.ui.GL;
 import audiodrive.ui.components.Viewport;
 import audiodrive.utilities.Arithmetic;
-import audiodrive.utilities.Log;
 import audiodrive.utilities.Range;
 
 public class Track {
 	
 	private static final String TRACK_TEXTURE = "models/track/track.png";
 	
-	private AnalyzedAudio audio;
-	private List<Vector> vectorinates;
-	private List<Block> blocks;
-	private int smoothing;
+	private final AnalyzedAudio audio;
+	private final List<Vector> spline;
+	private final List<Block> blocks;
+	private final int smoothing;
+	
+	private final int numberOfRails = 3;
+	private final int numberOfCollectables;
+	private final int numberOfObstacles;
+	private final double iterationRate;
 	
 	private List<Block> visibleBlocks;
 	private List<Ring> visibleRings;
 	List<MusicTower> visibleMusicTowers;
 	
-	private List<Vector> spline;
 	private List<Vector> splineArea;
 	private List<Vertex> splineArea2;
 	private double width = 3;
 	private double borderHeight = 0.2;
 	private double borderWidth = 0.2;
 	private double flightHeight = 0.2;
-	private double ringPulseScale = 1.0;
-	
-	private int numberOfRails = 3;
-	private int numberOfCollectables;
-	private int numberOfObstacles;
 	
 	private VertexBuffer pointBuffer;
 	private VertexBuffer splineBuffer;
@@ -88,24 +82,21 @@ public class Track {
 	private Player player;
 	private Index index;
 	
-	public Track(AnalyzedAudio audio, List<Vector> vectorinates, List<Block> blocks, int smoothing) {
+	public Track(AnalyzedAudio audio, List<Vector> spline, List<Block> blocks, int smoothing) {
 		this.audio = audio;
-		this.vectorinates = vectorinates;
+		this.spline = spline;
 		this.blocks = blocks;
 		this.smoothing = smoothing;
-		try {
-			trackTexture = TextureLoader.getTexture("PNG", new FileInputStream(new File(TRACK_TEXTURE)));
-		} catch (IOException e) {
-			Log.error(e);
-		}
 		numberOfCollectables = (int) blocks.stream().filter(Block::isCollectable).count();
 		numberOfObstacles = blocks.size() - numberOfCollectables;
-		build();
+		iterationRate = spline.size() / audio.getDuration();
 		spectraMinMax = SpectraMinMax.getMinMax(audio.getMix());
+		trackTexture = ModelLoader.getTexture(TRACK_TEXTURE);
+		build();
 	}
 	
 	private void build() {
-		calculateSpline();
+		generateTrack();
 		generateTowers();
 		splineArea2Buffer = new VertexBuffer(splineArea2).mode(GL_QUAD_STRIP).useColor(true).useTexture(true);
 	}
@@ -113,7 +104,7 @@ public class Track {
 	private void generateTowers() {
 		int spacing = 300;
 		musicTowers = new ArrayList<>();
-		for (int iteration = spacing; iteration < audio.getIterationCount(); iteration += spacing) {
+		for (int iteration = spacing; iteration < spline.size(); iteration += spacing) {
 			float peak = audio.getMix().getThreshold().getClamped(iteration);
 			if (peak > 0.7) musicTowers.add(new TubeTower(iteration));
 			else if (peak > 0.3) musicTowers.add(new SpectralTower(iteration));
@@ -121,8 +112,7 @@ public class Track {
 		}
 	}
 	
-	private void calculateSpline() {
-		spline = CatmullRom.interpolate(vectorinates, smoothing, CatmullRom.Type.Centripetal);
+	private void generateTrack() {
 		splineArea = new ArrayList<>();
 		splineArea2 = new ArrayList<>();
 		
@@ -606,10 +596,6 @@ public class Track {
 	
 	public AnalyzedAudio getAudio() {
 		return audio;
-	}
-	
-	public List<Vector> getVectors() {
-		return vectorinates;
 	}
 	
 	public double getDuration() {

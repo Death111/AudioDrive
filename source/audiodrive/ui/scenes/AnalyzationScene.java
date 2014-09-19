@@ -10,7 +10,6 @@ import audiodrive.ui.components.Scene;
 import audiodrive.ui.components.Text;
 import audiodrive.ui.effects.ShaderProgram;
 import audiodrive.utilities.Buffers;
-import audiodrive.utilities.Log;
 
 public class AnalyzationScene extends Scene {
 	
@@ -34,9 +33,7 @@ public class AnalyzationScene extends Scene {
 		Camera.overlay(getWidth(), getHeight());
 		analyzer = new AudioAnalyzer();
 		Thread thread = new Thread(() -> {
-			Log.info("analyzing audio...");
 			analyzer.analyze(file);
-			Log.info("analyzation complete");
 		});
 		thread.setName("Analyzation Thread");
 		thread.start();

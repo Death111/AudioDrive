@@ -58,23 +58,24 @@ public class AudioAnalyzer {
 	
 	public AudioAnalyzer analyze(AudioFile file) {
 		if (file.equals(this.file)) return null;
+		Log.info("Analyzing audio...");
 		this.file = file;
 		done.set(false);
-		Log.debug("analyzing \"%s\"...", file.getName());
+		Log.debug("Analyzing \"%s\"...", file.getName());
 		stopwatch.start();
 		samples = new AudioDecoder().decode(file);
-		Log.trace("decoding took %.3f seconds", stopwatch.getSeconds());
+		Log.trace("Decoding took %.3f seconds", stopwatch.getSeconds());
 		double duration = samples.getSampleCount() / samples.getSampleRate();
 		ArrayList<Channel> channels = new ArrayList<>(samples.getChannels());
 		channels.add(samples.getMix());
 		List<AnalyzedChannel> analyzedChannels = channels.stream().parallel().map(this::analyze).collect(Collectors.toList());
 		AnalyzedChannel analyzedMix = analyzedChannels.remove(analyzedChannels.size() - 1);
 		results = new AnalyzedAudio(samples, duration, analyzedChannels, analyzedMix);
-		Log.debug("analyzation took %.3f seconds total", stopwatch.stop());
+		Log.debug("Analyzation took %.3f seconds total", stopwatch.stop());
 		int minutes = (int) (results.getDuration() / 60);
 		int seconds = (int) Math.round(results.getDuration() - minutes * 60);
 		Log.debug(
-			"analyzation results:"
+			"Analyzation results:"
 				+ "%n%s minutes %s seconds duration"
 				+ "%n%s channels"
 				+ "%n%s samples per second"
@@ -92,6 +93,7 @@ public class AudioAnalyzer {
 			results.getBandCount(),
 			results.getIteration(),
 			results.getIterationRate());
+		Log.info("Analyzation complete");
 		done.set(true);
 		return this;
 	}
@@ -99,17 +101,17 @@ public class AudioAnalyzer {
 	private AnalyzedChannel analyze(Channel channel) {
 		Stopwatch stopwatch = new Stopwatch().start();
 		List<float[]> spectra = calculateSpectra(channel);
-		Log.trace("spectra calculation of %s took %.3f seconds", channel, stopwatch.getSeconds());
+		Log.trace("Spectra calculation of %s took %.3f seconds", channel, stopwatch.getSeconds());
 		AnalyzationData spectralSum = calculateSpectralSum(spectra, channel);
-		Log.trace("spectralSum calculation of %s took %.3f seconds", channel, stopwatch.getSeconds());
+		Log.trace("SpectralSum calculation of %s took %.3f seconds", channel, stopwatch.getSeconds());
 		AnalyzationData spectralFlux = calculateSpectralFlux(spectra, channel);
-		Log.trace("spectralFlux calculation of %s took %.3f seconds", channel, stopwatch.getSeconds());
+		Log.trace("SpectralFlux calculation of %s took %.3f seconds", channel, stopwatch.getSeconds());
 		AnalyzationData threshold = calculateThreshold(spectralFlux);
-		Log.trace("threshold calculation of %s took %.3f seconds", channel, stopwatch.getSeconds());
+		Log.trace("Threshold calculation of %s took %.3f seconds", channel, stopwatch.getSeconds());
 		AnalyzationData prunnedSpectralFlux = calculatePrunnedSpectralFlux(spectralFlux, threshold);
-		Log.trace("prunnedSpectralFlux of %s calculation took %.3f seconds", channel, stopwatch.getSeconds());
+		Log.trace("PrunnedSpectralFlux of %s calculation took %.3f seconds", channel, stopwatch.getSeconds());
 		AnalyzationData peaks = calculatePeaks(prunnedSpectralFlux);
-		Log.trace("peaks calculation of %s took %.3f seconds", channel, stopwatch.getSeconds());
+		Log.trace("Peaks calculation of %s took %.3f seconds", channel, stopwatch.getSeconds());
 		return new AnalyzedChannel(channel, spectra, spectralSum, spectralFlux, threshold, prunnedSpectralFlux, peaks);
 	}
 	

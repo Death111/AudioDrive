@@ -1,16 +1,18 @@
-package audiodrive.ui.scenes.overlays;
+package audiodrive.ui.overlays;
 
 import static org.lwjgl.opengl.GL11.*;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import audiodrive.AudioDrive;
 import audiodrive.audio.AnalyzedAudio;
 import audiodrive.model.Player;
 import audiodrive.model.geometry.Color;
+import audiodrive.model.track.Block;
 import audiodrive.model.track.Track;
-import audiodrive.ui.TrackOverview;
 import audiodrive.ui.components.Camera;
 import audiodrive.ui.components.Overlay;
 import audiodrive.ui.components.Scene;
@@ -54,11 +56,15 @@ public class GameOverlay extends Overlay {
 	public void update() {
 		trackOverview.updatePlayerPosition(scene.getTrack().index());
 		// specialEffects.visible(scene.getState() != State.Paused);
+		List<Block> passed = scene.getTrack().getBlocks().stream().filter(block -> block.iteration() <= scene.getTrack().index().integer).collect(Collectors.toList());
+		int passedCollectables = (int) passed.stream().filter(Block::isCollectable).count();
+		int passedObstacles = passed.size() - passedCollectables;
 		text("time").setText(Format.seconds(scene.playtime()));
 		text("points").setText(String.format("Points: %d / %d (%.0f%%)", player.points(), collectables, 100.0 * player.points() / collectables));
-		text("damage").setText("Damage: " + player.collided() + " / " + player.hitpoints() + " (" + player.damage() + "%)");
-		text("collected").setText(String.format("Collected: %.1f%%", 100.0 * player.collected() / collectables));
-		text("collided").setText(String.format("Collided: %.1f%%", 100.0 * player.collided() / obstacles));
+		text("damage").setText(String.format("Damage: %d / %d (%d%%)", player.collided(), player.hitpoints(), player.damage()));
+		text("collected").setText(
+			String.format("Collected: %d / %d (%.1f%%)", player.collected(), passedCollectables, 100.0 * player.collected() / Math.max(passedCollectables, 1)));
+		text("collided").setText(String.format("Collided: %d / %d (%.1f%%)", player.collided(), passedObstacles, 100.0 * player.collided() / Math.max(passedObstacles, 1)));
 		Text notification = text("notification").setVisible(scene.getState() != State.Running && scene.getState() != State.Animating);
 		switch (scene.getState()) {
 		case Destroyed:

@@ -20,8 +20,8 @@ import audiodrive.ui.GL;
 import audiodrive.ui.components.Camera;
 import audiodrive.ui.components.Scene;
 import audiodrive.ui.components.Window;
-import audiodrive.ui.scenes.overlays.BackgroundOverlay;
-import audiodrive.ui.scenes.overlays.GameOverlay;
+import audiodrive.ui.overlays.BackgroundOverlay;
+import audiodrive.ui.overlays.GameOverlay;
 import audiodrive.utilities.Arithmetic;
 import audiodrive.utilities.Buffers;
 import audiodrive.utilities.CameraPath;
@@ -66,7 +66,7 @@ public class GameScene extends Scene {
 	
 	@Override
 	protected void entering() {
-		Log.info("starting game...");
+		Log.info("Starting game...");
 		keyboardSpeed = AudioDrive.Settings.getDouble("input.keyboard.speed");
 		mouseSpeed = AudioDrive.Settings.getDouble("input.mouse.speed");
 		volume = AudioDrive.Settings.getDouble("sound.volume");

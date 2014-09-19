@@ -1,4 +1,4 @@
-package audiodrive.ui.scenes.overlays;
+package audiodrive.ui.overlays;
 
 import audiodrive.ui.components.Camera;
 import audiodrive.ui.components.Overlay;

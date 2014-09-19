@@ -1,4 +1,4 @@
-package audiodrive.ui;
+package audiodrive.ui.overlays;
 
 import static org.lwjgl.opengl.GL11.*;
 
