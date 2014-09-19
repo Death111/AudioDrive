@@ -2,6 +2,7 @@ package audiodrive.ui.scenes.overlays;
 
 import audiodrive.ui.components.Camera;
 import audiodrive.ui.components.Overlay;
+import audiodrive.ui.effects.BackgroundSpectral;
 import audiodrive.ui.effects.ParticleEffects;
 import audiodrive.ui.scenes.GameScene;
 
@@ -9,6 +10,7 @@ public class BackgroundOverlay extends Overlay {
 	
 	private GameScene scene;
 	private ParticleEffects specialEffects;
+	BackgroundSpectral backgroundSpectral;
 	
 	private int width, height;
 	
@@ -17,6 +19,7 @@ public class BackgroundOverlay extends Overlay {
 		width = scene.getWidth();
 		height = scene.getHeight();
 		specialEffects = new ParticleEffects();
+		backgroundSpectral = new BackgroundSpectral(scene);
 	}
 	
 	public void update() {}
@@ -25,6 +28,7 @@ public class BackgroundOverlay extends Overlay {
 	public void render() {
 		Camera.overlay(width, height);
 		super.render();
+		backgroundSpectral.render();
 		specialEffects.render();
 	}
 }
