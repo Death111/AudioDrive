@@ -13,12 +13,12 @@ import audiodrive.utilities.Log;
 
 public class TrackGenerator {
 	
-	private double deltaX = 0.2;
+	private double deltaX = 3.0;
 	private double deltaY = 2.0;
 	private double deltaZ = 1.0;
 	
 	public Track generate(AnalyzedAudio audio) {
-		Log.debug("Generating track...");
+		Log.info("Generating track...");
 		int smoothing = Math.max(10, AudioDrive.Settings.getInteger("track.smoothing"));
 		AnalyzedChannel mixed = audio.getMix();
 		AnalyzedChannel left = audio.getChannel(0);
@@ -33,8 +33,7 @@ public class TrackGenerator {
 			if (iteration % smoothing == 0) {
 				vectorinates.add(new Vector(x, y, z));
 			}
-			float difference = right.getThreshold().get(iteration) - left.getThreshold().get(iteration);
-			int direction = Math.abs(difference) > 1 ? (int) Math.signum(difference) : 0;
+			double direction = right.getSpectralSum().getClamped(iteration) - left.getSpectralSum().getClamped(iteration);
 			x += direction * deltaX;
 			y += (0.5 - mixed.getThreshold().getClamped(iteration)) * deltaY;
 			z += deltaZ;
