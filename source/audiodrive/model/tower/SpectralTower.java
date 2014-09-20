@@ -1,5 +1,6 @@
 package audiodrive.model.tower;
 
+import audiodrive.model.geometry.Vector;
 import audiodrive.model.loader.Model;
 import audiodrive.model.loader.ModelLoader;
 import audiodrive.ui.components.Scene;
@@ -45,6 +46,7 @@ public class SpectralTower extends MusicTower {
 	
 	@Override
 	public void render() {
+		Vector up = model.placement().up();
 		model.placement().set(placement);
 		for (int i = 0; i < scales.length; i++) {
 			double targetScale = spectrum[i] * Radius;
@@ -53,7 +55,7 @@ public class SpectralTower extends MusicTower {
 			double scale = scales[i];
 			model.scaling().x(scale);
 			model.scaling().z(scale);
-			model.placement().position().yAdd(Spacing);
+			model.placement().position().add(up.multiplied(Spacing));
 			model.color(color.itensity(spectrum[i] * intensity)).render();
 		}
 	}
