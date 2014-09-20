@@ -2,16 +2,9 @@ package audiodrive.model;
 
 import static org.lwjgl.opengl.GL11.glDepthMask;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.newdawn.slick.opengl.Texture;
 
 import audiodrive.model.geometry.Color;
-import audiodrive.model.geometry.Face;
-import audiodrive.model.geometry.TextureCoordinate;
-import audiodrive.model.geometry.Vector;
-import audiodrive.model.geometry.Vertex;
 import audiodrive.model.geometry.transform.Placement;
 import audiodrive.model.loader.Model;
 import audiodrive.model.loader.ModelLoader;
@@ -21,26 +14,7 @@ public class Ring {
 	
 	public static final Texture Default = ModelLoader.getTexture("models/ring/ring.png");
 	public static final Texture Pulse = ModelLoader.getTexture("models/ring/ring-pulse.png");
-	private static final Model Model = createModel();
-	
-	private static Model createModel() {
-		List<Face> faces = new ArrayList<Face>();
-		
-		Vertex v1 = new Vertex().position(new Vector(-1, 1, 0)).normal(Vector.Z).textureCoordinate(new TextureCoordinate(0, 1));
-		Vertex v2 = new Vertex().position(new Vector(-1, -1, 0)).normal(Vector.Z).textureCoordinate(new TextureCoordinate(0, 0));
-		Vertex v3 = new Vertex().position(new Vector(1, -1, 0)).normal(Vector.Z).textureCoordinate(new TextureCoordinate(1, 0));
-		Vertex v4 = new Vertex().position(new Vector(1, 1, 0)).normal(Vector.Z).textureCoordinate(new TextureCoordinate(1, 1));
-		
-		Face f1 = new Face(v1, v2, v4);
-		Face f2 = new Face(v2, v3, v4);
-		
-		faces.add(f1);
-		faces.add(f2);
-		
-		Model model = new Model("ring", faces);
-		model.setTexture(Default);
-		return model;
-	}
+	private static final Model Model = ModelLoader.loadSingleModel("models/quad/quad").setTexture(Default);
 	
 	private Color color;
 	private Placement placement;

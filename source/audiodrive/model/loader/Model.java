@@ -121,8 +121,9 @@ public class Model extends Node {
 		return name;
 	}
 	
-	public final void setTexture(Texture texture) {
+	public final Model setTexture(Texture texture) {
 		this.texture = texture;
+		return this;
 	}
 	
 	public Texture getTexture() {

@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -192,13 +191,14 @@ public class ModelLoader {
 			
 			Log.info("Successfully loaded '" + modelCount + "' models.");
 			
+			br.close();
+			in.close();
+			fstream.close();
+			
 			return models;
 			
-		} catch (FileNotFoundException fnfe) {
-			Log.error(fnfe);
-		} catch (NumberFormatException | IOException e) {
-			Log.error(e.getMessage());
-			e.printStackTrace();
+		} catch (Exception e) {
+			Log.error("Error while loading model: " + e);
 		}
 		
 		return null;
@@ -207,12 +207,21 @@ public class ModelLoader {
 	public static Texture getTexture(String fileName) {
 		Texture texture = null;
 		Log.debug("Trying to load texture '" + fileName + "'.");
-		try {
-			texture = TextureLoader.getTexture("PNG", new FileInputStream(Resources.getFile(fileName)));
-			Log.info("Successfully loaded texture '" + fileName + "'");
-		} catch (IOException e) {
-			Log.debug("Could not load texure '" + fileName + "'. Reason: " + e.getMessage());
+		final File tryGetFile = Resources.tryGetFile(fileName);
+		
+		if (tryGetFile == null) {
+			Log.debug("Could not load texure '" + fileName + "'. (fileNotFound)");
+			return null;
 		}
+		
+		try {
+			texture = TextureLoader.getTexture("PNG", new FileInputStream(tryGetFile));
+		} catch (IOException e) {
+			Log.debug("Could not load texure '" + fileName + "'. Reason: " + e);
+			return null;
+		}
+		
+		Log.info("Successfully loaded texture '" + fileName + "'");
 		
 		return texture;
 	}
