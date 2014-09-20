@@ -13,11 +13,11 @@ import java.util.List;
 import org.newdawn.slick.opengl.Texture;
 import org.newdawn.slick.opengl.TextureLoader;
 
+import audiodrive.Resources;
 import audiodrive.model.geometry.Face;
 import audiodrive.model.geometry.TextureCoordinate;
 import audiodrive.model.geometry.Vector;
 import audiodrive.model.geometry.Vertex;
-import audiodrive.model.geometry.transform.Rotation;
 import audiodrive.utilities.Files;
 import audiodrive.utilities.Log;
 
@@ -72,7 +72,7 @@ public class ModelLoader {
 		
 		Log.info("Model from file '" + fileName + "' shall be loaded.");
 		Log.debug("Loading file '" + modelFileName + "' as Model");
-		File file = new File(modelFileName);
+		File file = Resources.getFile(modelFileName);
 		
 		// Check if obj exists
 		if (!file.exists()) {
@@ -208,7 +208,7 @@ public class ModelLoader {
 		Texture texture = null;
 		Log.debug("Trying to load texture '" + fileName + "'.");
 		try {
-			texture = TextureLoader.getTexture("PNG", new FileInputStream(new File(fileName)));
+			texture = TextureLoader.getTexture("PNG", new FileInputStream(Resources.getFile(fileName)));
 			Log.info("Successfully loaded texture '" + fileName + "'");
 		} catch (IOException e) {
 			Log.debug("Could not load texure '" + fileName + "'. Reason: " + e.getMessage());

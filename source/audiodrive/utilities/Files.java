@@ -6,6 +6,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
+import audiodrive.Resources;
+
 public class Files {
 	
 	/** Private constructor to prevent instantiation. */
@@ -14,7 +16,7 @@ public class Files {
 	}
 	
 	public static List<File> list(String directory, String extension, boolean recursive) {
-		return list(new File(directory), extension, recursive);
+		return list(Resources.getFile(directory), extension, recursive);
 	}
 	
 	public static List<File> list(File directory, String extension, boolean recursive) {
@@ -30,7 +32,7 @@ public class Files {
 	}
 	
 	public static Optional<File> find(String directory, String name) {
-		return find(new File(directory), name);
+		return find(Resources.getFile(directory), name);
 	}
 	
 	public static Optional<File> find(File directory, String name) {
