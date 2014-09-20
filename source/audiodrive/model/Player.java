@@ -115,11 +115,11 @@ public class Player implements Renderable {
 			double rate = tiltRate;
 			if (moved > 0) { // right
 				if (tiltProgress < 0.5) rate *= 2.0;
-				tiltProgress += rate * delta;
+				tiltProgress += rate * delta * elapsed * 40;
 				if (tiltProgress > 1.0) tiltProgress = 1.0;
 			} else { // left
 				if (tiltProgress > 0.5) rate *= 2.0;
-				tiltProgress -= rate * delta;
+				tiltProgress -= rate * delta * elapsed * 40;
 				if (tiltProgress < 0.0) tiltProgress = 0.0;
 			}
 			tiltTime = scene.playtime();

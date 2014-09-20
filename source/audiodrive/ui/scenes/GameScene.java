@@ -20,7 +20,7 @@ import audiodrive.ui.GL;
 import audiodrive.ui.components.Camera;
 import audiodrive.ui.components.Scene;
 import audiodrive.ui.components.Window;
-import audiodrive.ui.overlays.BackgroundOverlay;
+import audiodrive.ui.overlays.GameBackground;
 import audiodrive.ui.overlays.GameOverlay;
 import audiodrive.utilities.Arithmetic;
 import audiodrive.utilities.Buffers;
@@ -47,8 +47,8 @@ public class GameScene extends Scene {
 	private boolean rotate = true;
 	
 	private Playback playback;
-	private GameOverlay gameOverlay;
-	private BackgroundOverlay backgroundOverlay;
+	private GameOverlay overlay;
+	private GameBackground background;
 	
 	private CameraPath startCameraPath;
 	
@@ -56,6 +56,8 @@ public class GameScene extends Scene {
 	private double keyboardSpeed;
 	private double mouseSpeed;
 	private double volume;
+	
+	private boolean glow;
 	
 	public GameScene() {
 		draggable = false;
@@ -69,14 +71,15 @@ public class GameScene extends Scene {
 	@Override
 	protected void entering() {
 		Log.info("Starting game...");
+		glow = AudioDrive.Settings.getBoolean("graphics.glow");
 		keyboardSpeed = AudioDrive.Settings.getDouble("input.keyboard.speed");
 		mouseSpeed = AudioDrive.Settings.getDouble("input.mouse.speed");
 		volume = AudioDrive.Settings.getDouble("sound.volume");
 		File model = Files.find("models/player", AudioDrive.Settings.get("player.model") + ".obj").orElse(Files.list("models/player", ".obj", true).get(0));
 		player = new Player(this).model(ModelLoader.loadSingleModel(model.getPath()));
 		player.model().scale(0.05);
-		gameOverlay = new GameOverlay(this);
-		backgroundOverlay = new BackgroundOverlay(this);
+		overlay = new GameOverlay(this);
+		background = new GameBackground(this);
 		playback = new Playback(track.getAudio().getFile()).setVolume(AudioDrive.Settings.getDouble("music.volume"));
 		translation.reset();
 		rotation = 0;
@@ -110,8 +113,8 @@ public class GameScene extends Scene {
 	protected void update(double elapsed) {
 		checkState();
 		updateRotation(elapsed);
-		gameOverlay.update();
-		backgroundOverlay.update();
+		overlay.update();
+		background.update();
 		player.update();
 		if (state != State.Running) return;
 		time = playback.getTime();
@@ -161,7 +164,7 @@ public class GameScene extends Scene {
 		glClearColor(0, 0, 0, 1);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		
-		backgroundOverlay.render();
+		background.render();
 		
 		Camera.perspective(45, getWidth(), getHeight(), Near, Far);
 		if (state == State.Animating) startCameraPath.camera();
@@ -177,9 +180,9 @@ public class GameScene extends Scene {
 		
 		track.render();
 		player.render();
-		track.glow().render();
-		// Glow.overlay();
-		gameOverlay.render();
+		if (glow) track.glow().render();
+		
+		overlay.render();
 	}
 	
 	@Override
@@ -187,8 +190,8 @@ public class GameScene extends Scene {
 		GL.popAttributes();
 		playback.stop();
 		Mouse.setGrabbed(false);
-		gameOverlay = null;
-		backgroundOverlay = null;
+		overlay = null;
+		background = null;
 		track = null;
 		player = null;
 	}
@@ -287,7 +290,7 @@ public class GameScene extends Scene {
 			player.zoom(1.0);
 			break;
 		case Keyboard.KEY_P:
-			gameOverlay.togglePeaks();
+			overlay.togglePeaks();
 			break;
 		case Keyboard.KEY_V:
 			Window.toggleVSync();

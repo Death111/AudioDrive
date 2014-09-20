@@ -9,6 +9,7 @@ import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.Display;
 
 import audiodrive.AudioDrive;
+import audiodrive.audio.AudioFile;
 import audiodrive.ui.components.Camera;
 import audiodrive.ui.components.Overlay;
 import audiodrive.ui.components.Scene;
@@ -28,23 +29,21 @@ import audiodrive.utilities.Log;
  */
 public class SettingsScene extends Scene implements ItemListener {
 	
+	private static final List<Boolean> booleanValues = Arrays.asList(true, false);
+	private static final List<Integer> superSamplingValues = Arrays.asList(0, 2, 4, 8, 16);
+	private static final List<Double> difficultyValues = Arrays.asList(.1, .2, .3, .4, .5, .6, .7, .8, .9, 1.);
+	private static final List<Double> controlValues = Arrays.asList(.5, .6, .7, .8, .9, 1., 1.2, 1.4, 1.6, 1.8, 2.0);
+	private static final List<Double> volumeValues = Arrays.asList(0., .1, .2, .3, .4, .5, .6, .7, .8, .9, 1.);
+	
 	private Menu settingsMenu;
-	private Menu saveMenu;
-	
-	private List<Boolean> booleanValues = Arrays.asList(true, false);
-	
-	private List<Integer> superSamplingValues = Arrays.asList(2, 4, 8, 16);
-	
-	private List<Double> difficultyValues = Arrays.asList(.1, .2, .3, .4, .5, .6, .7, .8, .9, 1.);
-	private List<Double> keyboardValues = Arrays.asList(.1, .2, .3, .4, .5, .6, .7, .8, .9, 1.);
-	private List<Double> mouseValues = Arrays.asList(.1, .2, .3, .4, .5, .6, .7, .8, .9, 1.);
-	private List<Double> interfaceVolumeValues = Arrays.asList(.1, .2, .3, .4, .5, .6, .7, .8, .9, 1.);
-	private List<Double> audioVolumeValues = Arrays.asList(.1, .2, .3, .4, .5, .6, .7, .8, .9, 1.);
-	private List<Double> soundVolumeValues = Arrays.asList(.1, .2, .3, .4, .5, .6, .7, .8, .9, 1.);
-	
-	private SettingsItem<Boolean> antiAliasing;
-	private SettingsItem<Integer> superSampling;
+	private SettingsItem<Boolean> antialiasing;
+	private SettingsItem<Integer> multisampling;
 	private SettingsItem<Boolean> vSync;
+	private SettingsItem<Boolean> glow;
+	private SettingsItem<Boolean> particles;
+	private SettingsItem<Boolean> reflections;
+	private SettingsItem<Boolean> environment;
+	private SettingsItem<Boolean> visualization;
 	private SettingsItem<Boolean> staticCollectableColor;
 	private SettingsItem<Boolean> glowingCollectables;
 	private SettingsItem<Boolean> staticObstacleColor;
@@ -56,17 +55,24 @@ public class SettingsScene extends Scene implements ItemListener {
 	private SettingsItem<Double> audioVolume;
 	private SettingsItem<Double> soundVolume;
 	
+	private Menu saveMenu;
 	private MenuItem saveItem;
 	private MenuItem closeItem;
+	
 	private Text titleText;
 	private Overlay background;
+	private AudioFile selectAudio;
+	
+	private double volume;
 	
 	@Override
 	public void entering() {
 		titleText = new Text("Settings").setFont(AudioDrive.Font).setSize(48).setPosition(20, 20);
 		
 		int width = 1000;
-		settingsMenu = new Menu(20, 180, width + 1, Display.getHeight() - 180, 1);
+		int height = Display.getHeight() * 2 / 3;
+		int y = (Display.getHeight() - height) / 2;
+		settingsMenu = new Menu(20, y, width + 1, height, 1);
 		saveMenu = new Menu(20, Display.getHeight() - MenuItem.MENU_ITEM_HEIGHT - 20, Display.getWidth() - 50, MenuItem.MENU_ITEM_HEIGHT + 1, 1);
 		
 		saveItem = new MenuItem("Save", this);
@@ -75,24 +81,34 @@ public class SettingsScene extends Scene implements ItemListener {
 		saveMenu.addItem(saveItem);
 		saveMenu.addItem(closeItem);
 		
-		int height = 40;
-		antiAliasing = new SettingsItem<Boolean>("Anti Aliasing", booleanValues, width, height);
-		superSampling = new SettingsItem<Integer>("Multi Sampling", superSamplingValues, width, height);
-		vSync = new SettingsItem<Boolean>("VSync", booleanValues, width, height);
-		staticCollectableColor = new SettingsItem<Boolean>("Static Collectable Color", booleanValues, width, height);
-		glowingCollectables = new SettingsItem<Boolean>("Glowing Collectables", booleanValues, width, height);
-		staticObstacleColor = new SettingsItem<Boolean>("Static Obstacle Color", booleanValues, width, height);
-		glowingObstacles = new SettingsItem<Boolean>("Glowing Obstacles", booleanValues, width, height);
-		difficulty = new SettingsItem<Double>("Difficulty", difficultyValues, width, height);
-		keyboard = new SettingsItem<Double>("Keyboard", keyboardValues, width, height);
-		mouse = new SettingsItem<Double>("Mouse", mouseValues, width, height);
-		interfaceVolume = new SettingsItem<Double>("Interface Volume", interfaceVolumeValues, width, height);
-		audioVolume = new SettingsItem<Double>("Audio Volume", audioVolumeValues, width, height);
-		soundVolume = new SettingsItem<Double>("Sound Volume", soundVolumeValues, width, height);
+		int itemHeight = 50;
+		antialiasing = new SettingsItem<Boolean>("Anti-Aliasing", booleanValues, width, itemHeight);
+		multisampling = new SettingsItem<Integer>("Multisampling", superSamplingValues, width, itemHeight);
+		vSync = new SettingsItem<Boolean>("V-Sync", booleanValues, width, itemHeight);
+		glow = new SettingsItem<Boolean>("Glow", booleanValues, width, itemHeight);
+		particles = new SettingsItem<Boolean>("Particles", booleanValues, width, itemHeight);
+		reflections = new SettingsItem<Boolean>("Reflections", booleanValues, width, itemHeight);
+		environment = new SettingsItem<Boolean>("Environment", booleanValues, width, itemHeight);
+		visualization = new SettingsItem<Boolean>("Visualization", booleanValues, width, itemHeight);
+		staticCollectableColor = new SettingsItem<Boolean>("Static Collectable Color", booleanValues, width, itemHeight);
+		glowingCollectables = new SettingsItem<Boolean>("Glowing Collectables", booleanValues, width, itemHeight);
+		staticObstacleColor = new SettingsItem<Boolean>("Static Obstacle Color", booleanValues, width, itemHeight);
+		glowingObstacles = new SettingsItem<Boolean>("Glowing Obstacles", booleanValues, width, itemHeight);
+		difficulty = new SettingsItem<Double>("Difficulty", difficultyValues, width, itemHeight);
+		keyboard = new SettingsItem<Double>("Keyboard", controlValues, width, itemHeight);
+		mouse = new SettingsItem<Double>("Mouse", controlValues, width, itemHeight);
+		interfaceVolume = new SettingsItem<Double>("Interface Volume", volumeValues, width, itemHeight);
+		audioVolume = new SettingsItem<Double>("Audio Volume", volumeValues, width, itemHeight);
+		soundVolume = new SettingsItem<Double>("Sound Volume", volumeValues, width, itemHeight);
 		
-		settingsMenu.addItem(antiAliasing);
-		settingsMenu.addItem(superSampling);
+		settingsMenu.addItem(antialiasing);
+		settingsMenu.addItem(multisampling);
 		settingsMenu.addItem(vSync);
+		settingsMenu.addItem(glow);
+		settingsMenu.addItem(particles);
+		settingsMenu.addItem(reflections);
+		settingsMenu.addItem(environment);
+		settingsMenu.addItem(visualization);
 		settingsMenu.addItem(staticCollectableColor);
 		settingsMenu.addItem(glowingCollectables);
 		settingsMenu.addItem(staticObstacleColor);
@@ -104,6 +120,9 @@ public class SettingsScene extends Scene implements ItemListener {
 		settingsMenu.addItem(audioVolume);
 		settingsMenu.addItem(soundVolume);
 		
+		selectAudio = new AudioFile("sounds/Select.mp3");
+		volume = AudioDrive.Settings.getDouble("interface.volume");
+		
 		background = new Overlay().shader(new ShaderProgram("shaders/default.vs", "shaders/title.fs"));
 		updateSettings();
 		Camera.overlay(getWidth(), getHeight());
@@ -111,14 +130,19 @@ public class SettingsScene extends Scene implements ItemListener {
 	
 	private void updateSettings() {
 		AudioDrive.Settings.load();
-		antiAliasing.setValue(AudioDrive.Settings.getBoolean("window.antialiasing"));
-		superSampling.setValue(AudioDrive.Settings.getInteger("window.supersampling"));
+		antialiasing.setValue(AudioDrive.Settings.getBoolean("window.antialiasing"));
+		multisampling.setValue(AudioDrive.Settings.getInteger("window.multisampling"));
 		vSync.setValue(AudioDrive.Settings.getBoolean("window.vsync"));
+		glow.setValue(AudioDrive.Settings.getBoolean("graphics.glow"));
+		particles.setValue(AudioDrive.Settings.getBoolean("graphics.particles"));
+		reflections.setValue(AudioDrive.Settings.getBoolean("graphics.reflections"));
+		environment.setValue(AudioDrive.Settings.getBoolean("game.environment"));
+		visualization.setValue(AudioDrive.Settings.getBoolean("game.visualization"));
+		difficulty.setValue(AudioDrive.Settings.getDouble("game.difficulty"));
 		staticCollectableColor.setValue(AudioDrive.Settings.getBoolean("block.collectable.color.static"));
 		glowingCollectables.setValue(AudioDrive.Settings.getBoolean("block.collectable.glowing"));
 		staticObstacleColor.setValue(AudioDrive.Settings.getBoolean("block.obstacle.color.static"));
 		glowingObstacles.setValue(AudioDrive.Settings.getBoolean("block.obstacle.glowing"));
-		difficulty.setValue(AudioDrive.Settings.getDouble("game.difficulty"));
 		keyboard.setValue(AudioDrive.Settings.getDouble("input.keyboard.speed"));
 		mouse.setValue(AudioDrive.Settings.getDouble("input.mouse.speed"));
 		interfaceVolume.setValue(AudioDrive.Settings.getDouble("interface.volume"));
@@ -172,27 +196,42 @@ public class SettingsScene extends Scene implements ItemListener {
 	
 	@Override
 	public void onSelect(Item item, boolean select) {
+		selectAudio.play(volume);
 		if (item == saveItem) {
 			saveSettings();
+			back();
 		} else if (item == closeItem) {
 			back();
 		}
 	}
 	
 	private void saveSettings() {
+		AudioDrive.Settings.set("window.antialiasing", antialiasing.valueAsString());
+		AudioDrive.Settings.set("window.multisampling", multisampling.valueAsString());
+		AudioDrive.Settings.set("window.vsync", vSync.valueAsString());
+		AudioDrive.Settings.set("graphics.glow", glow.valueAsString());
+		AudioDrive.Settings.set("graphics.particles", particles.valueAsString());
+		AudioDrive.Settings.set("graphics.reflections", reflections.valueAsString());
+		AudioDrive.Settings.set("game.environment", environment.valueAsString());
+		AudioDrive.Settings.set("game.visualization", visualization.valueAsString());
+		AudioDrive.Settings.set("game.difficulty", difficulty.valueAsString());
 		AudioDrive.Settings.set("block.collectable.color.static", staticCollectableColor.valueAsString());
 		AudioDrive.Settings.set("block.collectable.glowing", glowingCollectables.valueAsString());
 		AudioDrive.Settings.set("block.obstacle.color.static", staticObstacleColor.valueAsString());
 		AudioDrive.Settings.set("block.obstacle.glowing", glowingObstacles.valueAsString());
-		AudioDrive.Settings.set("game.difficulty", difficulty.valueAsString());
-		AudioDrive.Settings.set("input.mouse.speed", mouse.valueAsString());
 		AudioDrive.Settings.set("input.keyboard.speed", keyboard.valueAsString());
+		AudioDrive.Settings.set("input.mouse.speed", mouse.valueAsString());
 		AudioDrive.Settings.set("interface.volume", interfaceVolume.valueAsString());
 		AudioDrive.Settings.set("music.volume", audioVolume.valueAsString());
 		AudioDrive.Settings.set("sound.volume", soundVolume.valueAsString());
-		AudioDrive.Settings.set("window.antialiasing", antiAliasing.valueAsString());
-		AudioDrive.Settings.set("window.supersampling", superSampling.valueAsString());
-		AudioDrive.Settings.set("window.vsync", vSync.valueAsString());
 		AudioDrive.Settings.save();
+		applySettings();
 	}
+	
+	private void applySettings() {
+		// not yet possible, since entering the game scene would cause a crash
+		// int muiltisampling = AudioDrive.Settings.getInteger("window.multisampling");
+		// if (muiltisampling != Window.getPixelFormat().getSamples()) Window.setMultisampling(muiltisampling);
+	}
+	
 }

@@ -128,7 +128,7 @@ public class Window {
 			throw new RuntimeException(exception);
 		}
 		ContextCapabilities capabilities = GLContext.getCapabilities();
-		int samples = capabilities.GL_ARB_multisample ? Arithmetic.clamp(Arithmetic.nextPowerOfTwo(AudioDrive.Settings.getInteger("window.supersampling")), 0, 16) : 0;
+		int samples = capabilities.GL_ARB_multisample ? Arithmetic.clamp(Arithmetic.nextPowerOfTwo(AudioDrive.Settings.getInteger("window.multisampling")), 0, 16) : 0;
 		if (pixelFormat.getSamples() != samples) pixelFormat = pixelFormat.withSamples(samples);
 		// TODO check OpenGL version etc
 	}
@@ -285,7 +285,7 @@ public class Window {
 	}
 	
 	public static void setMonitor(GraphicsDevice monitor) {
-		if (Window.monitor.equals(monitor)) return;
+		if (Window.monitor.equals(monitor) || monitor == null) return;
 		Window.monitor = monitor;
 		recreate = true;
 	}

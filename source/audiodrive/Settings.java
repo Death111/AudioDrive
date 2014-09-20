@@ -32,7 +32,12 @@ public class Settings {
 		set("color.intense", "1,0,0,1");
 		set("color.average", "0,1,0,1");
 		set("color.relaxed", "0,0,1,1");
+		set("game.environment", "true");
+		set("game.visualization", "true");
 		set("game.difficulty", "0.5");
+		set("graphics.glow", "true");
+		set("graphics.particles", "true");
+		set("graphics.reflections", "true");
 		set("input.mouse.speed", "1.0");
 		set("input.keyboard.speed", "1.0");
 		set("interface.useBoxes", "false");
@@ -43,7 +48,7 @@ public class Settings {
 		set("sound.volume", "1.0");
 		set("track.smoothing", "15");
 		set("window.antialiasing", "true");
-		set("window.supersampling", "4");
+		set("window.multisampling", "4");
 		set("window.framerate", "0");
 		set("window.useSecondaryMonitor", "false");
 		set("window.vsync", "true");

@@ -78,8 +78,12 @@ public class Track implements Renderable {
 	private Color relaxedColor = AudioDrive.Settings.getColor("color.relaxed");
 	private Color averageColor = AudioDrive.Settings.getColor("color.average");
 	private Color intenseColor = AudioDrive.Settings.getColor("color.intense");
+	
 	private boolean colorizeCollectables = !AudioDrive.Settings.getBoolean("block.collectable.color.static");
 	private boolean colorizeObstacles = !AudioDrive.Settings.getBoolean("block.obstacle.color.static");
+	private boolean reflections = AudioDrive.Settings.getBoolean("graphics.reflections");
+	private boolean environment = AudioDrive.Settings.getBoolean("game.environment");
+	private boolean visualization = AudioDrive.Settings.getBoolean("game.visualization");
 	
 	private List<MinMax> spectraMinMax;
 	private Glow glow;
@@ -108,8 +112,9 @@ public class Track implements Renderable {
 	}
 	
 	private void generateTowers() {
-		int spacing = 300;
 		musicTowers = new ArrayList<>();
+		if (!environment) return;
+		int spacing = 300;
 		for (int iteration = spacing; iteration < spline.size(); iteration += spacing) {
 			float peak = audio.getMix().getThreshold().getClamped(iteration);
 			if (peak > 0.7) musicTowers.add(new TubeTower(iteration));
@@ -371,7 +376,7 @@ public class Track implements Renderable {
 		
 		AnalyzedChannel mix = audio.getMix();
 		visibleRings = new ArrayList<>();
-		double pulse = Arithmetic.smooth(0, 2, mix.getPeaks().getClamped(iteration));
+		double pulse = visualization ? Arithmetic.smooth(0, 2, mix.getPeaks().getClamped(iteration)) : 0;
 		for (int i = minimum; i < maximum; i++) {
 			if (mix.getPeaks().getClamped(i) == 0) continue;
 			double ringScale = 5 - 3 * mix.getThreshold().getClamped(i);
@@ -441,7 +446,7 @@ public class Track implements Renderable {
 		}
 		
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-		drawReflections();
+		if (reflections) drawReflections();
 		// Draw track
 		if (trackTexture != null) {
 			glEnable(GL_TEXTURE_2D);
