@@ -110,6 +110,7 @@ public class MenuScene extends Scene implements ItemListener {
 		case Keyboard.KEY_V:
 			onSelect(visualizeMenuItem, true);
 			break;
+		case Keyboard.KEY_RETURN:
 		case Keyboard.KEY_P:
 			onSelect(playMenuItem, true);
 			break;

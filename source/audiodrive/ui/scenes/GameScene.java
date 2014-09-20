@@ -43,6 +43,8 @@ public class GameScene extends Scene {
 	
 	private Translation translation = new Translation();
 	private double rotation = 0;
+	private int rotationDirection = 1;
+	private boolean rotate = true;
 	
 	private Playback playback;
 	private GameOverlay gameOverlay;
@@ -146,7 +148,7 @@ public class GameScene extends Scene {
 	
 	private void updateRotation(double elapsed) {
 		if (rotateable()) {
-			rotation += 15 * elapsed;
+			if (rotate) rotation += rotationDirection * 15 * elapsed;
 		} else if (state == State.Resuming) {
 			rotation = Rotation.unify180(rotation);
 			rotation -= Arithmetic.smooth(15 * rotation, 1, Math.abs(rotation) / 360) * elapsed;
@@ -285,6 +287,13 @@ public class GameScene extends Scene {
 			break;
 		case Keyboard.KEY_A:
 			Window.toggleAntialiasing();
+			break;
+		case Keyboard.KEY_R:
+			if (Keyboard.isKeyDown(Keyboard.KEY_LSHIFT) || Keyboard.isKeyDown(Keyboard.KEY_RSHIFT)) {
+				rotationDirection *= -1;
+			} else {
+				rotate = !rotate;
+			}
 			break;
 		default:
 			break;
