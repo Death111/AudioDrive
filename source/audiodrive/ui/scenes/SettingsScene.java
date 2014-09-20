@@ -182,7 +182,10 @@ public class SettingsScene extends Scene implements ItemListener {
 	}
 	
 	private void saveSettings() {
-		AudioDrive.Settings.set("color.collectable.static", staticObstacleColor.valueAsString());
+		AudioDrive.Settings.set("block.collectable.color.static", staticCollectableColor.valueAsString());
+		AudioDrive.Settings.set("block.collectable.glowing", glowingCollectables.valueAsString());
+		AudioDrive.Settings.set("block.obstacle.color.static", staticObstacleColor.valueAsString());
+		AudioDrive.Settings.set("block.obstacle.glowing", glowingObstacles.valueAsString());
 		AudioDrive.Settings.set("game.difficulty", difficulty.valueAsString());
 		AudioDrive.Settings.set("input.mouse.speed", mouse.valueAsString());
 		AudioDrive.Settings.set("input.keyboard.speed", keyboard.valueAsString());
