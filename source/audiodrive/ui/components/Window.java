@@ -17,6 +17,7 @@ import org.lwjgl.opengl.GLContext;
 import org.lwjgl.opengl.PixelFormat;
 
 import audiodrive.AudioDrive;
+import audiodrive.Resources;
 import audiodrive.ui.control.Input;
 import audiodrive.utilities.Arithmetic;
 import audiodrive.utilities.Get;
@@ -111,6 +112,7 @@ public class Window {
 		} catch (LWJGLException exception) {
 			throw new RuntimeException(exception);
 		}
+		Resources.reload();
 		Camera.reset();
 		if (antialiasing) glEnable(GL_MULTISAMPLE);
 		else glDisable(GL_MULTISAMPLE);

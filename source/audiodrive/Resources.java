@@ -4,8 +4,14 @@ import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.HashMap;
+
+import org.newdawn.slick.opengl.Texture;
 
 import audiodrive.audio.AudioFile;
+import audiodrive.model.loader.Model;
+import audiodrive.model.loader.ModelLoader;
+import audiodrive.ui.menu.item.Item.Icon;
 
 public class Resources {
 	
@@ -45,6 +51,41 @@ public class Resources {
 	
 	public static AudioFile getAudioFile(String name) {
 		return new AudioFile(getFile(name));
+	}
+	
+	/** Static Resources */
+	
+	private static class Cache {
+		
+		private static Model iconModel;
+		private static HashMap<Icon, Texture> iconTextures;
+		
+		static {
+			reload();
+		}
+		
+		private static void reload() {
+			iconModel = ModelLoader.loadSingleModel("models/quad/quad");
+			iconTextures = new HashMap<Icon, Texture>(5);
+			iconTextures.put(Icon.Music, ModelLoader.getTexture("textures/icon/music.png"));
+			iconTextures.put(Icon.Folder, ModelLoader.getTexture("textures/icon/folder.png"));
+			iconTextures.put(Icon.Normal, ModelLoader.getTexture("textures/icon/normal.png"));
+			iconTextures.put(Icon.Next, ModelLoader.getTexture("textures/icon/normal.png"));
+			iconTextures.put(Icon.Previous, ModelLoader.getTexture("textures/icon/normal.png"));
+		}
+		
+	}
+	
+	public static void reload() {
+		Cache.reload();
+	}
+	
+	public static Model getIconModel() {
+		return Cache.iconModel;
+	}
+	
+	public static HashMap<Icon, Texture> getIconTextures() {
+		return Cache.iconTextures;
 	}
 	
 }

@@ -7,13 +7,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.newdawn.slick.opengl.Texture;
-
 import audiodrive.AudioDrive;
+import audiodrive.Resources;
 import audiodrive.model.geometry.Color;
 import audiodrive.model.geometry.Vector;
-import audiodrive.model.loader.Model;
-import audiodrive.model.loader.ModelLoader;
 import audiodrive.ui.components.Text;
 import audiodrive.utilities.Log;
 
@@ -46,26 +43,15 @@ public abstract class Item {
 	protected List<ItemListener> itemListeners = new ArrayList<ItemListener>();
 	protected Map<State, Colors> colorMapping;
 	
-	protected final static Model iconModel = ModelLoader.loadSingleModel("models/quad/quad");
-	protected final static Map<Icon, Texture> iconTextures;
 	protected Icon icon = Icon.Normal;
 	protected int iconWidth;
-	
-	static {
-		iconTextures = new HashMap<Icon, Texture>(2);
-		iconTextures.put(Icon.Music, ModelLoader.getTexture("textures/icon/music.png"));
-		iconTextures.put(Icon.Folder, ModelLoader.getTexture("textures/icon/folder.png"));
-		iconTextures.put(Icon.Normal, ModelLoader.getTexture("textures/icon/normal.png"));
-		iconTextures.put(Icon.Next, ModelLoader.getTexture("textures/icon/normal.png"));
-		iconTextures.put(Icon.Previous, ModelLoader.getTexture("textures/icon/normal.png"));
-	}
 	
 	public Item(String itemText, int width, int height) {
 		x = 0;
 		y = 0;
 		this.width = width;
 		this.height = height;
-		this.iconWidth = height;
+		iconWidth = height;
 		// TODO calculate size by width and height
 		recalculate(itemText);
 	}
@@ -113,8 +99,8 @@ public abstract class Item {
 		final Color color = box ? colors.foreground : colors.text;
 		text.setColor(color).setPosition(x + iconWidth, y).render();
 		if (icon != null) {
-			iconModel.position(new Vector(x, y, 0)).position().xAdd(iconWidth / 2).yAdd(iconWidth / 2);
-			iconModel.scale(iconWidth / 2).color(color).setTexture(iconTextures.get(icon)).render();
+			Resources.getIconModel().position(new Vector(x, y, 0)).position().xAdd(iconWidth / 2).yAdd(iconWidth / 2);
+			Resources.getIconModel().scale(iconWidth / 2).color(color).setTexture(Resources.getIconTextures().get(icon)).render();
 		}
 	}
 	

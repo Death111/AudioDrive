@@ -4,6 +4,7 @@ import static org.lwjgl.opengl.GL11.*;
 
 import java.util.List;
 
+import audiodrive.Resources;
 import audiodrive.model.geometry.Color;
 import audiodrive.model.geometry.Vector;
 import audiodrive.ui.components.Text;
@@ -40,16 +41,16 @@ public class SettingsItem<T> extends Item {
 		text.setText(name).setColor(color).setPosition(x, y).render();
 		
 		int xOffset = width - length;
-		iconModel.position(new Vector(x + xOffset, y, 0)).position().xAdd(iconWidth / 2).yAdd(iconWidth / 2);
-		iconModel.scale(-1 * iconWidth / 2).color(color).setTexture(iconTextures.get(Icon.Previous)).render();
+		Resources.getIconModel().position(new Vector(x + xOffset, y, 0)).position().xAdd(iconWidth / 2).yAdd(iconWidth / 2);
+		Resources.getIconModel().scale(-1 * iconWidth / 2).color(color).setTexture(Resources.getIconTextures().get(Icon.Previous)).render();
 		
 		Text valueText = new Text(valueAsString());
 		valueText.setSize(text.getSize());
 		xOffset += length / 2 - valueText.getWidth() / 2;
 		valueText.setColor(color).setPosition(x + xOffset, y).render();
 		xOffset = width - iconWidth;
-		iconModel.position(new Vector(x + xOffset, y, 0)).position().xAdd(iconWidth / 2).yAdd(iconWidth / 2);
-		iconModel.scale(iconWidth / 2).color(color).setTexture(iconTextures.get(Icon.Next)).render();
+		Resources.getIconModel().position(new Vector(x + xOffset, y, 0)).position().xAdd(iconWidth / 2).yAdd(iconWidth / 2);
+		Resources.getIconModel().scale(iconWidth / 2).color(color).setTexture(Resources.getIconTextures().get(Icon.Next)).render();
 	}
 	
 	public void setSelected(boolean selected, int x, int y) {
