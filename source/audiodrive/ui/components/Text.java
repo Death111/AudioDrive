@@ -38,6 +38,7 @@ public class Text {
 	private double x, y;
 	private Alignment alignment = Alignment.UpperLeft;
 	private boolean visible = true;
+	private int size;
 	
 	public Text() {
 		setFont(DefaultFont);
@@ -81,8 +82,13 @@ public class Text {
 	}
 	
 	public Text setSize(int size) {
+		this.size = size;
 		setFont(font.deriveFont((float) size));
 		return this;
+	}
+	
+	public int getSize() {
+		return this.size;
 	}
 	
 	public Text setStyle(int style) {

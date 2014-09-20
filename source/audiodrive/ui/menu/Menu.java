@@ -6,6 +6,7 @@ import java.util.List;
 import audiodrive.ui.menu.item.FileChooserItem;
 import audiodrive.ui.menu.item.Item;
 import audiodrive.ui.menu.item.ItemListener;
+import audiodrive.ui.menu.item.SettingsItem;
 
 public class Menu implements ItemListener {
 	
@@ -150,7 +151,12 @@ public class Menu implements ItemListener {
 	 * Set selected if mouse is in bounds.
 	 */
 	private void setSelected(int x, int y, Item item) {
-		item.setSelected(inBounds(item, x, y));
+		final boolean selected = inBounds(item, x, y);
+		item.setSelected(selected);
+		if (item instanceof SettingsItem<?>) {
+			SettingsItem<?> setItem = (SettingsItem<?>) item;
+			setItem.setSelected(selected, x, y);
+		}
 	}
 	
 	private boolean inBounds(Item item, int x, int y) {

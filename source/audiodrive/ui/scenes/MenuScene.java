@@ -1,6 +1,7 @@
 package audiodrive.ui.scenes;
 
-import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL11.GL_COLOR_BUFFER_BIT;
+import static org.lwjgl.opengl.GL11.glClear;
 
 import org.lwjgl.input.Keyboard;
 
@@ -185,13 +186,13 @@ public class MenuScene extends Scene implements ItemListener {
 			Scene.get(ModelSelectionScene.class).enter();
 			return;
 		}
-		if (item == selectAudioMenuItem) {
-			AudioDrive.Settings.load();
-			return;
-		}
 		if (item == exitMenuItem) {
 			exit();
 			return;
+		}
+		if (item == settingsMenuItem) {
+			AudioDrive.Settings.load();
+			Scene.get(SettingsScene.class).enter();
 		}
 	}
 	

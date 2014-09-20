@@ -24,7 +24,7 @@ public abstract class Item {
 	}
 	
 	public static enum Icon {
-		Music, Folder, Normal
+		Music, Folder, Normal, Next, Previous
 	}
 	
 	protected static final Map<State, Colors> DefaultColors = new HashMap<>();
@@ -46,16 +46,18 @@ public abstract class Item {
 	protected List<ItemListener> itemListeners = new ArrayList<ItemListener>();
 	protected Map<State, Colors> colorMapping;
 	
-	private final static Model iconModel = ModelLoader.loadSingleModel("models/quad/quad");
-	private final static Map<Icon, Texture> iconTextures;
-	private Icon icon = Icon.Normal;
-	private int iconWidth;
+	protected final static Model iconModel = ModelLoader.loadSingleModel("models/quad/quad");
+	protected final static Map<Icon, Texture> iconTextures;
+	protected Icon icon = Icon.Normal;
+	protected int iconWidth;
 	
 	static {
 		iconTextures = new HashMap<Icon, Texture>(2);
 		iconTextures.put(Icon.Music, ModelLoader.getTexture("textures/icon/music.png"));
 		iconTextures.put(Icon.Folder, ModelLoader.getTexture("textures/icon/folder.png"));
 		iconTextures.put(Icon.Normal, ModelLoader.getTexture("textures/icon/normal.png"));
+		iconTextures.put(Icon.Next, ModelLoader.getTexture("textures/icon/normal.png"));
+		iconTextures.put(Icon.Previous, ModelLoader.getTexture("textures/icon/normal.png"));
 	}
 	
 	public Item(String itemText, int width, int height) {
@@ -65,6 +67,10 @@ public abstract class Item {
 		this.height = height;
 		this.iconWidth = height;
 		// TODO calculate size by width and height
+		recalculate(itemText);
+	}
+	
+	protected void recalculate(String itemText) {
 		int size = 30;
 		if (width > height) {
 			size = (int) (height / 1.5);
