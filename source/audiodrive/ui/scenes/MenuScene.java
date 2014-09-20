@@ -191,7 +191,6 @@ public class MenuScene extends Scene implements ItemListener {
 			return;
 		}
 		if (item == settingsMenuItem) {
-			AudioDrive.Settings.load();
 			Scene.get(SettingsScene.class).enter();
 		}
 	}
