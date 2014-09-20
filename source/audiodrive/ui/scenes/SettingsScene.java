@@ -33,7 +33,7 @@ public class SettingsScene extends Scene implements ItemListener {
 	
 	private final List<Boolean> booleanValues = Arrays.asList(true, false);
 	
-	private final List<Integer> superSamplingValues = Arrays.asList(2, 4, 6, 8, 16);
+	private final List<Integer> superSamplingValues = Arrays.asList(2, 4, 8, 16);
 	
 	private final List<Double> difficultyValues = Arrays.asList(.1, .2, .3, .4, .5, .6, .7, .8, .9, 1.);
 	private final List<Double> keyboardValues = Arrays.asList(.1, .2, .3, .4, .5, .6, .7, .8, .9, 1.);
