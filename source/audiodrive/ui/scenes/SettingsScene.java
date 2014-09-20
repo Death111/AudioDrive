@@ -26,40 +26,38 @@ import audiodrive.utilities.Log;
  */
 public class SettingsScene extends Scene implements ItemListener {
 	
-	private Menu settingsMenu;
-	private Menu saveMenu;
+	private final Menu settingsMenu;
+	private final Menu saveMenu;
 	
-	List<Boolean> anitaliasingValues = Arrays.asList(true, false);
-	List<Integer> superSamplingValues = Arrays.asList(2, 4, 6, 8, 16);
-	List<Boolean> vSyncValues = Arrays.asList(true, false);
+	private final List<Boolean> anitaliasingValues = Arrays.asList(true, false);
+	private final List<Integer> superSamplingValues = Arrays.asList(2, 4, 6, 8, 16);
+	private final List<Boolean> vSyncValues = Arrays.asList(true, false);
 	
-	List<Boolean> staticObstacleValues = Arrays.asList(true, false);
+	private final List<Boolean> staticObstacleValues = Arrays.asList(true, false);
 	
-	List<Double> difficultyValues = Arrays.asList(.1, .2, .3, .4, .5, .6, .7, .8, .9, 1.);
-	List<Double> keyboardValues = Arrays.asList(.1, .2, .3, .4, .5, .6, .7, .8, .9, 1.);
-	List<Double> mouseValues = Arrays.asList(.1, .2, .3, .4, .5, .6, .7, .8, .9, 1.);
-	List<Double> interfaceVolumeValues = Arrays.asList(.1, .2, .3, .4, .5, .6, .7, .8, .9, 1.);
-	List<Double> audioVolumeValues = Arrays.asList(.1, .2, .3, .4, .5, .6, .7, .8, .9, 1.);
-	List<Double> soundVolumeValues = Arrays.asList(.1, .2, .3, .4, .5, .6, .7, .8, .9, 1.);
+	private final List<Double> difficultyValues = Arrays.asList(.1, .2, .3, .4, .5, .6, .7, .8, .9, 1.);
+	private final List<Double> keyboardValues = Arrays.asList(.1, .2, .3, .4, .5, .6, .7, .8, .9, 1.);
+	private final List<Double> mouseValues = Arrays.asList(.1, .2, .3, .4, .5, .6, .7, .8, .9, 1.);
+	private final List<Double> interfaceVolumeValues = Arrays.asList(.1, .2, .3, .4, .5, .6, .7, .8, .9, 1.);
+	private final List<Double> audioVolumeValues = Arrays.asList(.1, .2, .3, .4, .5, .6, .7, .8, .9, 1.);
+	private final List<Double> soundVolumeValues = Arrays.asList(.1, .2, .3, .4, .5, .6, .7, .8, .9, 1.);
 	
-	private SettingsItem<Boolean> antiAliasing;
-	private SettingsItem<Integer> superSampling;
-	private SettingsItem<Boolean> vSync;
-	private SettingsItem<Boolean> staticObstacleColor;
-	private SettingsItem<Double> difficulty;
-	private SettingsItem<Double> keyboard;
-	private SettingsItem<Double> mouse;
-	private SettingsItem<Double> interfaceVolume;
-	private SettingsItem<Double> audioVolume;
-	private SettingsItem<Double> soundVolume;
+	private final SettingsItem<Boolean> antiAliasing;
+	private final SettingsItem<Integer> superSampling;
+	private final SettingsItem<Boolean> vSync;
+	private final SettingsItem<Boolean> staticObstacleColor;
+	private final SettingsItem<Double> difficulty;
+	private final SettingsItem<Double> keyboard;
+	private final SettingsItem<Double> mouse;
+	private final SettingsItem<Double> interfaceVolume;
+	private final SettingsItem<Double> audioVolume;
+	private final SettingsItem<Double> soundVolume;
 	
-	private MenuItem saveItem;
-	private MenuItem closeItem;
-	private Text titleText;
+	private final MenuItem saveItem;
+	private final MenuItem closeItem;
+	private final Text titleText;
 	
-	@Override
-	public void entering() {
-		
+	public SettingsScene() {
 		titleText = new Text("Settings").setFont(AudioDrive.Font).setSize(48).setPosition(20, 20);
 		
 		settingsMenu = new Menu(20, 180, 801, Display.getHeight() - 180, 1);
@@ -92,11 +90,15 @@ public class SettingsScene extends Scene implements ItemListener {
 		settingsMenu.addItem(interfaceVolume);
 		settingsMenu.addItem(audioVolume);
 		settingsMenu.addItem(soundVolume);
-		
+	}
+	
+	@Override
+	public void entering() {
 		updateSettings();
 	}
 	
 	private void updateSettings() {
+		AudioDrive.Settings.load();
 		antiAliasing.setValue(AudioDrive.Settings.getBoolean("window.antialiasing"));
 		superSampling.setValue(AudioDrive.Settings.getInteger("window.supersampling"));
 		vSync.setValue(AudioDrive.Settings.getBoolean("window.vsync"));
@@ -106,6 +108,7 @@ public class SettingsScene extends Scene implements ItemListener {
 		mouse.setValue(AudioDrive.Settings.getDouble("input.mouse.speed"));
 		interfaceVolume.setValue(AudioDrive.Settings.getDouble("interface.volume"));
 		audioVolume.setValue(AudioDrive.Settings.getDouble("music.volume"));
+		soundVolume.setValue(AudioDrive.Settings.getDouble("sound.volume"));
 	}
 	
 	@Override
@@ -117,9 +120,7 @@ public class SettingsScene extends Scene implements ItemListener {
 	}
 	
 	@Override
-	public void exiting() {
-		settingsMenu = null;
-	}
+	public void exiting() {}
 	
 	@Override
 	public void mouseMoved(int x, int y, int dx, int dy) {
@@ -163,7 +164,6 @@ public class SettingsScene extends Scene implements ItemListener {
 	}
 	
 	private void saveSettings() {
-		// TODO thomas warum speichert er sich das nicht?
 		AudioDrive.Settings.set("color.collectable.static", staticObstacleColor.valueAsString());
 		AudioDrive.Settings.set("game.difficulty", difficulty.valueAsString());
 		AudioDrive.Settings.set("input.mouse.speed", mouse.valueAsString());
