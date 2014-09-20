@@ -473,24 +473,19 @@ public class Track {
 		Matrix mvpMatrix = GL.modelviewProjectionMatrix();
 		Viewport viewport = GL.viewport();
 		Range depthRange = GL.depthRange();
-		// TODO render depth buffer in texture and use this as look-up to improve performance
 		List<Block> blocks = visibleBlocks.stream().filter(block -> block.iteration() > index.integer - range && block.iteration() < index.integer + range).filter(block -> {
+			if (Math.abs(block.iteration() - index.integer) < indexRate * 0.1) return true; // render reflection of close blocks always
 			Vector side = block.placement().side().multiplied(block.width());
-			Vector screenspaceVectorLeft = GL.screenspace(block.placement().position().plus(side), mvpMatrix, viewport, depthRange);
-			Vector screenspaceVectorRight = GL.screenspace(block.placement().position().plus(side.negated()), mvpMatrix, viewport, depthRange);
-			if (!viewport.contains(screenspaceVectorLeft) && !viewport.contains(screenspaceVectorRight)) return false;
-			double depthLeft = GL.depthBufferValue((int) screenspaceVectorLeft.x(), (int) screenspaceVectorLeft.y());
-			double depthRight = GL.depthBufferValue((int) screenspaceVectorRight.x(), (int) screenspaceVectorRight.y());
-			return screenspaceVectorLeft.z() < depthLeft || screenspaceVectorRight.z() < depthRight;
+			Vector leftScreenspaceVector = GL.screenspace(block.placement().position().plus(side), mvpMatrix, viewport, depthRange);
+			Vector rightScreenspaceVector = GL.screenspace(block.placement().position().plus(side.negated()), mvpMatrix, viewport, depthRange);
+			return isVisible(viewport, leftScreenspaceVector, rightScreenspaceVector);
 		}).collect(Collectors.toList());
 		List<Ring> rings = visibleRings.stream().filter(ring -> ring.iteration() > index.integer - range && ring.iteration() < index.integer + range).filter(ring -> {
+			if (Math.abs(ring.iteration() - index.integer) < indexRate * 0.1) return true; // render reflection of close rings always
 			Vector side = ring.placement().side().multiplied(ring.width());
-			Vector screenspaceVectorLeft = GL.screenspace(ring.placement().position().plus(side), mvpMatrix, viewport, depthRange);
-			Vector screenspaceVectorRight = GL.screenspace(ring.placement().position().plus(side.negated()), mvpMatrix, viewport, depthRange);
-			if (!viewport.contains(screenspaceVectorLeft) && !viewport.contains(screenspaceVectorRight)) return false;
-			double depthLeft = GL.depthBufferValue((int) screenspaceVectorLeft.x(), (int) screenspaceVectorLeft.y());
-			double depthRight = GL.depthBufferValue((int) screenspaceVectorRight.x(), (int) screenspaceVectorRight.y());
-			return screenspaceVectorLeft.z() < depthLeft || screenspaceVectorRight.z() < depthRight;
+			Vector leftScreenspaceVector = GL.screenspace(ring.placement().position().plus(side), mvpMatrix, viewport, depthRange);
+			Vector rightScreenspaceVector = GL.screenspace(ring.placement().position().plus(side.negated()), mvpMatrix, viewport, depthRange);
+			return isVisible(viewport, leftScreenspaceVector, rightScreenspaceVector);
 		}).collect(Collectors.toList());
 		
 		// clear buffers
@@ -544,6 +539,24 @@ public class Track {
 		model.placement(originalPlacement);
 		
 		glDisable(GL_STENCIL_TEST);
+	}
+	
+	private boolean isVisible(Viewport viewport, Vector leftScreenspaceVector, Vector rightScreenspaceVector) {
+		boolean leftVisible = viewport.contains(leftScreenspaceVector);
+		boolean rightVisible = viewport.contains(rightScreenspaceVector);
+		if (!leftVisible && !rightVisible) return false;
+		if (leftVisible && rightVisible) {
+			double depthLeft = GL.depthBufferValue((int) leftScreenspaceVector.x(), (int) leftScreenspaceVector.y());
+			double depthRight = GL.depthBufferValue((int) rightScreenspaceVector.x(), (int) rightScreenspaceVector.y());
+			return leftScreenspaceVector.z() < depthLeft && rightScreenspaceVector.z() < depthRight;
+		} else if (leftVisible) {
+			double depthLeft = GL.depthBufferValue((int) leftScreenspaceVector.x(), (int) leftScreenspaceVector.y());
+			return leftScreenspaceVector.z() < depthLeft;
+			
+		} else {
+			double depthRight = GL.depthBufferValue((int) rightScreenspaceVector.x(), (int) rightScreenspaceVector.y());
+			return rightScreenspaceVector.z() < depthRight;
+		}
 	}
 	
 	private void drawBorderNormals(List<Vertex> vertexList) {
