@@ -18,6 +18,7 @@ public class FileChooserItem extends Item {
 	 */
 	public FileChooserItem(String text, boolean isDirectory, ItemListener itemListener, int width, int heigth) {
 		super(text, width, heigth);
+		setIcon(isDirectory ? Icon.Folder : Icon.Music);
 		this.isDirectory = isDirectory;
 		this.addItemListener(itemListener);
 	}

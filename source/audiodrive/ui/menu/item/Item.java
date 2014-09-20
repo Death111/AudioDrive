@@ -7,8 +7,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.newdawn.slick.opengl.Texture;
+
 import audiodrive.AudioDrive;
 import audiodrive.model.geometry.Color;
+import audiodrive.model.geometry.Vector;
+import audiodrive.model.loader.Model;
+import audiodrive.model.loader.ModelLoader;
 import audiodrive.ui.components.Text;
 import audiodrive.utilities.Log;
 
@@ -16,6 +21,10 @@ public abstract class Item {
 	
 	public static enum State {
 		Normal, Hovering, Selected, Disabled
+	}
+	
+	public static enum Icon {
+		Music, Folder, Normal
 	}
 	
 	protected static final Map<State, Colors> DefaultColors = new HashMap<>();
@@ -37,12 +46,24 @@ public abstract class Item {
 	protected List<ItemListener> itemListeners = new ArrayList<ItemListener>();
 	protected Map<State, Colors> colorMapping;
 	
+	private final static Model iconModel = ModelLoader.loadSingleModel("models/quad/quad");
+	private final static Map<Icon, Texture> iconTextures;
+	private Icon icon = Icon.Normal;
+	private int iconWidth;
+	
+	static {
+		iconTextures = new HashMap<Icon, Texture>(2);
+		iconTextures.put(Icon.Music, ModelLoader.getTexture("textures/icon/music.png"));
+		iconTextures.put(Icon.Folder, ModelLoader.getTexture("textures/icon/folder.png"));
+		iconTextures.put(Icon.Normal, ModelLoader.getTexture("textures/icon/normal.png"));
+	}
+	
 	public Item(String itemText, int width, int height) {
 		x = 0;
 		y = 0;
 		this.width = width;
 		this.height = height;
-		
+		this.iconWidth = height;
 		// TODO calculate size by width and height
 		int size = 30;
 		if (width > height) {
@@ -50,12 +71,15 @@ public abstract class Item {
 		} else {
 			size = width / 10;
 		}
+		
 		text = new Text(itemText).setFont(AudioDrive.Font).setPosition(x, y).setSize(size);
+		
 		// Check if text is to big
-		if (text.getHeight() > height || text.getWidth() > width) {
+		final int availableTextWidth = width - iconWidth;
+		if (text.getHeight() > height || text.getWidth() > availableTextWidth) {
 			Log.trace("Text '" + itemText + "' is bigger than menuItem. Trimming it");
 			boolean trimmed = false;
-			while (text.getWidth() > width) {
+			while (text.getWidth() > availableTextWidth) {
 				String trimmedText = text.getText();
 				trimmed = true;
 				text.setText(trimmedText.substring(0, trimmedText.length() - 1));
@@ -80,8 +104,13 @@ public abstract class Item {
 			glVertex2f(x + width, y);
 			glEnd();
 		}
-		text.setColor(box ? colors.foreground : colors.text).setPosition(x, y).render();
-	};
+		final Color color = box ? colors.foreground : colors.text;
+		text.setColor(color).setPosition(x + iconWidth, y).render();
+		if (icon != null) {
+			iconModel.position(new Vector(x, y, 0)).position().xAdd(iconWidth / 2).yAdd(iconWidth / 2);
+			iconModel.scale(iconWidth / 2).color(color).setTexture(iconTextures.get(icon)).render();
+		}
+	}
 	
 	public void addItemListener(ItemListener itemListener) {
 		itemListeners.add(itemListener);
@@ -105,6 +134,11 @@ public abstract class Item {
 		default:
 			break;
 		}
+	}
+	
+	protected Item setIcon(Icon icon) {
+		this.icon = icon;
+		return this;
 	}
 	
 	public void setBox(boolean box) {
