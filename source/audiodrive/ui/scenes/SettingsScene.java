@@ -129,7 +129,6 @@ public class SettingsScene extends Scene implements ItemListener {
 	}
 	
 	private void updateSettings() {
-		AudioDrive.Settings.load();
 		antialiasing.setValue(AudioDrive.Settings.getBoolean("window.antialiasing"));
 		multisampling.setValue(AudioDrive.Settings.getInteger("window.multisampling"));
 		vSync.setValue(AudioDrive.Settings.getBoolean("window.vsync"));
