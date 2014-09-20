@@ -12,8 +12,8 @@ import audiodrive.utilities.Arithmetic;
 
 public class Ring {
 	
-	public static final Texture Default = ModelLoader.getTexture("models/ring/ring.png");
-	public static final Texture Pulse = ModelLoader.getTexture("models/ring/ring-pulse.png");
+	public static final Texture Default = ModelLoader.getTexture("textures/ring/ring.png");
+	public static final Texture Pulse = ModelLoader.getTexture("textures/ring/ring-pulse.png");
 	private static final Model Model = ModelLoader.loadSingleModel("models/quad/quad").setTexture(Default);
 	
 	private Color color;
