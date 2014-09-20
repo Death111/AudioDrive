@@ -1,7 +1,6 @@
 package audiodrive.ui.scenes;
 
-import static org.lwjgl.opengl.GL11.GL_COLOR_BUFFER_BIT;
-import static org.lwjgl.opengl.GL11.glClear;
+import static org.lwjgl.opengl.GL11.*;
 
 import java.util.Arrays;
 import java.util.List;
@@ -32,11 +31,9 @@ public class SettingsScene extends Scene implements ItemListener {
 	private final Menu settingsMenu;
 	private final Menu saveMenu;
 	
-	private final List<Boolean> anitaliasingValues = Arrays.asList(true, false);
-	private final List<Integer> superSamplingValues = Arrays.asList(2, 4, 6, 8, 16);
-	private final List<Boolean> vSyncValues = Arrays.asList(true, false);
+	private final List<Boolean> booleanValues = Arrays.asList(true, false);
 	
-	private final List<Boolean> staticObstacleValues = Arrays.asList(true, false);
+	private final List<Integer> superSamplingValues = Arrays.asList(2, 4, 6, 8, 16);
 	
 	private final List<Double> difficultyValues = Arrays.asList(.1, .2, .3, .4, .5, .6, .7, .8, .9, 1.);
 	private final List<Double> keyboardValues = Arrays.asList(.1, .2, .3, .4, .5, .6, .7, .8, .9, 1.);
@@ -48,7 +45,10 @@ public class SettingsScene extends Scene implements ItemListener {
 	private final SettingsItem<Boolean> antiAliasing;
 	private final SettingsItem<Integer> superSampling;
 	private final SettingsItem<Boolean> vSync;
+	private final SettingsItem<Boolean> staticCollectableColor;
+	private final SettingsItem<Boolean> glowingCollectables;
 	private final SettingsItem<Boolean> staticObstacleColor;
+	private final SettingsItem<Boolean> glowingObstacles;
 	private final SettingsItem<Double> difficulty;
 	private final SettingsItem<Double> keyboard;
 	private final SettingsItem<Double> mouse;
@@ -64,7 +64,8 @@ public class SettingsScene extends Scene implements ItemListener {
 	public SettingsScene() {
 		titleText = new Text("Settings").setFont(AudioDrive.Font).setSize(48).setPosition(20, 20);
 		
-		settingsMenu = new Menu(20, 180, 801, Display.getHeight() - 180, 1);
+		int width = 1000;
+		settingsMenu = new Menu(20, 180, width + 1, Display.getHeight() - 180, 1);
 		saveMenu = new Menu(20, Display.getHeight() - MenuItem.MENU_ITEM_HEIGHT - 20, Display.getWidth() - 50, MenuItem.MENU_ITEM_HEIGHT + 1, 1);
 		
 		saveItem = new MenuItem("Save", this);
@@ -73,21 +74,27 @@ public class SettingsScene extends Scene implements ItemListener {
 		saveMenu.addItem(saveItem);
 		saveMenu.addItem(closeItem);
 		
-		antiAliasing = new SettingsItem<Boolean>("Anti Aliasing", anitaliasingValues, 800, 50);
-		superSampling = new SettingsItem<Integer>("Multi Sampling", superSamplingValues, 800, 50);
-		vSync = new SettingsItem<Boolean>("VSync", vSyncValues, 800, 50);
-		staticObstacleColor = new SettingsItem<Boolean>("Static obstacle Color", staticObstacleValues, 800, 50);
-		difficulty = new SettingsItem<Double>("Difficulty", difficultyValues, 800, 50);
-		keyboard = new SettingsItem<Double>("Keyboard", keyboardValues, 800, 50);
-		mouse = new SettingsItem<Double>("Mouse", mouseValues, 800, 50);
-		interfaceVolume = new SettingsItem<Double>("Interface Volume", interfaceVolumeValues, 800, 50);
-		audioVolume = new SettingsItem<Double>("Audio Volume", audioVolumeValues, 800, 50);
-		soundVolume = new SettingsItem<Double>("Sound Volume", soundVolumeValues, 800, 50);
+		antiAliasing = new SettingsItem<Boolean>("Anti Aliasing", booleanValues, width, 50);
+		superSampling = new SettingsItem<Integer>("Multi Sampling", superSamplingValues, width, 50);
+		vSync = new SettingsItem<Boolean>("VSync", booleanValues, width, 50);
+		staticCollectableColor = new SettingsItem<Boolean>("Static Collectable Color", booleanValues, width, 50);
+		glowingCollectables = new SettingsItem<Boolean>("Glowing Collectables", booleanValues, width, 50);
+		staticObstacleColor = new SettingsItem<Boolean>("Static Obstacle Color", booleanValues, width, 50);
+		glowingObstacles = new SettingsItem<Boolean>("Glowing Obstacles", booleanValues, width, 50);
+		difficulty = new SettingsItem<Double>("Difficulty", difficultyValues, width, 50);
+		keyboard = new SettingsItem<Double>("Keyboard", keyboardValues, width, 50);
+		mouse = new SettingsItem<Double>("Mouse", mouseValues, width, 50);
+		interfaceVolume = new SettingsItem<Double>("Interface Volume", interfaceVolumeValues, width, 50);
+		audioVolume = new SettingsItem<Double>("Audio Volume", audioVolumeValues, width, 50);
+		soundVolume = new SettingsItem<Double>("Sound Volume", soundVolumeValues, width, 50);
 		
 		settingsMenu.addItem(antiAliasing);
 		settingsMenu.addItem(superSampling);
 		settingsMenu.addItem(vSync);
+		settingsMenu.addItem(staticCollectableColor);
+		settingsMenu.addItem(glowingCollectables);
 		settingsMenu.addItem(staticObstacleColor);
+		settingsMenu.addItem(glowingObstacles);
 		settingsMenu.addItem(difficulty);
 		settingsMenu.addItem(keyboard);
 		settingsMenu.addItem(mouse);
@@ -109,7 +116,10 @@ public class SettingsScene extends Scene implements ItemListener {
 		antiAliasing.setValue(AudioDrive.Settings.getBoolean("window.antialiasing"));
 		superSampling.setValue(AudioDrive.Settings.getInteger("window.supersampling"));
 		vSync.setValue(AudioDrive.Settings.getBoolean("window.vsync"));
-		staticObstacleColor.setValue(AudioDrive.Settings.getBoolean("color.collectable.static"));
+		staticCollectableColor.setValue(AudioDrive.Settings.getBoolean("block.collectable.color.static"));
+		glowingCollectables.setValue(AudioDrive.Settings.getBoolean("block.collectable.glowing"));
+		staticObstacleColor.setValue(AudioDrive.Settings.getBoolean("block.obstacle.color.static"));
+		glowingObstacles.setValue(AudioDrive.Settings.getBoolean("block.obstacle.glowing"));
 		difficulty.setValue(AudioDrive.Settings.getDouble("game.difficulty"));
 		keyboard.setValue(AudioDrive.Settings.getDouble("input.keyboard.speed"));
 		mouse.setValue(AudioDrive.Settings.getDouble("input.mouse.speed"));

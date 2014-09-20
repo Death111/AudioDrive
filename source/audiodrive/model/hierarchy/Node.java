@@ -1,11 +1,17 @@
 package audiodrive.model.hierarchy;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
-import audiodrive.model.geometry.transform.*;
+import audiodrive.model.Renderable;
+import audiodrive.model.geometry.transform.Placement;
+import audiodrive.model.geometry.transform.Rotation;
+import audiodrive.model.geometry.transform.Scaling;
+import audiodrive.model.geometry.transform.Transformation;
+import audiodrive.model.geometry.transform.Translation;
 import audiodrive.ui.GL;
 
-public abstract class Node {
+public abstract class Node implements Renderable {
 	
 	private List<Transformation> transformations = new ArrayList<>();
 	private List<Node> children = new ArrayList<>();
@@ -15,6 +21,7 @@ public abstract class Node {
 	private Rotation rotation = new Rotation();
 	private Scaling scaling = new Scaling();
 	
+	@Override
 	public void render() {
 		boolean transformed = hasTransformations();
 		if (transformed) GL.pushMatrix();

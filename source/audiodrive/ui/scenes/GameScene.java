@@ -151,13 +151,14 @@ public class GameScene extends Scene {
 			if (rotate) rotation += rotationDirection * 15 * elapsed;
 		} else if (state == State.Resuming) {
 			rotation = Rotation.unify180(rotation);
-			rotation -= Arithmetic.smooth(15 * rotation, 1, Math.abs(rotation) / 360) * elapsed;
+			rotation -= Arithmetic.smooth(10 * rotation, 1, Math.abs(rotation) / 360) * elapsed;
 			rotation = Arithmetic.significance(rotation, 0.1);
 		}
 	}
 	
 	@Override
 	protected void render() {
+		glClearColor(0, 0, 0, 1);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		
 		backgroundOverlay.render();
@@ -176,6 +177,8 @@ public class GameScene extends Scene {
 		
 		track.render();
 		player.render();
+		track.glow().render();
+		// Glow.overlay();
 		gameOverlay.render();
 	}
 	
@@ -267,6 +270,10 @@ public class GameScene extends Scene {
 	@Override
 	public void keyReleased(int key, char character) {
 		switch (key) {
+		case Keyboard.KEY_RETURN:
+			if (state == State.Animating) startCameraPath.skip();
+			else pause();
+			break;
 		case Keyboard.KEY_PAUSE:
 			if (state != State.Animating) pause();
 			break;

@@ -14,7 +14,7 @@ import audiodrive.audio.AnalyzedChannel;
 import audiodrive.audio.MinMax;
 import audiodrive.audio.SpectraMinMax;
 import audiodrive.model.Player;
-import audiodrive.model.Ring;
+import audiodrive.model.Renderable;
 import audiodrive.model.buffer.VertexBuffer;
 import audiodrive.model.geometry.Color;
 import audiodrive.model.geometry.CuboidStripRenderer;
@@ -32,10 +32,11 @@ import audiodrive.model.tower.SpectralTower;
 import audiodrive.model.tower.TubeTower;
 import audiodrive.ui.GL;
 import audiodrive.ui.components.Viewport;
+import audiodrive.ui.effects.Glow;
 import audiodrive.utilities.Arithmetic;
 import audiodrive.utilities.Range;
 
-public class Track {
+public class Track implements Renderable {
 	
 	private static final String TRACK_TEXTURE = "models/track/track.png";
 	
@@ -51,7 +52,8 @@ public class Track {
 	
 	private List<Block> visibleBlocks;
 	private List<Ring> visibleRings;
-	List<MusicTower> visibleMusicTowers;
+	private List<MusicTower> visibleMusicTowers;
+	private List<MusicTower> musicTowers;
 	
 	private List<Vector> splineArea;
 	private List<Vertex> splineArea2;
@@ -74,10 +76,13 @@ public class Track {
 	private VertexBuffer rightBorderVertexBuffer;
 	
 	private Color relaxedColor = AudioDrive.Settings.getColor("color.relaxed");
+	private Color averageColor = AudioDrive.Settings.getColor("color.average");
 	private Color intenseColor = AudioDrive.Settings.getColor("color.intense");
-	private boolean staticCollectableColor = AudioDrive.Settings.getBoolean("color.collectable.static");
-	private List<MusicTower> musicTowers;
+	private boolean colorizeCollectables = !AudioDrive.Settings.getBoolean("block.collectable.color.static");
+	private boolean colorizeObstacles = !AudioDrive.Settings.getBoolean("block.obstacle.color.static");
+	
 	private List<MinMax> spectraMinMax;
+	private Glow glow;
 	
 	private Player player;
 	private Index index;
@@ -92,6 +97,7 @@ public class Track {
 		indexRate = spline.size() / audio.getDuration();
 		spectraMinMax = SpectraMinMax.getMinMax(audio.getMix());
 		trackTexture = ModelLoader.getTexture(TRACK_TEXTURE);
+		glow = new Glow().depthpass(() -> splineArea2Buffer.draw()).renderpass(() -> visibleBlocks.stream().filter(Block::isGlowing).forEach(Block::render));
 		build();
 	}
 	
@@ -288,7 +294,7 @@ public class Track {
 	}
 	
 	private Color getColor(double t) {
-		return Color.Lerp(relaxedColor, intenseColor, (float) Arithmetic.scaleLinear(t, 0, 1, -.7f, .7f));
+		return Color.lerp(relaxedColor, averageColor, intenseColor, Arithmetic.scaleLinear(t, 0, 1, -0.5f, 0.5f));
 	}
 	
 	private int textureIndex = 0;
@@ -337,6 +343,7 @@ public class Track {
 		
 	}
 	
+	@Override
 	public void update(double time) {
 		int preview = 150;
 		int review = 100;
@@ -346,13 +353,20 @@ public class Track {
 		
 		int iteration = (int) (audio.getIterationRate() * time);
 		if (iteration >= audio.getIterationCount()) iteration = audio.getIterationCount() - 1;
-		Color currentColor = getColorAtIndex(index.integer);
+		Color borderColor = getColorAtIndex(index.integer);
+		Color inverseBorderColor = borderColor.inverse();
 		visibleBlocks = blocks.stream().filter(block -> block.iteration() > minimum && block.iteration() < maximum).collect(Collectors.toList());
 		visibleBlocks.forEach(block -> {
 			double position = block.iteration() - (block.iteration() - index.integer) / 2.0;
 			block.placement(getPlacement(new Index((int) position, position - (int) position), true, block.rail()));
 			block.update(index.integer);
-			if (!staticCollectableColor && block.isCollectable()) block.color(currentColor);
+			if (colorizeCollectables && colorizeObstacles) {
+				block.color(block.isCollectable() ? inverseBorderColor : borderColor);
+			} else if (block.isCollectable()) {
+				if (colorizeCollectables) block.color(borderColor);
+			} else {
+				if (colorizeObstacles) block.color(borderColor);
+			}
 		});
 		
 		AnalyzedChannel mix = audio.getMix();
@@ -388,7 +402,7 @@ public class Track {
 			// a.direction(Vector.Z);
 			if (musicTower instanceof TubeTower) musicTower.intensity(linearIntensity);
 			else if (musicTower instanceof RotationTower) musicTower.intensity(Math.min(linearIntensity + 0.5, 1));
-			musicTower.placement(a).color(currentColor);
+			musicTower.placement(a).color(borderColor);
 		});
 		
 		int combine = 15;
@@ -406,6 +420,7 @@ public class Track {
 		return color;
 	}
 	
+	@Override
 	public void render() {
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 		glColor4d(1, 1, 1, 1);
@@ -449,6 +464,7 @@ public class Track {
 		
 		visibleMusicTowers.forEach(MusicTower::render);
 		visibleBlocks.forEach(Block::render);
+		// glow.render(visibleBlocks);
 		
 		// Draw borders
 		leftBorderVertexBuffer.draw();
@@ -474,14 +490,14 @@ public class Track {
 		Viewport viewport = GL.viewport();
 		Range depthRange = GL.depthRange();
 		List<Block> blocks = visibleBlocks.stream().filter(block -> block.iteration() > index.integer - range && block.iteration() < index.integer + range).filter(block -> {
-			if (Math.abs(block.iteration() - index.integer) < indexRate * 0.1) return true; // render reflection of close blocks always
+			if (Math.abs(block.iteration() - index.integer) < indexRate * 0.15) return true; // render reflection of close blocks always
 			Vector side = block.placement().side().multiplied(block.width());
 			Vector leftScreenspaceVector = GL.screenspace(block.placement().position().plus(side), mvpMatrix, viewport, depthRange);
 			Vector rightScreenspaceVector = GL.screenspace(block.placement().position().plus(side.negated()), mvpMatrix, viewport, depthRange);
 			return isVisible(viewport, leftScreenspaceVector, rightScreenspaceVector);
 		}).collect(Collectors.toList());
 		List<Ring> rings = visibleRings.stream().filter(ring -> ring.iteration() > index.integer - range && ring.iteration() < index.integer + range).filter(ring -> {
-			if (Math.abs(ring.iteration() - index.integer) < indexRate * 0.1) return true; // render reflection of close rings always
+			if (Math.abs(ring.iteration() - index.integer) < indexRate * 0.15) return true; // render reflection of close rings always
 			Vector side = ring.placement().side().multiplied(ring.width());
 			Vector leftScreenspaceVector = GL.screenspace(ring.placement().position().plus(side), mvpMatrix, viewport, depthRange);
 			Vector rightScreenspaceVector = GL.screenspace(ring.placement().position().plus(side.negated()), mvpMatrix, viewport, depthRange);
@@ -625,6 +641,10 @@ public class Track {
 	
 	public List<Block> getBlocks() {
 		return blocks;
+	}
+	
+	public Glow glow() {
+		return glow;
 	}
 	
 	public double width() {

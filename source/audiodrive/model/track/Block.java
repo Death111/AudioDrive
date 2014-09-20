@@ -6,19 +6,18 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.newdawn.slick.opengl.Texture;
 
 import audiodrive.AudioDrive;
+import audiodrive.model.Renderable;
 import audiodrive.model.geometry.Color;
 import audiodrive.model.geometry.transform.Placement;
 import audiodrive.model.loader.Model;
 import audiodrive.model.loader.ModelLoader;
 
-public class Block {
+public class Block implements Renderable {
 	
-	public static final Color CollectableColor = AudioDrive.Settings.getColor("color.collectable");
-	public static final Color ObstacleColor = AudioDrive.Settings.getColor("color.obstacle");
-	private static final List<Model> Models = ModelLoader.loadModels("models/obstacle/obstacle_lod");
 	public static final Texture Texture = ModelLoader.getTexture("models/obstacle/obstacle_lod.png");
 	public static final Texture Reflected = ModelLoader.getTexture("models/obstacle/obstacle-reflection.png");
 	
+	private static final List<Model> Models = ModelLoader.loadModels("models/obstacle/obstacle_lod");
 	private static AtomicLong ID = new AtomicLong();
 	
 	private long id;
@@ -26,6 +25,7 @@ public class Block {
 	private Color color;
 	private boolean collectable;
 	private boolean destroyed;
+	private boolean glowing;
 	private int iteration;
 	private int rail;
 	private Model Model = Models.get(0);
@@ -35,7 +35,8 @@ public class Block {
 		this.collectable = collectable;
 		this.iteration = iteration;
 		this.rail = rail;
-		color = collectable ? CollectableColor : ObstacleColor;
+		color = AudioDrive.Settings.getColor(collectable ? "block.collectable.color" : "block.obstacle.color");
+		glowing = AudioDrive.Settings.getBoolean(collectable ? "block.collectable.glowing" : "block.obstacle.glowing");
 	}
 	
 	public void update(int currentIteration) {
@@ -46,11 +47,12 @@ public class Block {
 		Model = Models.get(lodIndex);
 	}
 	
+	@Override
 	public void render() {
 		if (destroyed) return;
 		Model.scale(0.1);
-		Model.placement().set(placement);
 		Model.color(color);
+		Model.placement().set(placement);
 		Model.render();
 	}
 	
@@ -74,6 +76,10 @@ public class Block {
 	
 	public Color color() {
 		return color;
+	}
+	
+	public boolean isGlowing() {
+		return glowing;
 	}
 	
 	public boolean isCollectable() {

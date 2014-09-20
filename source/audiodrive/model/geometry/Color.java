@@ -51,9 +51,14 @@ public class Color implements FloatData {
 		this.a = a;
 	}
 	
-	public static Color Lerp(Color a, Color b, float t) {
-		t = (float) Arithmetic.clamp(t);
-		return new Color(a.r + (b.r - a.r) * t, a.g + (b.g - a.g) * t, a.b + (b.b - a.b) * t, a.a + (b.a - a.a) * t);
+	public static Color lerp(Color from, Color to, double fraction) {
+		fraction = Arithmetic.clamp(fraction);
+		return new Color(from.r + (to.r - from.r) * fraction, from.g + (to.g - from.g) * fraction, from.b + (to.b - from.b) * fraction, from.a + (to.a - from.a) * fraction);
+	}
+	
+	public static Color lerp(Color from, Color over, Color to, double fraction) {
+		fraction = Arithmetic.clamp(fraction);
+		return lerp(lerp(from, over, fraction), lerp(over, to, fraction), fraction);
 	}
 	
 	@Override
@@ -100,6 +105,10 @@ public class Color implements FloatData {
 		return new Color(r, g, b, alpha);
 	}
 	
+	public Color inverse() {
+		return new Color(1 - r, 1 - g, 1 - b);
+	}
+	
 	@Override
 	public int floats() {
 		return Color.Dimension;
@@ -116,6 +125,7 @@ public class Color implements FloatData {
 	}
 	
 	public static Color parse(String string) {
+		if (string == null || string.isEmpty()) return null;
 		String[] splits = string.split(",");
 		if (splits.length != 4) throw new RuntimeException("couldn't parse color string: " + string);
 		return new Color(Double.parseDouble(splits[0]), Double.parseDouble(splits[1]), Double.parseDouble(splits[2]), Double.parseDouble(splits[3]));

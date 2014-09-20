@@ -15,7 +15,7 @@ import audiodrive.ui.scenes.GameScene.State;
 import audiodrive.utilities.Arithmetic;
 import audiodrive.utilities.Log;
 
-public class Player {
+public class Player implements Renderable {
 	
 	private static final AudioFile CollectSound = new AudioFile("sounds/Collect.mp3");
 	private static final AudioFile CollideSound = new AudioFile("sounds/Collide.mp3");
@@ -72,6 +72,7 @@ public class Player {
 		zoom(true);
 	}
 	
+	@Override
 	public void update(double elapsed) {
 		model.placement(track.getPlacement(scene.playtime()));
 		double newX = model.translation().x();
@@ -164,6 +165,7 @@ public class Player {
 		lastCollisionCheck = scene.playtime();
 	}
 	
+	@Override
 	public void render() {
 		model.render();
 	}

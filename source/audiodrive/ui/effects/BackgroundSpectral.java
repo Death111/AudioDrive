@@ -57,7 +57,7 @@ public class BackgroundSpectral extends Overlay {
 			final float f = spectrum[band];
 			final MinMax minMax2 = minMax.get(band);
 			final float scaleLinear = (float) Arithmetic.scaleLinear(f, 0, 1, minMax2.min, minMax2.max);
-			Color.Lerp(Color.Black, Color.White, scaleLinear).itensity(.2).gl();
+			Color.lerp(Color.Black, Color.White, scaleLinear).itensity(.2).gl();
 			new Vector().x(width * band).y(0).glVertex(); // top
 			new Vector().x(width * band).y(height).glVertex(); // down
 		}

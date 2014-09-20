@@ -1,16 +1,17 @@
-package audiodrive.model;
+package audiodrive.model.track;
 
 import static org.lwjgl.opengl.GL11.glDepthMask;
 
 import org.newdawn.slick.opengl.Texture;
 
+import audiodrive.model.Renderable;
 import audiodrive.model.geometry.Color;
 import audiodrive.model.geometry.transform.Placement;
 import audiodrive.model.loader.Model;
 import audiodrive.model.loader.ModelLoader;
 import audiodrive.utilities.Arithmetic;
 
-public class Ring {
+public class Ring implements Renderable {
 	
 	public static final Texture Default = ModelLoader.getTexture("textures/ring/ring.png");
 	public static final Texture Pulse = ModelLoader.getTexture("textures/ring/ring-pulse.png");
@@ -28,6 +29,7 @@ public class Ring {
 		this.placement = placement;
 	}
 	
+	@Override
 	public void render() {
 		glDepthMask(false); // disable depth
 		Model.setTexture(Default);
