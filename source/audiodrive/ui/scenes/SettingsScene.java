@@ -10,8 +10,11 @@ import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.Display;
 
 import audiodrive.AudioDrive;
+import audiodrive.ui.components.Camera;
+import audiodrive.ui.components.Overlay;
 import audiodrive.ui.components.Scene;
 import audiodrive.ui.components.Text;
+import audiodrive.ui.effects.ShaderProgram;
 import audiodrive.ui.menu.Menu;
 import audiodrive.ui.menu.item.Item;
 import audiodrive.ui.menu.item.ItemListener;
@@ -56,6 +59,7 @@ public class SettingsScene extends Scene implements ItemListener {
 	private final MenuItem saveItem;
 	private final MenuItem closeItem;
 	private final Text titleText;
+	private Overlay background;
 	
 	public SettingsScene() {
 		titleText = new Text("Settings").setFont(AudioDrive.Font).setSize(48).setPosition(20, 20);
@@ -90,11 +94,14 @@ public class SettingsScene extends Scene implements ItemListener {
 		settingsMenu.addItem(interfaceVolume);
 		settingsMenu.addItem(audioVolume);
 		settingsMenu.addItem(soundVolume);
+		
+		background = new Overlay().shader(new ShaderProgram("shaders/default.vs", "shaders/title.fs"));
 	}
 	
 	@Override
 	public void entering() {
 		updateSettings();
+		Camera.overlay(getWidth(), getHeight());
 	}
 	
 	private void updateSettings() {
@@ -114,6 +121,7 @@ public class SettingsScene extends Scene implements ItemListener {
 	@Override
 	public void render() {
 		glClear(GL_COLOR_BUFFER_BIT);
+		background.render();
 		titleText.render();
 		settingsMenu.render();
 		saveMenu.render();
