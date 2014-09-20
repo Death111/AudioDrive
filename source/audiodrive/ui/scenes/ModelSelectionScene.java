@@ -73,7 +73,6 @@ public class ModelSelectionScene extends Scene {
 	@Override
 	protected void render() {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		
 		Camera.overlay(getWidth(), getHeight());
 		title.render();
 		
@@ -85,7 +84,10 @@ public class ModelSelectionScene extends Scene {
 		glTranslated(translate.x(), translate.y(), translate.z());
 		rotation.apply();
 		
-		if (!Mouse.isButtonDown(0) && !Mouse.isButtonDown(1) && time() - time > 0.1) rotation.yAdd(1);
+		if (!Mouse.isButtonDown(0) && !Mouse.isButtonDown(1)) {
+			rotation.yAdd(10 * (time() - time));
+		}
+		time = time();
 		
 		if (coordinateSystem) drawCoordinateSystem(3);
 		
