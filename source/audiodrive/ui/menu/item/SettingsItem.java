@@ -15,12 +15,14 @@ public class SettingsItem<T> extends Item {
 	String name;
 	List<T> values;
 	
-	private static int length = 300;
+	private int length = 300;
 	
 	public SettingsItem(String name, List<T> values, int width, int height) {
 		super(name, width, height);
 		this.name = name;
 		this.values = values;
+		length = (width / 3) < length ? width / 3 : length;
+		recalculate(name, width - length + iconWidth);
 	}
 	
 	@Override
@@ -38,16 +40,21 @@ public class SettingsItem<T> extends Item {
 		}
 		final Color color = box ? colors.foreground : colors.text;
 		
-		text.setText(name).setColor(color).setPosition(x, y).render();
+		// Setting name
+		text.setColor(color).setPosition(x, y).render();
 		
 		int xOffset = width - length;
+		// Previous arrow
 		Resources.getIconModel().position(new Vector(x + xOffset, y, 0)).position().xAdd(iconWidth / 2).yAdd(iconWidth / 2);
 		Resources.getIconModel().scale(-1 * iconWidth / 2).color(color).setTexture(Resources.getIconTextures().get(Icon.Previous)).render();
 		
+		// Setting value
 		Text valueText = new Text(valueAsString());
 		valueText.setSize(text.getSize());
 		xOffset += length / 2 - valueText.getWidth() / 2;
 		valueText.setColor(color).setPosition(x + xOffset, y).render();
+		
+		// Next arrow
 		xOffset = width - iconWidth;
 		Resources.getIconModel().position(new Vector(x + xOffset, y, 0)).position().xAdd(iconWidth / 2).yAdd(iconWidth / 2);
 		Resources.getIconModel().scale(iconWidth / 2).color(color).setTexture(Resources.getIconTextures().get(Icon.Next)).render();

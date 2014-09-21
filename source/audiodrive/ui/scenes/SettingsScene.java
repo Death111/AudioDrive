@@ -1,6 +1,7 @@
 package audiodrive.ui.scenes;
 
-import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL11.GL_COLOR_BUFFER_BIT;
+import static org.lwjgl.opengl.GL11.glClear;
 
 import java.util.Arrays;
 import java.util.List;
@@ -35,7 +36,9 @@ public class SettingsScene extends Scene implements ItemListener {
 	private static final List<Double> controlValues = Arrays.asList(.5, .6, .7, .8, .9, 1., 1.2, 1.4, 1.6, 1.8, 2.0);
 	private static final List<Double> volumeValues = Arrays.asList(0., .1, .2, .3, .4, .5, .6, .7, .8, .9, 1.);
 	
-	private Menu settingsMenu;
+	private Menu graphicMenu;
+	private Menu volumeMenu;
+	private Menu inputMenu;
 	private SettingsItem<Boolean> antialiasing;
 	private SettingsItem<Integer> multisampling;
 	private SettingsItem<Boolean> vSync;
@@ -60,6 +63,9 @@ public class SettingsScene extends Scene implements ItemListener {
 	private MenuItem closeItem;
 	
 	private Text titleText;
+	private Text graphicSettingsText;
+	private Text soundSettingsText;
+	private Text inputSettingsText;
 	private Overlay background;
 	private AudioFile selectAudio;
 	
@@ -69,11 +75,19 @@ public class SettingsScene extends Scene implements ItemListener {
 	public void entering() {
 		titleText = new Text("Settings").setFont(AudioDrive.Font).setSize(48).setPosition(20, 20);
 		
-		int width = 1000;
 		int height = Display.getHeight() * 2 / 3;
 		int y = (Display.getHeight() - height) / 2;
-		settingsMenu = new Menu(20, y, width + 1, height, 1);
-		saveMenu = new Menu(20, Display.getHeight() - MenuItem.MENU_ITEM_HEIGHT - 20, Display.getWidth() - 50, MenuItem.MENU_ITEM_HEIGHT + 1, 1);
+		final int spacing = 50;
+		int itemHeight = spacing;
+		int width = (Display.getWidth() - 3 * spacing) / 2;
+		graphicMenu = new Menu(spacing, y, width + 1, height, 1);
+		graphicSettingsText = new Text("Graphic").setFont(AudioDrive.Font).setSize(48).setPosition(spacing, y - itemHeight * 1.5);
+		volumeMenu = new Menu(spacing + spacing + width, y, width + 1, height / 3, 1);
+		soundSettingsText = new Text("Sound").setFont(AudioDrive.Font).setSize(48).setPosition(spacing + spacing + width, y - itemHeight * 1.5);
+		inputMenu = new Menu(spacing + spacing + width, y + height / 3 + (int) (spacing * 1.5), width + 1, height / 3, 1);
+		inputSettingsText = new Text("Input").setFont(AudioDrive.Font).setSize(48).setPosition(spacing + spacing + width, y + height / 3);
+		
+		saveMenu = new Menu(20, Display.getHeight() - MenuItem.MENU_ITEM_HEIGHT - 20, Display.getWidth() - spacing, MenuItem.MENU_ITEM_HEIGHT + 1, 1);
 		
 		saveItem = new MenuItem("Save", this);
 		closeItem = new MenuItem("Return", this);
@@ -81,7 +95,6 @@ public class SettingsScene extends Scene implements ItemListener {
 		saveMenu.addItem(saveItem);
 		saveMenu.addItem(closeItem);
 		
-		int itemHeight = 50;
 		antialiasing = new SettingsItem<Boolean>("Anti-Aliasing", booleanValues, width, itemHeight);
 		multisampling = new SettingsItem<Integer>("Multisampling", superSamplingValues, width, itemHeight);
 		vSync = new SettingsItem<Boolean>("V-Sync", booleanValues, width, itemHeight);
@@ -95,30 +108,30 @@ public class SettingsScene extends Scene implements ItemListener {
 		staticObstacleColor = new SettingsItem<Boolean>("Static Obstacle Color", booleanValues, width, itemHeight);
 		glowingObstacles = new SettingsItem<Boolean>("Glowing Obstacles", booleanValues, width, itemHeight);
 		difficulty = new SettingsItem<Double>("Difficulty", difficultyValues, width, itemHeight);
-		keyboard = new SettingsItem<Double>("Keyboard", controlValues, width, itemHeight);
-		mouse = new SettingsItem<Double>("Mouse", controlValues, width, itemHeight);
+		keyboard = new SettingsItem<Double>("Keyboard Sensitivity", controlValues, width, itemHeight);
+		mouse = new SettingsItem<Double>("Mouse Sensitivity", controlValues, width, itemHeight);
 		interfaceVolume = new SettingsItem<Double>("Interface Volume", volumeValues, width, itemHeight);
 		audioVolume = new SettingsItem<Double>("Audio Volume", volumeValues, width, itemHeight);
 		soundVolume = new SettingsItem<Double>("Sound Volume", volumeValues, width, itemHeight);
 		
-		settingsMenu.addItem(antialiasing);
-		settingsMenu.addItem(multisampling);
-		settingsMenu.addItem(vSync);
-		settingsMenu.addItem(glow);
-		settingsMenu.addItem(particles);
-		settingsMenu.addItem(reflections);
-		settingsMenu.addItem(environment);
-		settingsMenu.addItem(visualization);
-		settingsMenu.addItem(staticCollectableColor);
-		settingsMenu.addItem(glowingCollectables);
-		settingsMenu.addItem(staticObstacleColor);
-		settingsMenu.addItem(glowingObstacles);
-		settingsMenu.addItem(difficulty);
-		settingsMenu.addItem(keyboard);
-		settingsMenu.addItem(mouse);
-		settingsMenu.addItem(interfaceVolume);
-		settingsMenu.addItem(audioVolume);
-		settingsMenu.addItem(soundVolume);
+		graphicMenu.addItem(antialiasing);
+		graphicMenu.addItem(multisampling);
+		graphicMenu.addItem(vSync);
+		graphicMenu.addItem(glow);
+		graphicMenu.addItem(particles);
+		graphicMenu.addItem(reflections);
+		graphicMenu.addItem(environment);
+		graphicMenu.addItem(visualization);
+		graphicMenu.addItem(staticCollectableColor);
+		graphicMenu.addItem(glowingCollectables);
+		graphicMenu.addItem(staticObstacleColor);
+		graphicMenu.addItem(glowingObstacles);
+		graphicMenu.addItem(difficulty);
+		inputMenu.addItem(keyboard);
+		inputMenu.addItem(mouse);
+		volumeMenu.addItem(interfaceVolume);
+		volumeMenu.addItem(audioVolume);
+		volumeMenu.addItem(soundVolume);
 		
 		selectAudio = new AudioFile("sounds/Select.mp3");
 		volume = AudioDrive.Settings.getDouble("interface.volume");
@@ -154,7 +167,12 @@ public class SettingsScene extends Scene implements ItemListener {
 		glClear(GL_COLOR_BUFFER_BIT);
 		background.render();
 		titleText.render();
-		settingsMenu.render();
+		graphicSettingsText.render();
+		soundSettingsText.render();
+		inputSettingsText.render();
+		graphicMenu.render();
+		inputMenu.render();
+		volumeMenu.render();
 		saveMenu.render();
 	}
 	
@@ -165,7 +183,7 @@ public class SettingsScene extends Scene implements ItemListener {
 	public void mouseMoved(int x, int y, int dx, int dy) {
 		// yCoordinates start in left bottom corner, instead left top
 		y = getHeight() - y;
-		settingsMenu.mouseMoved(x, y);
+		graphicMenu.mouseMoved(x, y);
 		saveMenu.mouseMoved(x, y);
 	}
 	
@@ -173,7 +191,7 @@ public class SettingsScene extends Scene implements ItemListener {
 	public void mouseButtonReleased(int button, int x, int y) {
 		// yCoordinates start in left bottom corner, instead left top
 		y = getHeight() - y;
-		settingsMenu.mousePressed(button, x, y);
+		graphicMenu.mousePressed(button, x, y);
 		saveMenu.mousePressed(button, x, y);
 	}
 	

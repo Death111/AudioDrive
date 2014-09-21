@@ -53,22 +53,23 @@ public abstract class Item {
 		this.height = height;
 		iconWidth = height;
 		// TODO calculate size by width and height
-		recalculate(itemText);
+		recalculate(itemText, width);
 	}
 	
-	protected void recalculate(String itemText) {
+	protected void recalculate(String itemText, int availWidth) {
 		int size = 30;
-		if (width > height) {
+		if (availWidth > height) {
 			size = (int) (height / 1.5);
 		} else {
-			size = width / 10;
+			size = availWidth / 10;
 		}
 		
 		text = new Text(itemText).setFont(AudioDrive.Font).setPosition(x, y).setSize(size);
 		
 		// Check if text is to big
-		final int availableTextWidth = width - iconWidth;
-		if (text.getHeight() > height || text.getWidth() > availableTextWidth) {
+		final int availableTextWidth = availWidth - iconWidth;
+		final int width2 = text.getWidth();
+		if (text.getHeight() > height || width2 > availableTextWidth) {
 			Log.trace("Text '" + itemText + "' is bigger than menuItem. Trimming it");
 			boolean trimmed = false;
 			while (text.getWidth() > availableTextWidth) {
