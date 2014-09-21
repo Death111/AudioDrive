@@ -1,6 +1,7 @@
 package audiodrive.audio;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Can be used to retrieve the min, max and middle value of a single band
@@ -27,7 +28,7 @@ public class SpectraMinMax {
 				float f = currentSpectrum[band];
 				middle += f;
 				if (f > max) max = f;
-				else if (f < min) min = f;
+				if (f < min) min = f;
 			}
 			
 			middle /= size;
