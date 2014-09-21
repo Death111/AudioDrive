@@ -6,6 +6,8 @@ import java.util.List;
 
 import org.tritonus.share.sampled.FloatSampleBuffer;
 
+import audiodrive.utilities.Arithmetic;
+
 public class DecodedAudio implements Audio {
 	
 	private final String name;
@@ -38,8 +40,7 @@ public class DecodedAudio implements Audio {
 			mix[index++] = value / channelCount;
 		}
 		this.mix = new DecodedChannel(-1, mix, sampleCount, (float) sampleRate, iteration);
-		setIteration(1024);
-		// channels.stream().map(DecodedChannel::getRange).forEach(Log::debug);
+		setIteration(Arithmetic.nextPowerOfTwo((int) (buffer.getSampleRate() / 50)));
 	}
 	
 	protected DecodedAudio(Audio audio) {
@@ -54,6 +55,7 @@ public class DecodedAudio implements Audio {
 		mix = null;
 	}
 	
+	@Override
 	public String getName() {
 		return name;
 	}
