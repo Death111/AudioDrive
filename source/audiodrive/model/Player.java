@@ -175,7 +175,6 @@ public class Player implements Renderable {
 		double x = -model.translation().x(); // FIXME still don't know why it's negative
 		double tiltFraction = 0.5 - Math.abs(0.5 - tiltProgress);
 		double side = track.railWidth() / 4 * tiltFraction;
-		Log.debug("player width: " + 2 * side);
 		Range playerWidth = new Range(x - side, x + side);
 		Range railWidth = track.getRailRange(block.rail());
 		boolean intersects = playerWidth.intersects(railWidth);

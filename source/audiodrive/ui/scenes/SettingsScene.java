@@ -54,7 +54,7 @@ public class SettingsScene extends Scene implements ItemListener {
 	private SettingsItem<Double> keyboard;
 	private SettingsItem<Double> mouse;
 	private SettingsItem<Double> interfaceVolume;
-	private SettingsItem<Double> audioVolume;
+	private SettingsItem<Double> musicVolume;
 	private SettingsItem<Double> soundVolume;
 	
 	private Menu saveMenu;
@@ -110,7 +110,7 @@ public class SettingsScene extends Scene implements ItemListener {
 		keyboard = new SettingsItem<Double>("Keyboard Sensitivity", controlValues, width, itemHeight);
 		mouse = new SettingsItem<Double>("Mouse Sensitivity", controlValues, width, itemHeight);
 		interfaceVolume = new SettingsItem<Double>("Interface Volume", volumeValues, width, itemHeight);
-		audioVolume = new SettingsItem<Double>("Audio Volume", volumeValues, width, itemHeight);
+		musicVolume = new SettingsItem<Double>("Music Volume", volumeValues, width, itemHeight);
 		soundVolume = new SettingsItem<Double>("Sound Volume", volumeValues, width, itemHeight);
 		
 		graphicMenu.addItem(antialiasing);
@@ -129,7 +129,7 @@ public class SettingsScene extends Scene implements ItemListener {
 		inputMenu.addItem(keyboard);
 		inputMenu.addItem(mouse);
 		volumeMenu.addItem(interfaceVolume);
-		volumeMenu.addItem(audioVolume);
+		volumeMenu.addItem(musicVolume);
 		volumeMenu.addItem(soundVolume);
 		
 		selectAudio = new AudioFile("sounds/Select.mp3");
@@ -157,7 +157,7 @@ public class SettingsScene extends Scene implements ItemListener {
 		keyboard.setValue(AudioDrive.Settings.getDouble("input.keyboard.speed"));
 		mouse.setValue(AudioDrive.Settings.getDouble("input.mouse.speed"));
 		interfaceVolume.setValue(AudioDrive.Settings.getDouble("interface.volume"));
-		audioVolume.setValue(AudioDrive.Settings.getDouble("music.volume"));
+		musicVolume.setValue(AudioDrive.Settings.getDouble("music.volume"));
 		soundVolume.setValue(AudioDrive.Settings.getDouble("sound.volume"));
 	}
 	
@@ -242,7 +242,7 @@ public class SettingsScene extends Scene implements ItemListener {
 		AudioDrive.Settings.set("input.keyboard.speed", keyboard.valueAsString());
 		AudioDrive.Settings.set("input.mouse.speed", mouse.valueAsString());
 		AudioDrive.Settings.set("interface.volume", interfaceVolume.valueAsString());
-		AudioDrive.Settings.set("music.volume", audioVolume.valueAsString());
+		AudioDrive.Settings.set("music.volume", musicVolume.valueAsString());
 		AudioDrive.Settings.set("sound.volume", soundVolume.valueAsString());
 		AudioDrive.Settings.save();
 		applySettings();
