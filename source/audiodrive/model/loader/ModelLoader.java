@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
@@ -207,21 +206,13 @@ public class ModelLoader {
 	public static Texture getTexture(String fileName) {
 		Texture texture = null;
 		Log.debug("Trying to load texture '" + fileName + "'.");
-		final File tryGetFile = Resources.tryGetFile(fileName);
-		
-		if (tryGetFile == null) {
-			Log.debug("Could not load texure '" + fileName + "'. (fileNotFound)");
-			return null;
-		}
-		
 		try {
+			final File tryGetFile = Resources.getFile(fileName);
 			texture = TextureLoader.getTexture("PNG", new FileInputStream(tryGetFile));
-		} catch (IOException e) {
+			Log.info("Successfully loaded texture '" + fileName + "'");
+		} catch (Exception e) {
 			Log.debug("Could not load texure '" + fileName + "'. Reason: " + e);
-			return null;
 		}
-		
-		Log.info("Successfully loaded texture '" + fileName + "'");
 		
 		return texture;
 	}

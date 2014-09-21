@@ -20,11 +20,10 @@ public class Resources {
 		throw new IllegalStateException("This class shall not be instantiated.");
 	}
 	
-	public static URI get(String name, boolean fatal) {
+	public static URI get(String name) {
 		try {
 			URL url = ClassLoader.getSystemResource(name);
-			if (url == null && fatal) throw new RuntimeException("Can't find resource \"" + name + "\".");
-			if (url == null) return null;
+			if (url == null) throw new RuntimeException("Can't find resource \"" + name + "\".");
 			return url.toURI();
 		} catch (URISyntaxException exception) {
 			throw new RuntimeException(exception);
@@ -34,17 +33,7 @@ public class Resources {
 	public static File getFile(String name) {
 		File file = new File(name);
 		if (!file.exists()) {
-			file = new File(get(name, true));
-		}
-		return file;
-	}
-	
-	public static File tryGetFile(String name) {
-		File file = new File(name);
-		if (!file.exists()) {
-			final URI uri = get(name, false);
-			if (uri == null) return null;
-			file = new File(uri);
+			file = new File(get(name));
 		}
 		return file;
 	}
