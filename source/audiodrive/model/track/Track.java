@@ -85,6 +85,7 @@ public class Track implements Renderable {
 	private boolean environment = AudioDrive.Settings.getBoolean("game.environment");
 	private boolean visualization = AudioDrive.Settings.getBoolean("game.visualization");
 	private boolean night = AudioDrive.Settings.getBoolean("game.night");
+	private int sight = AudioDrive.Settings.getInteger("game.sight");
 	
 	private List<MinMax> spectraMinMax;
 	private Glow glow;
@@ -351,8 +352,8 @@ public class Track implements Renderable {
 	
 	@Override
 	public void update(double time) {
-		int preview = 150;
-		int review = 100;
+		int preview = sight;
+		int review = sight / 2;
 		index = getIndex(time);
 		int minimum = Math.max(index.integer - review, 0);
 		int maximum = Math.min(index.integer + preview, lastIndex());
@@ -394,7 +395,7 @@ public class Track implements Renderable {
 		
 		visibleMusicTowers = musicTowers
 			.stream()
-			.filter(musicTower -> musicTower.iteration() > index.integer - 10 && musicTower.iteration() < index.integer + 900)
+			.filter(musicTower -> musicTower.iteration() > index.integer - review && musicTower.iteration() < index.integer + preview * 5)
 			.collect(Collectors.toList());
 		visibleMusicTowers.forEach(musicTower -> {
 			float f = mix.getSpectrum(musicTower.iteration())[1];
@@ -490,7 +491,7 @@ public class Track implements Renderable {
 		splineArea2Buffer.draw();
 		
 		// filter objects depending on visibility and depth buffer
-		int range = smoothing * 5;
+		int range = sight / 2;
 		Matrix mvpMatrix = GL.modelviewProjectionMatrix();
 		Viewport viewport = GL.viewport();
 		Range depthRange = GL.depthRange();
