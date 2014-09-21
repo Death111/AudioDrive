@@ -1,7 +1,9 @@
 package audiodrive.model.track;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 import audiodrive.AudioDrive;
 import audiodrive.audio.AnalyzedAudio;
@@ -47,25 +49,27 @@ public class TrackGenerator {
 		
 		// generate blocks based on spline length and audio analyzation results
 		List<Block> blocks = new ArrayList<>();
-		Block last = null;
+		Block[] previous = new Block[3];
 		// no blocks within 1 second from start and end
 		int offset = (int) Math.round(iterationRate);
-		// set minimum distance between successive blocks to 0.1 seconds
-		int minumumDistance = (int) Math.round(iterationRate * 0.1);
+		// set minimum distance between successive blocks to 0.2 seconds
+		int minumumDistance = (int) Math.round(iterationRate * 0.2);
 		for (int iteration = offset; iteration < spline.size() - offset; iteration++) {
 			double intensity = mixed.getSpectralSum().getClamped(iteration);
 			double calmness = 1 - intensity;
 			double leftFlux = left.getSpectralFlux().getClamped(iteration);
-			double rightFlux = left.getSpectralFlux().getClamped(iteration);
+			double rightFlux = right.getSpectralFlux().getClamped(iteration);
 			double leftPeak = left.getPeaks().getClamped(iteration);
 			double rightPeak = right.getPeaks().getClamped(iteration);
-			double threshold = 0.2 + calmness * 0.1; // calm music -> fewer blocks
-			if (leftFlux + leftPeak < threshold && rightFlux + leftPeak < threshold) continue;
-			int rail = (int) Math.signum(Arithmetic.significance(leftPeak - rightPeak, 0.01));
-			if (last != null && last.rail() == rail && iteration - last.iteration() < minumumDistance) continue;
-			threshold = 0.3 + calmness * 0.2; // intense music -> more collectables, fewer obstacles
-			boolean collectable = leftFlux > threshold || rightFlux > threshold;
-			blocks.add(last = new Block(collectable, iteration, rail));
+			double threshold = 0.25 + calmness * 0.2; // calm music -> fewer blocks
+			if (leftFlux + leftPeak < threshold && rightFlux + rightPeak < threshold) continue;
+			int rail = (int) Math.signum(Arithmetic.significance(leftFlux - rightFlux, 0.05));
+			int r = rail + 1;
+			if (previous[r] != null && iteration - previous[r].iteration() < minumumDistance) continue;
+			threshold = 0.4 + calmness * 0.2; // intense music -> more collectables, fewer obstacles
+			boolean allPreviousAreObstacles = Arrays.stream(previous).filter(Objects::nonNull).noneMatch(Block::isCollectable);
+			boolean collectable = allPreviousAreObstacles ? true : (leftFlux > threshold || rightFlux > threshold);
+			blocks.add(previous[r] = new Block(collectable, iteration, rail));
 		}
 		Log.debug(blocks.size() + " blocks");
 		
