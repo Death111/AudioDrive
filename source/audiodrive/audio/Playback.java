@@ -22,6 +22,9 @@ public class Playback {
 	private volatile boolean stop = true;
 	private volatile boolean loop = false;
 	
+	private double volume = 1.0;
+	private boolean mute = false;
+	
 	public Playback(AudioFile file) {
 		this.file = file;
 	}
@@ -115,11 +118,15 @@ public class Playback {
 	 * <i>Range: 0.0 - 2.0</i>
 	 */
 	public Playback setVolume(double volume) {
-		initialize();
+		this.volume = Math.max(0, Math.min(2, volume));
+		if (initialized()) volume(this.volume);
+		return this;
+	}
+	
+	private void volume(double value) {
 		FloatControl control = (FloatControl) line.getControl(FloatControl.Type.MASTER_GAIN);
 		float decibel = Math.min(control.getMaximum(), (float) (Math.log(volume) / Math.log(10.0) * 20.0));
 		control.setValue(decibel);
-		return this;
 	}
 	
 	/**
@@ -128,21 +135,33 @@ public class Playback {
 	 * <i>Range: 0.0 - 2.0</i>
 	 */
 	public double getVolume() {
-		initialize();
+		if (initialized()) return volume();
+		return volume;
+	}
+	
+	private double volume() {
 		FloatControl control = (FloatControl) line.getControl(FloatControl.Type.MASTER_GAIN);
 		double volume = Math.round(Math.pow(Math.E, control.getValue() * Math.log(10) / 20) * 1000.0) * 0.001;
 		return volume;
 	}
 	
 	public Playback setMute(Boolean mute) {
-		initialize();
-		BooleanControl control = (BooleanControl) line.getControl(BooleanControl.Type.MUTE);
-		control.setValue(mute);
+		this.mute = mute;
+		if (initialized()) mute(this.mute);
 		return this;
 	}
 	
+	private void mute(boolean mute) {
+		BooleanControl control = (BooleanControl) line.getControl(BooleanControl.Type.MUTE);
+		control.setValue(mute);
+	}
+	
 	public boolean isMute() {
-		initialize();
+		if (initialized()) return mute();
+		return mute;
+	}
+	
+	private boolean mute() {
 		BooleanControl control = (BooleanControl) line.getControl(BooleanControl.Type.MUTE);
 		return control.getValue();
 	}
@@ -172,6 +191,8 @@ public class Playback {
 		thread = new Thread() {
 			@Override
 			public void run() {
+				volume(volume);
+				mute(mute);
 				line.start();
 				while (true) {
 					synchronized (this) {
@@ -231,7 +252,7 @@ public class Playback {
 		}
 		line.stop();
 		line.close();
-		restart = restart || (loop && !stop);
+		restart = (restart || loop) && !stop;
 		stream = null;
 		buffer = null;
 		line = null;

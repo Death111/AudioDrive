@@ -1,7 +1,6 @@
 package audiodrive.ui.scenes;
 
-import static org.lwjgl.opengl.GL11.GL_COLOR_BUFFER_BIT;
-import static org.lwjgl.opengl.GL11.glClear;
+import static org.lwjgl.opengl.GL11.*;
 
 import org.lwjgl.input.Keyboard;
 
@@ -58,7 +57,8 @@ public class MenuScene extends Scene implements ItemListener {
 	@Override
 	public void entering() {
 		volume = AudioDrive.Settings.getDouble("interface.volume");
-		if (!playback.isRunning()) playback.setVolume(volume).setLooping(true).start();
+		playback.setVolume(AudioDrive.Settings.getDouble("music.volume"));
+		if (!playback.isRunning()) playback.setLooping(true).start();
 		Log.trace("Entering MenueScene");
 		
 		title = new Text("AudioDrive").setFont(AudioDrive.Font).setSize(48).setPosition(100, 80);
