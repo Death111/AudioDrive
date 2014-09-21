@@ -61,6 +61,7 @@ public class AnalyzedAudio extends DecodedAudio {
 	 */
 	@Override
 	public AnalyzedChannel getChannel(int index) {
+		if (index < 0 || index >= channels.size()) return mix;
 		return channels.get(index);
 	}
 	
