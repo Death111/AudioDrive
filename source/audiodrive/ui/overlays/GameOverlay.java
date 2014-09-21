@@ -41,14 +41,15 @@ public class GameOverlay extends Overlay {
 		height = scene.getHeight();
 		player = scene.getPlayer();
 		trackOverview = new TrackOverview(scene.getTrack());
-		text("title").setText(scene.getTrack().getAudio().getName()).setSize(15).setPosition(width * 0.5, height - 10).setAlignment(Alignment.LowerCenter);
-		text("framerate").setSize(10).setPosition(scene.getWidth() - 10, 125).setAlignment(Alignment.UpperRight);
-		text("time").setSize(10).setPosition(scene.getWidth() - 10, 140).setAlignment(Alignment.UpperRight);
-		text("points").setSize(30).setPosition(10, 10);
-		text("damage").setSize(30).setPosition(10, 50);
-		text("collected").setSize(20).setPosition(10, 110);
-		text("collided").setSize(20).setPosition(10, 140);
-		text("notification").setText("Paused").setSize(48).setPosition(width * 0.5, height * 0.5).setAlignment(Alignment.Center).setVisible(false);
+		Color color = scene.getTrack().color().inverse();
+		text("title").setColor(color).setText(scene.getTrack().getAudio().getName()).setSize(15).setPosition(width * 0.5, height - 10).setAlignment(Alignment.LowerCenter);
+		text("framerate").setColor(color).setSize(10).setPosition(scene.getWidth() - 10, 125).setAlignment(Alignment.UpperRight);
+		text("time").setColor(color).setSize(10).setPosition(scene.getWidth() - 10, 140).setAlignment(Alignment.UpperRight);
+		text("points").setColor(color).setSize(30).setPosition(10, 10);
+		text("damage").setColor(color).setSize(30).setPosition(10, 50);
+		text("collected").setColor(color).setSize(20).setPosition(10, 110);
+		text("collided").setColor(color).setSize(20).setPosition(10, 140);
+		text("notification").setColor(color).setText("Paused").setSize(48).setPosition(width * 0.5, height * 0.5).setAlignment(Alignment.Center).setVisible(false);
 		collectables = scene.getTrack().getNumberOfCollectables();
 		obstacles = scene.getTrack().getNumberOfObstacles();
 	}

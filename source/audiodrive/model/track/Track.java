@@ -74,7 +74,7 @@ public class Track implements Renderable {
 	private VertexBuffer rightBorderVertexBuffer;
 	
 	private Texture trackTexture;
-	private Color trackBacksideColor;
+	private Color trackColor;
 	private Color relaxedColor = AudioDrive.Settings.getColor("color.relaxed");
 	private Color averageColor = AudioDrive.Settings.getColor("color.average");
 	private Color intenseColor = AudioDrive.Settings.getColor("color.intense");
@@ -101,7 +101,7 @@ public class Track implements Renderable {
 		numberOfObstacles = blocks.size() - numberOfCollectables;
 		indexRate = spline.size() / audio.getDuration();
 		spectraMinMax = SpectraMinMax.getMinMax(audio.getMix());
-		trackBacksideColor = night ? Color.Black : Color.White;
+		trackColor = night ? Color.Black : Color.White;
 		trackTexture = ModelLoader.getTexture(night ? "textures/track/track-black.png" : "textures/track/track-white.png");
 		glow = new Glow().depthpass(() -> splineArea2Buffer.draw()).renderpass(() -> visibleBlocks.stream().filter(Block::isGlowing).forEach(Block::render));
 		build();
@@ -463,7 +463,7 @@ public class Track implements Renderable {
 		// Draw track back-side
 		glCullFace(GL_FRONT);
 		splineArea2Buffer.useColor(false);
-		trackBacksideColor.gl();
+		trackColor.gl();
 		splineArea2Buffer.draw();
 		splineArea2Buffer.useColor(true);
 		glCullFace(GL_BACK);
@@ -650,6 +650,10 @@ public class Track implements Renderable {
 	
 	public Glow glow() {
 		return glow;
+	}
+	
+	public Color color() {
+		return trackColor;
 	}
 	
 	public double width() {
