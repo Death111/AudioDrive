@@ -167,7 +167,7 @@ public class GameScene extends Scene {
 		else glClearColor(1, 1, 1, 1);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		
-		// background.render();
+		background.render();
 		
 		Camera.perspective(45, getWidth(), getHeight(), Near, Far);
 		if (state == State.Animating) startCameraPath.camera();
