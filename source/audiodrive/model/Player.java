@@ -14,6 +14,7 @@ import audiodrive.ui.scenes.GameScene;
 import audiodrive.ui.scenes.GameScene.State;
 import audiodrive.utilities.Arithmetic;
 import audiodrive.utilities.Log;
+import audiodrive.utilities.Range;
 
 public class Player implements Renderable {
 	
@@ -124,7 +125,7 @@ public class Player implements Renderable {
 			}
 			tiltTime = scene.playtime();
 		} else if (tiltProgress != 0.5) { // reset
-			if (scene.playtime() - tiltTime < 0.1) return true; // delay
+			// if (scene.playtime() - tiltTime < 0.1) return true; // delay
 			double sign = -Math.signum(tiltProgress - 0.5);
 			tiltProgress += sign * elapsed * tiltRate;
 			if (sign < 0 && tiltProgress < 0.5 || sign > 0 && tiltProgress > 0.5) tiltProgress = 0.5;
@@ -172,7 +173,13 @@ public class Player implements Renderable {
 	
 	public void interact(Block block) {
 		double x = -model.translation().x(); // FIXME still don't know why it's negative
-		if (track.getRailRange(block.rail()).contains(x)) collide(block);
+		double tiltFraction = 0.5 - Math.abs(0.5 - tiltProgress);
+		double side = track.railWidth() / 4 * tiltFraction;
+		Log.debug("player width: " + 2 * side);
+		Range playerWidth = new Range(x - side, x + side);
+		Range railWidth = track.getRailRange(block.rail());
+		boolean intersects = playerWidth.intersects(railWidth);
+		if (intersects) collide(block);
 	}
 	
 	private void collide(Block block) {

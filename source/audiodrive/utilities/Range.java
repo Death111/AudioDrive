@@ -16,6 +16,14 @@ public class Range {
 		return minimum < value && value < maximum;
 	}
 	
+	public boolean contains(Range range) {
+		return contains(range.minimum) && contains(range.maximum);
+	}
+	
+	public boolean intersects(Range range) {
+		return contains(range.minimum) || contains(range.maximum) || range.contains(minimum) || range.contains(maximum);
+	}
+	
 	public double span() {
 		return maximum - minimum;
 	}
