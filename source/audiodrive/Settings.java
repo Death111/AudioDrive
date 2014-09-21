@@ -34,6 +34,7 @@ public class Settings {
 		set("color.relaxed", "0,0,1,1");
 		set("game.environment", "true");
 		set("game.visualization", "true");
+		set("game.night", "true");
 		set("game.difficulty", "0.5");
 		set("graphics.glow", "true");
 		set("graphics.particles", "true");

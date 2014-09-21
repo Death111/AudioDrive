@@ -14,10 +14,10 @@ import audiodrive.model.loader.ModelLoader;
 
 public class Block implements Renderable {
 	
-	public static final Texture Texture = ModelLoader.getTexture("models/obstacle/obstacle_lod.png");
-	public static final Texture Reflected = ModelLoader.getTexture("models/obstacle/obstacle-reflection.png");
+	public static final Texture Texture = ModelLoader.getTexture("models/block/block_lod.png");
+	public static final Texture Reflected = ModelLoader.getTexture("models/block/block-reflection.png");
 	
-	private static final List<Model> Models = ModelLoader.loadModels("models/obstacle/obstacle_lod");
+	private static final List<Model> Models = ModelLoader.loadModels("models/block/block_lod");
 	private static AtomicLong ID = new AtomicLong();
 	
 	private long id;

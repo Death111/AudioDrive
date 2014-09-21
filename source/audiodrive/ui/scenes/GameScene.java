@@ -58,6 +58,7 @@ public class GameScene extends Scene {
 	private double volume;
 	
 	private boolean glow;
+	private boolean night;
 	
 	public GameScene() {
 		draggable = false;
@@ -72,6 +73,7 @@ public class GameScene extends Scene {
 	protected void entering() {
 		Log.info("Starting game...");
 		glow = AudioDrive.Settings.getBoolean("graphics.glow");
+		night = AudioDrive.Settings.getBoolean("game.night");
 		keyboardSpeed = AudioDrive.Settings.getDouble("input.keyboard.speed");
 		mouseSpeed = AudioDrive.Settings.getDouble("input.mouse.speed");
 		volume = AudioDrive.Settings.getDouble("sound.volume");
@@ -161,10 +163,11 @@ public class GameScene extends Scene {
 	
 	@Override
 	protected void render() {
-		glClearColor(0, 0, 0, 1);
+		if (night) glClearColor(0, 0, 0, 1);
+		else glClearColor(1, 1, 1, 1);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		
-		background.render();
+		// background.render();
 		
 		Camera.perspective(45, getWidth(), getHeight(), Near, Far);
 		if (state == State.Animating) startCameraPath.camera();

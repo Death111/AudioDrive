@@ -38,8 +38,6 @@ import audiodrive.utilities.Range;
 
 public class Track implements Renderable {
 	
-	private static final String TRACK_TEXTURE = "models/track/track.png";
-	
 	private final AnalyzedAudio audio;
 	private final List<Vector> spline;
 	private final List<Block> blocks;
@@ -69,12 +67,14 @@ public class Track implements Renderable {
 	private VertexBuffer leftBorderBuffer;
 	private VertexBuffer rightBorderBuffer;
 	private CuboidStripRenderer cuboidStripRenderer;
-	private Texture trackTexture;
+	
 	private List<Vertex> leftVertexList;
 	private VertexBuffer leftBorderVertexBuffer;
 	private List<Vertex> rightVertexList;
 	private VertexBuffer rightBorderVertexBuffer;
 	
+	private Texture trackTexture;
+	private Color trackBacksideColor;
 	private Color relaxedColor = AudioDrive.Settings.getColor("color.relaxed");
 	private Color averageColor = AudioDrive.Settings.getColor("color.average");
 	private Color intenseColor = AudioDrive.Settings.getColor("color.intense");
@@ -84,6 +84,7 @@ public class Track implements Renderable {
 	private boolean reflections = AudioDrive.Settings.getBoolean("graphics.reflections");
 	private boolean environment = AudioDrive.Settings.getBoolean("game.environment");
 	private boolean visualization = AudioDrive.Settings.getBoolean("game.visualization");
+	private boolean night = AudioDrive.Settings.getBoolean("game.night");
 	
 	private List<MinMax> spectraMinMax;
 	private Glow glow;
@@ -100,7 +101,8 @@ public class Track implements Renderable {
 		numberOfObstacles = blocks.size() - numberOfCollectables;
 		indexRate = spline.size() / audio.getDuration();
 		spectraMinMax = SpectraMinMax.getMinMax(audio.getMix());
-		trackTexture = ModelLoader.getTexture(TRACK_TEXTURE);
+		trackBacksideColor = night ? Color.Black : Color.White;
+		trackTexture = ModelLoader.getTexture(night ? "textures/track/track-black.png" : "textures/track/track-white.png");
 		glow = new Glow().depthpass(() -> splineArea2Buffer.draw()).renderpass(() -> visibleBlocks.stream().filter(Block::isGlowing).forEach(Block::render));
 		build();
 	}
@@ -332,7 +334,7 @@ public class Track implements Renderable {
 		}
 		
 		leftTexture = new TextureCoordinate(0, offset);
-		rightTexture = new TextureCoordinate(0.25, offset);
+		rightTexture = new TextureCoordinate(1, offset);
 		
 		textureIndex += sub;
 		
@@ -340,12 +342,11 @@ public class Track implements Renderable {
 		leftVertex.textureCoordinate = leftTexture;
 		rightVertex.textureCoordinate = rightTexture;
 		
-		leftVertex.color = new Color(1, 1, 1, .8);
-		rightVertex.color = new Color(1, 1, 1, .8);
+		leftVertex.color = Color.White;
+		rightVertex.color = Color.White;
 		
 		splineArea2.add(leftVertex);
 		splineArea2.add(rightVertex);
-		
 	}
 	
 	@Override
@@ -446,7 +447,9 @@ public class Track implements Renderable {
 		}
 		
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		
 		if (reflections) drawReflections();
+		
 		// Draw track
 		if (trackTexture != null) {
 			glEnable(GL_TEXTURE_2D);
@@ -457,19 +460,16 @@ public class Track implements Renderable {
 			glBindTexture(GL_TEXTURE_2D, 0);
 			glDisable(GL_TEXTURE_2D);
 		}
-		GL.pushAttributes();
-		// glDisable(GL_LIGHTING);
+		// Draw track back-side
 		glCullFace(GL_FRONT);
 		splineArea2Buffer.useColor(false);
-		Color.Black.gl();
+		trackBacksideColor.gl();
 		splineArea2Buffer.draw();
 		splineArea2Buffer.useColor(true);
-		GL.popAttributes();
-		// Draw obstacles
+		glCullFace(GL_BACK);
 		
 		visibleMusicTowers.forEach(MusicTower::render);
 		visibleBlocks.forEach(Block::render);
-		// glow.render(visibleBlocks);
 		
 		// Draw borders
 		leftBorderVertexBuffer.draw();
