@@ -1,7 +1,6 @@
 package audiodrive.ui.scenes;
 
-import static org.lwjgl.opengl.GL11.GL_COLOR_BUFFER_BIT;
-import static org.lwjgl.opengl.GL11.glClear;
+import static org.lwjgl.opengl.GL11.*;
 
 import java.util.Arrays;
 import java.util.List;
@@ -184,6 +183,8 @@ public class SettingsScene extends Scene implements ItemListener {
 		// yCoordinates start in left bottom corner, instead left top
 		y = getHeight() - y;
 		graphicMenu.mouseMoved(x, y);
+		volumeMenu.mouseMoved(x, y);
+		inputMenu.mouseMoved(x, y);
 		saveMenu.mouseMoved(x, y);
 	}
 	
@@ -192,6 +193,8 @@ public class SettingsScene extends Scene implements ItemListener {
 		// yCoordinates start in left bottom corner, instead left top
 		y = getHeight() - y;
 		graphicMenu.mousePressed(button, x, y);
+		volumeMenu.mousePressed(button, x, y);
+		inputMenu.mousePressed(button, x, y);
 		saveMenu.mousePressed(button, x, y);
 	}
 	
