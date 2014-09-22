@@ -295,7 +295,9 @@ public class Window {
 	}
 	
 	public static GraphicsDevice getMonitor(int x, int y) {
-		Point point = new Point(x, y);
+		Point point = new Point(x, Display.getHeight() - y);
+		point.x += Display.getX();
+		point.y += Display.getY();
 		for (GraphicsDevice device : GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices()) {
 			if (device.getDefaultConfiguration().getBounds().contains(point)) return device;
 		}
