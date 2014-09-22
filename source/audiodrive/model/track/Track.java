@@ -112,10 +112,8 @@ public class Track implements Renderable {
 			visibleRings.stream().forEach(Ring::render);
 			visibleMusicTowers.stream().forEach(MusicTower::render);
 		});
-		if (sky) {
-			skybox = ModelLoader.loadSingleModel("models/skybox/skybox").scale(GameScene.Far / 4);
-			skybox.setTexture(ModelLoader.getTexture(night ? "models/skybox/night.png" : "models/skybox/day.png"));
-		}
+		skybox = ModelLoader.loadSingleModel("models/skybox/skybox").scale(GameScene.Far / 4);
+		skybox.setTexture(ModelLoader.getTexture(night ? "models/skybox/night.png" : "models/skybox/day.png"));
 		build();
 	}
 	
@@ -701,6 +699,24 @@ public class Track implements Renderable {
 	
 	public int getNumberOfObstacles() {
 		return numberOfObstacles;
+	}
+	
+	public Track reflections(boolean reflections) {
+		this.reflections = reflections;
+		return this;
+	}
+	
+	public boolean reflections() {
+		return reflections;
+	}
+	
+	public Track sky(boolean sky) {
+		this.sky = sky;
+		return this;
+	}
+	
+	public boolean sky() {
+		return sky;
 	}
 	
 	public class Index {

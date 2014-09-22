@@ -277,15 +277,17 @@ public class GameScene extends Scene {
 	public void keyReleased(int key, char character) {
 		switch (key) {
 		case Keyboard.KEY_RETURN:
-			if (state == State.Animating) startCameraPath.skip();
-			else pause();
-			break;
+			if (state == State.Animating) {
+				if (!startCameraPath.isFinished()) startCameraPath.skip();
+				break;
+			}
+		case Keyboard.KEY_SPACE:
 		case Keyboard.KEY_PAUSE:
 			if (state != State.Animating) pause();
 			break;
 		case Keyboard.KEY_ESCAPE:
 			if (state == State.Running) pause();
-			else if (state == State.Animating) startCameraPath.skip();
+			else if (state == State.Animating && !startCameraPath.isFinished()) startCameraPath.skip();
 			else back();
 			break;
 		case Keyboard.KEY_HOME:
@@ -301,12 +303,29 @@ public class GameScene extends Scene {
 		case Keyboard.KEY_A:
 			Window.toggleAntialiasing();
 			break;
+		case Keyboard.KEY_G:
+			glow = !glow;
+			break;
 		case Keyboard.KEY_R:
-			if (Keyboard.isKeyDown(Keyboard.KEY_LSHIFT) || Keyboard.isKeyDown(Keyboard.KEY_RSHIFT)) {
-				rotationDirection *= -1;
-			} else {
-				rotate = !rotate;
+			track.reflections(!track.reflections());
+			break;
+		case Keyboard.KEY_S:
+			track.sky(!track.sky());
+			break;
+		case Keyboard.KEY_LEFT:
+			if (state == State.Paused) {
+				rotationDirection = 1;
+				rotate = true;
 			}
+			break;
+		case Keyboard.KEY_RIGHT:
+			if (state == State.Paused) {
+				rotationDirection = -1;
+				rotate = true;
+			}
+			break;
+		case Keyboard.KEY_END:
+			rotate = false;
 			break;
 		default:
 			break;
