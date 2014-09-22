@@ -186,7 +186,7 @@ public class Player implements Renderable {
 			CollectSound.play(volume);
 			collected++;
 			Log.trace("collected %1s", block);
-			ParticleEffects.createParticles(block);
+			if (GameScene.particles) ParticleEffects.createParticles(block);
 		} else {
 			CollideSound.play(volume);
 			collided++;

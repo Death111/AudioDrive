@@ -20,6 +20,7 @@ import audiodrive.ui.GL;
 import audiodrive.ui.components.Camera;
 import audiodrive.ui.components.Scene;
 import audiodrive.ui.components.Window;
+import audiodrive.ui.effects.ParticleEffects;
 import audiodrive.ui.overlays.GameBackground;
 import audiodrive.ui.overlays.GameOverlay;
 import audiodrive.utilities.Arithmetic;
@@ -32,6 +33,17 @@ public class GameScene extends Scene {
 	
 	public static final double Near = 0.1;
 	public static final double Far = 100000;
+	
+	public static boolean colorizeCollectables;
+	public static boolean colorizeObstacles;
+	public static boolean visualization;
+	public static boolean environment;
+	public static boolean reflections;
+	public static boolean particles;
+	public static boolean glow;
+	public static boolean night;
+	public static boolean sky;
+	public static boolean peaks;
 	
 	public static enum State {
 		Animating, Running, Paused, Resuming, Ended, Destroyed
@@ -49,6 +61,7 @@ public class GameScene extends Scene {
 	private Playback playback;
 	private GameOverlay overlay;
 	private GameBackground background;
+	private ParticleEffects particleEffects;
 	
 	private CameraPath startCameraPath;
 	
@@ -56,9 +69,6 @@ public class GameScene extends Scene {
 	private double keyboardSpeed;
 	private double mouseSpeed;
 	private double volume;
-	
-	private boolean glow;
-	private boolean night;
 	
 	public GameScene() {
 		draggable = false;
@@ -72,11 +82,20 @@ public class GameScene extends Scene {
 	@Override
 	protected void entering() {
 		Log.info("Starting game...");
+		colorizeCollectables = !AudioDrive.Settings.getBoolean("block.collectable.color.static");
+		colorizeObstacles = !AudioDrive.Settings.getBoolean("block.obstacle.color.static");
+		visualization = AudioDrive.Settings.getBoolean("game.visualization");
+		environment = AudioDrive.Settings.getBoolean("game.environment");
+		reflections = AudioDrive.Settings.getBoolean("graphics.reflections");
+		particles = AudioDrive.Settings.getBoolean("graphics.particles");
 		glow = AudioDrive.Settings.getBoolean("graphics.glow");
 		night = AudioDrive.Settings.getBoolean("game.night");
+		sky = AudioDrive.Settings.getBoolean("game.sky");
 		keyboardSpeed = AudioDrive.Settings.getDouble("input.keyboard.speed");
 		mouseSpeed = AudioDrive.Settings.getDouble("input.mouse.speed");
 		volume = AudioDrive.Settings.getDouble("sound.volume");
+		particleEffects = new ParticleEffects();
+		track.build();
 		File model = Files.find("models/player", AudioDrive.Settings.get("player.model") + ".obj").orElse(Files.list("models/player", ".obj", true).get(0));
 		player = new Player(this).model(ModelLoader.loadSingleModel(model.getPath()));
 		player.model().scale(0.05);
@@ -223,6 +242,10 @@ public class GameScene extends Scene {
 		return state == State.Paused || state == State.Destroyed || state == State.Ended;
 	}
 	
+	public ParticleEffects particleEffects() {
+		return particleEffects;
+	}
+	
 	@Override
 	public void keyPressed(int key, char character) {
 		Vector translation = new Vector();
@@ -294,23 +317,26 @@ public class GameScene extends Scene {
 			translation.reset();
 			player.zoom(1.0);
 			break;
-		case Keyboard.KEY_P:
-			overlay.togglePeaks();
+		case Keyboard.KEY_A:
+			Window.toggleAntialiasing();
 			break;
 		case Keyboard.KEY_V:
 			Window.toggleVSync();
 			break;
-		case Keyboard.KEY_A:
-			Window.toggleAntialiasing();
+		case Keyboard.KEY_D:
+			peaks = !peaks;
 			break;
 		case Keyboard.KEY_G:
 			glow = !glow;
 			break;
+		case Keyboard.KEY_P:
+			particles = !particles;
+			break;
 		case Keyboard.KEY_R:
-			track.reflections(!track.reflections());
+			reflections = !reflections;
 			break;
 		case Keyboard.KEY_S:
-			track.sky(!track.sky());
+			sky = !sky;
 			break;
 		case Keyboard.KEY_LEFT:
 			if (state == State.Paused) {

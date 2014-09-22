@@ -31,7 +31,6 @@ public class GameOverlay extends Overlay {
 	private Player player;
 	
 	private int width, height;
-	private boolean showPeaks;
 	private int collectables;
 	private int obstacles;
 	
@@ -56,7 +55,6 @@ public class GameOverlay extends Overlay {
 	
 	public void update() {
 		trackOverview.updatePlayerPosition(scene.getTrack().index());
-		// specialEffects.visible(scene.getState() != State.Paused);
 		List<Block> passed = scene.getTrack().getBlocks().stream().filter(block -> block.iteration() <= scene.getTrack().index().integer).collect(Collectors.toList());
 		int passedCollectables = (int) passed.stream().filter(Block::isCollectable).count();
 		int passedObstacles = passed.size() - passedCollectables;
@@ -90,11 +88,11 @@ public class GameOverlay extends Overlay {
 		texts.get("framerate").setText(Scene.getFramerate() + " FPS");
 		Camera.overlay(width, height);
 		super.render();
+		if (GameScene.peaks) drawPeaks();
+		if (GameScene.particles && GameScene.sky && scene.getState() != State.Paused) scene.particleEffects().render();
 		trackOverview.render();
-		
 		if (text("notification").isVisible()) drawNotificationBackground();
 		texts.values().forEach(Text::render);
-		if (showPeaks) drawPeaks();
 	}
 	
 	private void drawNotificationBackground() {
@@ -117,10 +115,6 @@ public class GameOverlay extends Overlay {
 			texts.put(name, text);
 		}
 		return text;
-	}
-	
-	public void togglePeaks() {
-		showPeaks = !showPeaks;
 	}
 	
 	private void drawPeaks() {

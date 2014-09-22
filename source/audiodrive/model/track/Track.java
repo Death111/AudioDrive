@@ -80,13 +80,6 @@ public class Track implements Renderable {
 	private Color averageColor = AudioDrive.Settings.getColor("color.average");
 	private Color intenseColor = AudioDrive.Settings.getColor("color.intense");
 	
-	private boolean colorizeCollectables = !AudioDrive.Settings.getBoolean("block.collectable.color.static");
-	private boolean colorizeObstacles = !AudioDrive.Settings.getBoolean("block.obstacle.color.static");
-	private boolean reflections = AudioDrive.Settings.getBoolean("graphics.reflections");
-	private boolean environment = AudioDrive.Settings.getBoolean("game.environment");
-	private boolean visualization = AudioDrive.Settings.getBoolean("game.visualization");
-	private boolean night = AudioDrive.Settings.getBoolean("game.night");
-	private boolean sky = AudioDrive.Settings.getBoolean("game.sky");
 	private int sight = AudioDrive.Settings.getInteger("game.sight");
 	
 	private List<MinMax> spectraMinMax;
@@ -105,19 +98,18 @@ public class Track implements Renderable {
 		numberOfObstacles = blocks.size() - numberOfCollectables;
 		indexRate = spline.size() / audio.getDuration();
 		spectraMinMax = SpectraMinMax.getMinMax(audio.getMix());
-		trackColor = night ? Color.Black : Color.White;
-		trackTexture = ModelLoader.getTexture(night ? "textures/track/track-black.png" : "textures/track/track-white.png");
+	}
+	
+	public void build() {
+		trackColor = GameScene.night ? Color.Black : Color.White;
+		trackTexture = ModelLoader.getTexture(GameScene.night ? "textures/track/track-black.png" : "textures/track/track-white.png");
 		glow = new Glow().depthpass(() -> splineArea2Buffer.draw()).renderpass(() -> {
 			visibleBlocks.stream().filter(Block::isGlowing).forEach(Block::render);
 			visibleRings.stream().forEach(Ring::render);
 			visibleMusicTowers.stream().forEach(MusicTower::render);
 		});
 		skybox = ModelLoader.loadSingleModel("models/skybox/skybox").scale(GameScene.Far / 4);
-		skybox.setTexture(ModelLoader.getTexture(night ? "models/skybox/night.png" : "models/skybox/day.png"));
-		build();
-	}
-	
-	private void build() {
+		skybox.setTexture(ModelLoader.getTexture(GameScene.night ? "models/skybox/night.png" : "models/skybox/day.png"));
 		generateTrack();
 		generateTowers();
 		splineArea2Buffer = new VertexBuffer(splineArea2).mode(GL_QUAD_STRIP).useColor(true).useTexture(true);
@@ -125,7 +117,7 @@ public class Track implements Renderable {
 	
 	private void generateTowers() {
 		musicTowers = new ArrayList<>();
-		if (!environment) return;
+		if (!GameScene.environment) return;
 		int spacing = 300;
 		for (int iteration = spacing; iteration < spline.size(); iteration += spacing) {
 			float peak = audio.getMix().getThreshold().getClamped(iteration);
@@ -364,7 +356,7 @@ public class Track implements Renderable {
 		int preview = sight;
 		int review = sight / 2;
 		index = getIndex(time);
-		if (sky) skybox.placement().position().set(player.model().position());
+		if (GameScene.sky) skybox.placement().position().set(player.model().position());
 		int minimum = Math.max(index.integer - review, 0);
 		int maximum = Math.min(index.integer + preview, lastIndex());
 		
@@ -377,18 +369,18 @@ public class Track implements Renderable {
 			double position = block.iteration() - (block.iteration() - index.integer) / 2.0;
 			block.placement(getPlacement(new Index((int) position, position - (int) position), true, block.rail()));
 			block.update(index.integer);
-			if (colorizeCollectables && colorizeObstacles) {
+			if (GameScene.colorizeCollectables && GameScene.colorizeObstacles) {
 				block.color(block.isCollectable() ? inverseBorderColor : borderColor);
 			} else if (block.isCollectable()) {
-				if (colorizeCollectables) block.color(borderColor);
+				if (GameScene.colorizeCollectables) block.color(borderColor);
 			} else {
-				if (colorizeObstacles) block.color(borderColor);
+				if (GameScene.colorizeObstacles) block.color(borderColor);
 			}
 		});
 		
 		AnalyzedChannel mix = audio.getMix();
 		visibleRings = new ArrayList<>();
-		double pulse = visualization ? Arithmetic.smooth(0, 2, mix.getPeaks().getClamped(iteration)) : 0;
+		double pulse = GameScene.visualization ? Arithmetic.smooth(0, 2, mix.getPeaks().getClamped(iteration)) : 0;
 		for (int i = minimum; i < maximum; i++) {
 			if (mix.getPeaks().getClamped(i) == 0) continue;
 			double ringScale = 5 - 3 * mix.getThreshold().getClamped(i);
@@ -459,7 +451,7 @@ public class Track implements Renderable {
 		
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 		
-		if (reflections) drawReflections();
+		if (GameScene.reflections) drawReflections();
 		
 		// Draw track
 		if (trackTexture != null) {
@@ -488,7 +480,7 @@ public class Track implements Renderable {
 		
 		glDisable(GL_CULL_FACE);
 		glDisable(GL_LIGHTING);
-		if (sky) skybox.render();
+		if (GameScene.sky) skybox.render();
 		visibleRings.forEach(Ring::render);
 		glEnable(GL_LIGHTING);
 		glEnable(GL_CULL_FACE);
@@ -699,24 +691,6 @@ public class Track implements Renderable {
 	
 	public int getNumberOfObstacles() {
 		return numberOfObstacles;
-	}
-	
-	public Track reflections(boolean reflections) {
-		this.reflections = reflections;
-		return this;
-	}
-	
-	public boolean reflections() {
-		return reflections;
-	}
-	
-	public Track sky(boolean sky) {
-		this.sky = sky;
-		return this;
-	}
-	
-	public boolean sky() {
-		return sky;
 	}
 	
 	public class Index {
