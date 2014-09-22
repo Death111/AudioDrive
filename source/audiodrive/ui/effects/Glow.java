@@ -27,8 +27,8 @@ public class Glow extends Framebuffer {
 	public Glow render() {
 		super.render();
 		Camera.overlay(Window.getWidth(), Window.getHeight());
-		int times = 10;
-		double shift = 0.002;
+		int times = 15;
+		double shift = 0.0015;
 		double alpha = 0.1;
 		double offset = 0.0;
 		double alphainc = alpha / times;
@@ -37,11 +37,6 @@ public class Glow extends Framebuffer {
 		glEnable(GL_BLEND);
 		texture().bind();
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-		// TODO make texture transparent...
-		// glDisable(GL_DEPTH_TEST);
-		// glDepthMask(false);
-		// glEnable(GL_ALPHA_TEST);
-		// glAlphaFunc(GL_GREATER, 0.1f);
 		glBegin(GL_QUADS);
 		for (int i = 0; i < times; i++) {
 			glColor4d(1.0, 1.0, 1.0, alpha);

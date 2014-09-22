@@ -107,7 +107,11 @@ public class Track implements Renderable {
 		spectraMinMax = SpectraMinMax.getMinMax(audio.getMix());
 		trackColor = night ? Color.Black : Color.White;
 		trackTexture = ModelLoader.getTexture(night ? "textures/track/track-black.png" : "textures/track/track-white.png");
-		glow = new Glow().depthpass(() -> splineArea2Buffer.draw()).renderpass(() -> visibleBlocks.stream().filter(Block::isGlowing).forEach(Block::render));
+		glow = new Glow().depthpass(() -> splineArea2Buffer.draw()).renderpass(() -> {
+			visibleBlocks.stream().filter(Block::isGlowing).forEach(Block::render);
+			visibleRings.stream().forEach(Ring::render);
+			visibleMusicTowers.stream().forEach(MusicTower::render);
+		});
 		if (sky) {
 			skybox = ModelLoader.loadSingleModel("models/skybox/skybox").scale(GameScene.Far / 4);
 			skybox.setTexture(ModelLoader.getTexture(night ? "models/skybox/night.png" : "models/skybox/day.png"));
