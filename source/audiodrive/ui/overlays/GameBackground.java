@@ -31,7 +31,7 @@ public class GameBackground extends Overlay {
 	public void render() {
 		Camera.overlay(width, height);
 		super.render();
-		if (visualization) backgroundSpectral.render();
+		// if (visualization) backgroundSpectral.render();
 		if (particles) specialEffects.render();
 	}
 	

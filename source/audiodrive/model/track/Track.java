@@ -33,6 +33,7 @@ import audiodrive.model.tower.TubeTower;
 import audiodrive.ui.GL;
 import audiodrive.ui.components.Viewport;
 import audiodrive.ui.effects.Glow;
+import audiodrive.ui.scenes.GameScene;
 import audiodrive.utilities.Arithmetic;
 import audiodrive.utilities.Range;
 
@@ -85,10 +86,12 @@ public class Track implements Renderable {
 	private boolean environment = AudioDrive.Settings.getBoolean("game.environment");
 	private boolean visualization = AudioDrive.Settings.getBoolean("game.visualization");
 	private boolean night = AudioDrive.Settings.getBoolean("game.night");
+	private boolean sky = AudioDrive.Settings.getBoolean("game.sky");
 	private int sight = AudioDrive.Settings.getInteger("game.sight");
 	
 	private List<MinMax> spectraMinMax;
 	private Glow glow;
+	private Model skybox;
 	
 	private Player player;
 	private Index index;
@@ -105,6 +108,10 @@ public class Track implements Renderable {
 		trackColor = night ? Color.Black : Color.White;
 		trackTexture = ModelLoader.getTexture(night ? "textures/track/track-black.png" : "textures/track/track-white.png");
 		glow = new Glow().depthpass(() -> splineArea2Buffer.draw()).renderpass(() -> visibleBlocks.stream().filter(Block::isGlowing).forEach(Block::render));
+		if (sky) {
+			skybox = ModelLoader.loadSingleModel("models/skybox/skybox").scale(GameScene.Far / 4);
+			skybox.setTexture(ModelLoader.getTexture(night ? "models/skybox/night.png" : "models/skybox/day.png"));
+		}
 		build();
 	}
 	
@@ -355,6 +362,7 @@ public class Track implements Renderable {
 		int preview = sight;
 		int review = sight / 2;
 		index = getIndex(time);
+		if (sky) skybox.placement().position().set(player.model().position());
 		int minimum = Math.max(index.integer - review, 0);
 		int maximum = Math.min(index.integer + preview, lastIndex());
 		
@@ -477,7 +485,10 @@ public class Track implements Renderable {
 		rightBorderVertexBuffer.draw();
 		
 		glDisable(GL_CULL_FACE);
+		glDisable(GL_LIGHTING);
+		if (sky) skybox.render();
 		visibleRings.forEach(Ring::render);
+		glEnable(GL_LIGHTING);
 		glEnable(GL_CULL_FACE);
 		
 		// drawBorderNormals(leftVertexList);

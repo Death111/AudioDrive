@@ -31,7 +31,7 @@ public class SettingsScene extends Scene implements ItemListener {
 	
 	private static final List<Boolean> booleanValues = Arrays.asList(true, false);
 	private static final List<Integer> multisamplingValues = Arrays.asList(0, 2, 4, 8, 16);
-	private static final List<Integer> sightValues = Arrays.asList(50, 100, 150, 200, 250, 300, 350, 400);
+	private static final List<Integer> sightValues = Arrays.asList(50, 100, 150, 200, 250, 300);
 	private static final List<Double> difficultyValues = Arrays.asList(.1, .2, .3, .4, .5, .6, .7, .8, .9, 1.);
 	private static final List<Double> controlValues = Arrays.asList(.5, .6, .7, .8, .9, 1., 1.2, 1.4, 1.6, 1.8, 2.0);
 	private static final List<Double> volumeValues = Arrays.asList(0., .1, .2, .3, .4, .5, .6, .7, .8, .9, 1.);
@@ -49,6 +49,7 @@ public class SettingsScene extends Scene implements ItemListener {
 	private SettingsItem<Boolean> visualization;
 	private SettingsItem<Integer> sight;
 	private SettingsItem<Boolean> night;
+	private SettingsItem<Boolean> sky;
 	private SettingsItem<Boolean> staticCollectableColor;
 	private SettingsItem<Boolean> glowingCollectables;
 	private SettingsItem<Boolean> staticObstacleColor;
@@ -107,6 +108,7 @@ public class SettingsScene extends Scene implements ItemListener {
 		visualization = new SettingsItem<Boolean>("Visualization", booleanValues, width, itemHeight);
 		sight = new SettingsItem<Integer>("Sight Range", sightValues, width, itemHeight);
 		night = new SettingsItem<Boolean>("Night", booleanValues, width, itemHeight);
+		sky = new SettingsItem<Boolean>("Sky", booleanValues, width, itemHeight);
 		staticCollectableColor = new SettingsItem<Boolean>("Static Collectable Color", booleanValues, width, itemHeight);
 		glowingCollectables = new SettingsItem<Boolean>("Glowing Collectables", booleanValues, width, itemHeight);
 		staticObstacleColor = new SettingsItem<Boolean>("Static Obstacle Color", booleanValues, width, itemHeight);
@@ -128,6 +130,7 @@ public class SettingsScene extends Scene implements ItemListener {
 		graphicMenu.addItem(visualization);
 		graphicMenu.addItem(sight);
 		graphicMenu.addItem(night);
+		graphicMenu.addItem(sky);
 		graphicMenu.addItem(staticCollectableColor);
 		graphicMenu.addItem(glowingCollectables);
 		graphicMenu.addItem(staticObstacleColor);
@@ -158,6 +161,7 @@ public class SettingsScene extends Scene implements ItemListener {
 		visualization.setValue(AudioDrive.Settings.getBoolean("game.visualization"));
 		sight.setValue(AudioDrive.Settings.getInteger("game.sight"));
 		night.setValue(AudioDrive.Settings.getBoolean("game.night"));
+		sky.setValue(AudioDrive.Settings.getBoolean("game.sky"));
 		difficulty.setValue(AudioDrive.Settings.getDouble("game.difficulty"));
 		staticCollectableColor.setValue(AudioDrive.Settings.getBoolean("block.collectable.color.static"));
 		glowingCollectables.setValue(AudioDrive.Settings.getBoolean("block.collectable.glowing"));
@@ -245,6 +249,7 @@ public class SettingsScene extends Scene implements ItemListener {
 		AudioDrive.Settings.set("game.visualization", visualization.valueAsString());
 		AudioDrive.Settings.set("game.sight", sight.valueAsString());
 		AudioDrive.Settings.set("game.night", night.valueAsString());
+		AudioDrive.Settings.set("game.sky", sky.valueAsString());
 		AudioDrive.Settings.set("game.difficulty", difficulty.valueAsString());
 		AudioDrive.Settings.set("block.collectable.color.static", staticCollectableColor.valueAsString());
 		AudioDrive.Settings.set("block.collectable.glowing", glowingCollectables.valueAsString());

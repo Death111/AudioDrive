@@ -35,7 +35,8 @@ public class Settings {
 		set("game.environment", "true");
 		set("game.visualization", "true");
 		set("game.night", "true");
-		set("game.sight", "200");
+		set("game.sky", "true");
+		set("game.sight", "150");
 		set("game.difficulty", "0.5");
 		set("graphics.glow", "true");
 		set("graphics.particles", "true");
@@ -50,7 +51,7 @@ public class Settings {
 		set("sound.volume", "1.0");
 		set("track.smoothing", "15");
 		set("window.antialiasing", "true");
-		set("window.multisampling", "4");
+		set("window.multisampling", "2");
 		set("window.framerate", "0");
 		set("window.useSecondaryMonitor", "false");
 		set("window.vsync", "true");
