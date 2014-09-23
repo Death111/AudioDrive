@@ -14,6 +14,7 @@ import audiodrive.ui.components.Camera;
 import audiodrive.ui.components.Overlay;
 import audiodrive.ui.components.Scene;
 import audiodrive.ui.components.Text;
+import audiodrive.ui.components.Text.Alignment;
 import audiodrive.ui.effects.ShaderProgram;
 import audiodrive.ui.menu.Menu;
 import audiodrive.ui.menu.item.Item;
@@ -37,8 +38,9 @@ public class SettingsScene extends Scene implements ItemListener {
 	private static final List<Double> volumeValues = Arrays.asList(0., .1, .2, .3, .4, .5, .6, .7, .8, .9, 1.);
 	
 	private Menu graphicMenu;
-	private Menu volumeMenu;
+	private Menu soundMenu;
 	private Menu inputMenu;
+	private Menu gameMenu;
 	private SettingsItem<Boolean> antialiasing;
 	private SettingsItem<Integer> multisampling;
 	private SettingsItem<Boolean> vSync;
@@ -69,6 +71,7 @@ public class SettingsScene extends Scene implements ItemListener {
 	private Text graphicSettingsText;
 	private Text soundSettingsText;
 	private Text inputSettingsText;
+	private Text gameSettingsText;
 	private Overlay background;
 	private AudioFile selectAudio;
 	
@@ -79,18 +82,32 @@ public class SettingsScene extends Scene implements ItemListener {
 		titleText = new Text("Settings").setFont(AudioDrive.Font).setSize(48).setPosition(20, 20);
 		
 		int height = Display.getHeight() * 2 / 3;
-		int y = (Display.getHeight() - height) / 2;
-		final int spacing = 50;
-		int itemHeight = spacing;
-		int width = (Display.getWidth() - 3 * spacing) / 2;
-		graphicMenu = new Menu(spacing, y, width + 1, height, 1);
-		graphicSettingsText = new Text("Graphic").setFont(AudioDrive.Font).setSize(48).setPosition(spacing, y - itemHeight * 1.5);
-		volumeMenu = new Menu(spacing + spacing + width, y, width + 1, height / 3, 1);
-		soundSettingsText = new Text("Sound").setFont(AudioDrive.Font).setSize(48).setPosition(spacing + spacing + width, y - itemHeight * 1.5);
-		inputMenu = new Menu(spacing + spacing + width, y + height / 3 + (int) (spacing * 1.5), width + 1, height / 3, 1);
-		inputSettingsText = new Text("Input").setFont(AudioDrive.Font).setSize(48).setPosition(spacing + spacing + width, y + height / 3);
+		int y = (Display.getHeight() - height) / 2 + titleText.getHeight() / 2;
+		int itemHeight = height / 15 - 1;
+		int headingSize = itemHeight - 5;
+		int width = (Display.getWidth() - 3 * itemHeight) / 2;
+		int graphicMenuY = y;
+		graphicSettingsText = new Text("Graphic").setFont(AudioDrive.Font).setSize(headingSize).setAlignment(Alignment.LowerLeft).setPosition(itemHeight, graphicMenuY);
+		graphicMenu = new Menu(itemHeight, graphicMenuY, width + 1, height, 1);
+		int soundMenuY = y;
+		soundSettingsText = new Text("Sound")
+			.setFont(AudioDrive.Font)
+			.setSize(headingSize)
+			.setAlignment(Alignment.LowerLeft)
+			.setPosition(itemHeight + itemHeight + width, soundMenuY);
+		soundMenu = new Menu(itemHeight + itemHeight + width, soundMenuY, width + 1, height / 3, 1);
+		int inputMenuY = y + (itemHeight + 1) * 5;
+		inputSettingsText = new Text("Input")
+			.setFont(AudioDrive.Font)
+			.setSize(headingSize)
+			.setAlignment(Alignment.LowerLeft)
+			.setPosition(itemHeight + itemHeight + width, inputMenuY);
+		inputMenu = new Menu(itemHeight + itemHeight + width, inputMenuY, width + 1, height / 3, 1);
+		int gameMenuY = y + (itemHeight + 1) * 14;
+		gameSettingsText = new Text("Game").setFont(AudioDrive.Font).setSize(headingSize).setAlignment(Alignment.LowerLeft).setPosition(itemHeight + itemHeight + width, gameMenuY);
+		gameMenu = new Menu(itemHeight + itemHeight + width, gameMenuY, width + 1, height / 3, 1);
 		
-		saveMenu = new Menu(20, Display.getHeight() - MenuItem.MENU_ITEM_HEIGHT - 20, Display.getWidth() - spacing, MenuItem.MENU_ITEM_HEIGHT + 1, 1);
+		saveMenu = new Menu(20, Display.getHeight() - MenuItem.MENU_ITEM_HEIGHT - 20, Display.getWidth() - itemHeight, MenuItem.MENU_ITEM_HEIGHT + 1, 1);
 		
 		saveItem = new MenuItem("Save", this);
 		closeItem = new MenuItem("Return", this);
@@ -126,21 +143,21 @@ public class SettingsScene extends Scene implements ItemListener {
 		graphicMenu.addItem(glow);
 		graphicMenu.addItem(particles);
 		graphicMenu.addItem(reflections);
-		graphicMenu.addItem(environment);
 		graphicMenu.addItem(visualization);
-		graphicMenu.addItem(sight);
-		graphicMenu.addItem(night);
+		graphicMenu.addItem(environment);
 		graphicMenu.addItem(sky);
+		graphicMenu.addItem(night);
 		graphicMenu.addItem(staticCollectableColor);
 		graphicMenu.addItem(glowingCollectables);
 		graphicMenu.addItem(staticObstacleColor);
 		graphicMenu.addItem(glowingObstacles);
-		graphicMenu.addItem(difficulty);
+		graphicMenu.addItem(sight);
+		soundMenu.addItem(interfaceVolume);
+		soundMenu.addItem(musicVolume);
+		soundMenu.addItem(soundVolume);
 		inputMenu.addItem(keyboard);
 		inputMenu.addItem(mouse);
-		volumeMenu.addItem(interfaceVolume);
-		volumeMenu.addItem(musicVolume);
-		volumeMenu.addItem(soundVolume);
+		gameMenu.addItem(difficulty);
 		
 		selectAudio = new AudioFile("sounds/Select.mp3");
 		volume = AudioDrive.Settings.getDouble("interface.volume");
@@ -180,11 +197,13 @@ public class SettingsScene extends Scene implements ItemListener {
 		background.render();
 		titleText.render();
 		graphicSettingsText.render();
-		soundSettingsText.render();
-		inputSettingsText.render();
 		graphicMenu.render();
+		soundSettingsText.render();
+		soundMenu.render();
+		inputSettingsText.render();
 		inputMenu.render();
-		volumeMenu.render();
+		gameSettingsText.render();
+		gameMenu.render();
 		saveMenu.render();
 	}
 	
@@ -196,8 +215,9 @@ public class SettingsScene extends Scene implements ItemListener {
 		// yCoordinates start in left bottom corner, instead left top
 		y = getHeight() - y;
 		graphicMenu.mouseMoved(x, y);
-		volumeMenu.mouseMoved(x, y);
+		soundMenu.mouseMoved(x, y);
 		inputMenu.mouseMoved(x, y);
+		gameMenu.mouseMoved(x, y);
 		saveMenu.mouseMoved(x, y);
 	}
 	
@@ -206,8 +226,9 @@ public class SettingsScene extends Scene implements ItemListener {
 		// yCoordinates start in left bottom corner, instead left top
 		y = getHeight() - y;
 		graphicMenu.mousePressed(button, x, y);
-		volumeMenu.mousePressed(button, x, y);
+		soundMenu.mousePressed(button, x, y);
 		inputMenu.mousePressed(button, x, y);
+		gameMenu.mousePressed(button, x, y);
 		saveMenu.mousePressed(button, x, y);
 	}
 	
