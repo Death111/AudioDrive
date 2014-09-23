@@ -28,6 +28,7 @@ public class CameraPath {
 	
 	private List<Vector> positions = null;
 	private List<Vector> pointOfInterests = null;
+	private List<Vector> ups = null;
 	private List<Vector> orientations = null;
 	
 	private Vector offsetLookAt;
@@ -101,13 +102,16 @@ public class CameraPath {
 		// Calculate point of interests from orientation
 		if (orientations != null) {
 			pointOfInterests = new ArrayList<Vector>();
+			ups = new ArrayList<>();
 			for (int i = 0; i < orientations.size(); i++) {
 				Vector orientation = orientations.get(i);
 				Matrix m = new Matrix();
 				m.rotation(orientation.x(), orientation.y(), orientation.z());
-				final Vector vector2 = positions.get(i);
-				Vector vector = m.multiplied(vector2).subtract(vector2);
+				Vector up = m.multiplied(Vector.Y);
+				final Vector position = positions.get(i);
+				Vector vector = m.multiplied(position).subtract(position);
 				pointOfInterests.add(vector);
+				ups.add(up);
 			}
 		}
 		
@@ -140,8 +144,8 @@ public class CameraPath {
 		if (reverse) index = frameCount - 1 - index;
 		Vector cameraPosition = positions.get(index);
 		Vector cameraLookAt = pointOfInterests.get(index);
+		Vector up = ups.get(index);
 		
-		final Vector up = Vector.Y;// TODO calculate up vector
 		Camera.position(offsetPosition.plus(cameraPosition));
 		Camera.lookAt(offsetLookAt.plus(cameraLookAt), up);
 	}
