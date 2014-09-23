@@ -227,6 +227,10 @@ public class Player implements Renderable {
 		return model;
 	}
 	
+	public Rotation inclination() {
+		return inclination;
+	}
+	
 	public int hitpoints() {
 		return hitpoints;
 	}

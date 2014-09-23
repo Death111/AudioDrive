@@ -557,13 +557,18 @@ public class Track implements Renderable {
 		// draw player reflection
 		Placement placement = model.placement();
 		Placement originalPlacement = placement.clone();
-		placement.position(placement.position().plus(placement.up().multiplied(-2 * flightHeight)));
+		placement.position(placement.position().plus(placement.up().multiplied(-2 * (flightHeight + model.translation().y()))));
 		model.rotation().invert();
+		player.inclination().invert();
 		model.transformations().add(flip);
 		model.render();
 		model.transformations().remove(flip);
+		player.inclination().invert();
 		model.rotation().invert();
 		model.placement(originalPlacement);
+		
+		leftBorderVertexBuffer.draw();
+		rightBorderVertexBuffer.draw();
 		
 		glDisable(GL_STENCIL_TEST);
 	}
