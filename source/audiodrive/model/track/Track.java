@@ -103,7 +103,12 @@ public class Track implements Renderable {
 	public void build() {
 		trackColor = GameScene.night ? Color.Black : Color.White;
 		trackTexture = ModelLoader.getTexture(GameScene.night ? "textures/track/track-black.png" : "textures/track/track-white.png");
-		glow = new Glow().depthpass(() -> splineArea2Buffer.draw()).renderpass(() -> {
+		glow = new Glow().depthpass(() -> {
+			splineArea2Buffer.draw();
+			leftBorderVertexBuffer.draw();
+			rightBorderVertexBuffer.draw();
+			visibleBlocks.stream().filter(block -> !block.isCollectable()).forEach(Block::render);
+		}).renderpass(() -> {
 			visibleBlocks.stream().filter(Block::isGlowing).forEach(Block::render);
 			visibleRings.stream().forEach(Ring::render);
 			visibleMusicTowers.stream().forEach(MusicTower::render);
@@ -566,9 +571,6 @@ public class Track implements Renderable {
 		player.inclination().invert();
 		model.rotation().invert();
 		model.placement(originalPlacement);
-		
-		leftBorderVertexBuffer.draw();
-		rightBorderVertexBuffer.draw();
 		
 		glDisable(GL_STENCIL_TEST);
 	}
