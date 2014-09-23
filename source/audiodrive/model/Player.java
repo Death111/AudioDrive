@@ -4,6 +4,7 @@ import audiodrive.AudioDrive;
 import audiodrive.audio.AudioFile;
 import audiodrive.model.geometry.Color;
 import audiodrive.model.geometry.Vector;
+import audiodrive.model.geometry.transform.Rotation;
 import audiodrive.model.loader.Model;
 import audiodrive.model.track.Block;
 import audiodrive.model.track.Track;
@@ -43,7 +44,7 @@ public class Player implements Renderable {
 	private double zoomMaximum = 5.0;
 	private double zoomSpeed = 1.0;
 	
-	private double jumpHeight = 0.05;
+	private double jumpHeight = 0.1;
 	private double jumpRate = 1.5;
 	private double jumpProgress = 0.0;
 	private boolean jumpUpwards = true;
@@ -55,6 +56,8 @@ public class Player implements Renderable {
 	private double tiltTime;
 	
 	private double volume = AudioDrive.Settings.getDouble("sound.volume");
+	
+	private Rotation inclination = new Rotation();
 	
 	public Player(GameScene scene) {
 		this.scene = scene;
@@ -80,8 +83,8 @@ public class Player implements Renderable {
 		double moved = newX - oldX;
 		oldX = newX;
 		boolean tilting = tilt(elapsed, moved);
-		jump(elapsed, tilting ? true : jumpUpwards);
-		checkCollisions();
+		boolean collision = checkCollisions(elapsed);
+		jump(elapsed, tilting || collision ? true : jumpUpwards);
 	}
 	
 	public void move(double x) {
@@ -123,7 +126,7 @@ public class Player implements Renderable {
 				tiltProgress -= rate * delta * elapsed * 40;
 				if (tiltProgress < 0.0) tiltProgress = 0.0;
 			}
-			tiltTime = scene.playtime();
+			// tiltTime = scene.playtime();
 		} else if (tiltProgress != 0.5) { // reset
 			// if (scene.playtime() - tiltTime < 0.1) return true; // delay
 			double sign = -Math.signum(tiltProgress - 0.5);
@@ -158,12 +161,27 @@ public class Player implements Renderable {
 	
 	private double lastCollisionCheck;
 	
-	private void checkCollisions() {
+	private boolean checkCollisions(double elapsed) {
 		int offset = (int) (track.indexRate() / 15);
 		int maximum = track.index().integer + offset;
 		int minimum = track.index().integer - offset - (int) (track.indexRate() * (scene.playtime() - lastCollisionCheck));
-		track.getBlocks().stream().filter(block -> !block.isDestroyed() && (block.iteration() > minimum && block.iteration() < maximum)).forEach(this::interact);
+		long collisions = track
+			.getBlocks()
+			.stream()
+			.filter(block -> !block.isDestroyed() && (block.iteration() > minimum && block.iteration() < maximum))
+			.filter(this::interact)
+			.filter(block -> !block.isCollectable())
+			.count();
 		lastCollisionCheck = scene.playtime();
+		boolean collision = collisions > 0;
+		if (collision) {
+			double x = Math.max(-30, (inclination.x() - 5));
+			inclination.x(x);
+		} else {
+			double x = Math.min(0, (inclination.x() + 15 * elapsed));
+			inclination.x(x);
+		}
+		return collision;
 	}
 	
 	@Override
@@ -171,7 +189,7 @@ public class Player implements Renderable {
 		model.render();
 	}
 	
-	public void interact(Block block) {
+	public boolean interact(Block block) {
 		double x = -model.translation().x(); // FIXME still don't know why it's negative
 		double tiltFraction = 0.5 - Math.abs(0.5 - tiltProgress);
 		double side = track.railWidth() / 4 * tiltFraction;
@@ -179,6 +197,7 @@ public class Player implements Renderable {
 		Range railWidth = track.getRailRange(block.rail());
 		boolean intersects = playerWidth.intersects(railWidth);
 		if (intersects) collide(block);
+		return intersects;
 	}
 	
 	private void collide(Block block) {
@@ -198,6 +217,8 @@ public class Player implements Renderable {
 	}
 	
 	public Player model(Model model) {
+		if (this.model != null) model.transformations().remove(inclination);
+		model.transformations().add(inclination);
 		this.model = model;
 		return this;
 	}
