@@ -44,6 +44,7 @@ public class GameScene extends Scene {
 	public static boolean night;
 	public static boolean sky;
 	public static boolean peaks;
+	public static boolean hitbox;
 	
 	public static enum State {
 		Animating, Running, Paused, Resuming, Ended, Destroyed
@@ -329,6 +330,9 @@ public class GameScene extends Scene {
 			break;
 		case Keyboard.KEY_G:
 			glow = !glow;
+			break;
+		case Keyboard.KEY_H:
+			hitbox = !hitbox;
 			break;
 		case Keyboard.KEY_P:
 			particles = !particles;

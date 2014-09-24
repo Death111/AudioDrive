@@ -1,5 +1,6 @@
 package audiodrive.model;
 
+import static org.lwjgl.opengl.GL11.*;
 import audiodrive.AudioDrive;
 import audiodrive.audio.AudioFile;
 import audiodrive.model.geometry.Color;
@@ -52,7 +53,10 @@ public class Player implements Renderable {
 	private double tiltRate = 1.0;
 	private double tiltProgress = 0.5;
 	private double oldX = 0.0;
-	private double tiltTime;
+	
+	private int hitboxStart;
+	private int hitboxEnd;
+	private double hitboxSide;
 	
 	private double volume = AudioDrive.Settings.getDouble("sound.volume");
 	
@@ -118,11 +122,11 @@ public class Player implements Renderable {
 			double rate = tiltRate;
 			if (moved > 0) { // right
 				if (tiltProgress < 0.5) rate *= 2.0;
-				tiltProgress += rate * delta * elapsed * 40;
+				tiltProgress += rate * delta;
 				if (tiltProgress > 1.0) tiltProgress = 1.0;
 			} else { // left
 				if (tiltProgress > 0.5) rate *= 2.0;
-				tiltProgress -= rate * delta * elapsed * 40;
+				tiltProgress -= rate * delta;
 				if (tiltProgress < 0.0) tiltProgress = 0.0;
 			}
 			// tiltTime = scene.playtime();
@@ -158,20 +162,20 @@ public class Player implements Renderable {
 		return true;
 	}
 	
-	private double lastCollisionCheck;
-	
 	private boolean checkCollisions(double elapsed) {
-		int offset = (int) (track.indexRate() / 15);
-		int maximum = track.index().integer + offset;
-		int minimum = track.index().integer - offset - (int) (track.indexRate() * (scene.playtime() - lastCollisionCheck));
+		int start = track.index().integer;
+		int end = track.index().integer + (int) Math.ceil(track.indexRate() * elapsed);
 		long collisions = track
 			.getBlocks()
 			.stream()
-			.filter(block -> !block.isDestroyed() && (block.iteration() > minimum && block.iteration() < maximum))
+			.filter(block -> !block.isDestroyed() && (block.iteration() >= start && block.iteration() <= end))
 			.filter(this::interact)
 			.filter(block -> !block.isCollectable())
 			.count();
-		lastCollisionCheck = scene.playtime();
+		double tiltFraction = 0.5 - Math.abs(0.5 - tiltProgress);
+		hitboxSide = track.railWidth() * Arithmetic.smooth(0.01, 0.5, tiltFraction);
+		hitboxStart = start;
+		hitboxEnd = end;
 		boolean collision = collisions > 0;
 		if (collision) {
 			double x = Math.max(-30, (inclination.x() - 5));
@@ -186,13 +190,28 @@ public class Player implements Renderable {
 	@Override
 	public void render() {
 		model.render();
+		if (GameScene.hitbox) renderHitbox();
+	}
+	
+	private void renderHitbox() {
+		Vector side = model.placement().side().multiplied(hitboxSide);
+		Vector up = model.up().multiplied(0.1);
+		Vector start = track.spline().get(Math.max(0, hitboxStart)).plus(up);
+		Vector end = track.spline().get(Math.min(track.spline().size() - 1, hitboxEnd)).plus(up);
+		start.add(model.translation().vector());
+		end.add(model.translation().vector());
+		Color.TransparentRed.gl();
+		glBegin(GL_QUADS);
+		start.plus(side.negated()).glVertex();
+		start.plus(side).glVertex();
+		end.plus(side).glVertex();
+		end.plus(side.negated()).glVertex();
+		glEnd();
 	}
 	
 	public boolean interact(Block block) {
-		double x = -model.translation().x(); // FIXME still don't know why it's negative
-		double tiltFraction = 0.5 - Math.abs(0.5 - tiltProgress);
-		double side = track.railWidth() / 4 * tiltFraction;
-		Range playerWidth = new Range(x - side, x + side);
+		double x = -model.translation().x();
+		Range playerWidth = new Range(x - hitboxSide, x + hitboxSide);
 		Range railWidth = track.getRailRange(block.rail());
 		boolean intersects = playerWidth.intersects(railWidth);
 		if (intersects) collide(block);
