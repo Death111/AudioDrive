@@ -27,8 +27,6 @@ public class Scene implements Input.Observer {
 	private static int framerate;
 	private static int frames;
 	
-	protected boolean draggable = true;
-	
 	@SuppressWarnings("unchecked")
 	public static <T extends Scene> T get(Class<T> clazz) {
 		if (scenes.containsKey(clazz)) return (T) scenes.get(clazz);
@@ -178,7 +176,7 @@ public class Scene implements Input.Observer {
 	public void keyReleased(int key, char character) {
 		switch (key) {
 		case Keyboard.KEY_TAB:
-			if (draggable) Window.switchMonitor();
+			Window.switchMonitor();
 			break;
 		}
 	}
@@ -191,7 +189,6 @@ public class Scene implements Input.Observer {
 	
 	@Override
 	public void mouseDragged(int button, int x, int y, int dx, int dy) {
-		if (!draggable) return;
 		GraphicsDevice monitor = Window.getMonitor(x, y);
 		if (!Window.getMonitor().equals(monitor)) {
 			Window.setMonitor(monitor);

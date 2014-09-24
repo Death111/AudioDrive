@@ -10,7 +10,6 @@ import audiodrive.model.track.Block;
 import audiodrive.model.track.Track;
 import audiodrive.ui.components.Camera;
 import audiodrive.ui.components.Scene;
-import audiodrive.ui.effects.ParticleEffects;
 import audiodrive.ui.scenes.GameScene;
 import audiodrive.ui.scenes.GameScene.State;
 import audiodrive.utilities.Arithmetic;
@@ -205,7 +204,7 @@ public class Player implements Renderable {
 			CollectSound.play(volume);
 			collected++;
 			Log.trace("collected %1s", block);
-			if (GameScene.particles) ParticleEffects.createParticles(block);
+			if (GameScene.particles) scene.particleEffects().createParticles(block);
 		} else {
 			CollideSound.play(volume);
 			collided++;

@@ -25,8 +25,8 @@ public class ParticleEffects {
 	
 	private static int particleCount = 10;
 	
-	private static List<Model> models = null;
-	private static List<ParticleWave> particles = new ArrayList<>();
+	private List<Model> models = null;
+	private List<ParticleWave> particles = new ArrayList<>();
 	
 	private boolean visible = true;
 	
@@ -83,10 +83,10 @@ public class ParticleEffects {
 	 * @param block.color()
 	 * @param time
 	 */
-	public static void createParticles(Block block) {
+	public void createParticles(Block block) {
 		
 		final ArrayList<Particle> particleList = new ArrayList<Particle>(particleCount);
-		final int x = (int) (Display.getWidth() / 2 + Display.getWidth() / 3 * block.rail());
+		final int x = Display.getWidth() / 2 + Display.getWidth() / 3 * block.rail();
 		final Vector startPosition = new Vector(x, -50, 0);
 		for (int i = 0; i < particleCount; i++) {
 			Particle particle = new Particle();

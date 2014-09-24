@@ -175,7 +175,6 @@ public class MenuScene extends Scene implements ItemListener {
 			TrackGenerator trackGenerator = new TrackGenerator();
 			Track track = trackGenerator.generate(audio);
 			playback.setLooping(false);
-			draggable = false; // TODO add support for monitor switching after playing
 			Scene.get(GameScene.class).enter(track);
 			return;
 		}
