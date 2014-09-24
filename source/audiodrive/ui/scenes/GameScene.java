@@ -211,6 +211,8 @@ public class GameScene extends Scene {
 		GL.popAttributes();
 		playback.stop();
 		Mouse.setGrabbed(false);
+		startCameraPath = null;
+		particleEffects = null;
 		overlay = null;
 		background = null;
 		track = null;

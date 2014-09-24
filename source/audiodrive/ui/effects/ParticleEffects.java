@@ -5,38 +5,31 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.lwjgl.opengl.Display;
-import org.newdawn.slick.opengl.Texture;
 
+import audiodrive.Resources;
 import audiodrive.model.geometry.Color;
 import audiodrive.model.geometry.Face;
 import audiodrive.model.geometry.TextureCoordinate;
 import audiodrive.model.geometry.Vector;
 import audiodrive.model.geometry.Vertex;
 import audiodrive.model.loader.Model;
-import audiodrive.model.loader.ModelLoader;
 import audiodrive.model.track.Block;
 import audiodrive.ui.components.Scene;
 
 public class ParticleEffects {
 	
-	private Texture particleTexture;
 	private static int rows = 2;
 	private static int columns = 2;
 	
 	private static int particleCount = 10;
 	
-	private List<Model> models = null;
+	private List<Model> models = new ArrayList<>(rows * columns);
 	private List<ParticleWave> particles = new ArrayList<>();
 	
 	private boolean visible = true;
 	
 	public ParticleEffects() {
-		particleTexture = ModelLoader.getTexture("models/particles/particles.png");
-		
-		if (models == null) {
-			models = new ArrayList<>(rows * columns);
-			createModels();
-		}
+		createModels();
 	}
 	
 	/**
@@ -68,7 +61,7 @@ public class ParticleEffects {
 				faces.add(f1);
 				faces.add(f2);
 				final Model model = new Model(row + "_" + column + "_particle", faces);
-				model.setTexture(particleTexture);
+				model.setTexture(Resources.getParticleTexture());
 				int size = 50;
 				model.position().xAdd(size / 2);
 				model.position().yAdd(size / 2);

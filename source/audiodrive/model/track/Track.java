@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import org.newdawn.slick.opengl.Texture;
 
 import audiodrive.AudioDrive;
+import audiodrive.Resources;
 import audiodrive.audio.AnalyzedAudio;
 import audiodrive.audio.AnalyzedChannel;
 import audiodrive.audio.MinMax;
@@ -118,7 +119,6 @@ public class Track implements Renderable {
 		skybox.setTexture(ModelLoader.getTexture(GameScene.night ? "models/skybox/night.png" : "models/skybox/day.png"));
 		generateTrack();
 		generateTowers();
-		splineArea2Buffer = new VertexBuffer(splineArea2).mode(GL_QUAD_STRIP).useColor(true).useTexture(true);
 	}
 	
 	private void generateTowers() {
@@ -177,6 +177,7 @@ public class Track implements Renderable {
 			calculateVertex(left, right);
 			last = next;
 		}
+		splineArea2Buffer = new VertexBuffer(splineArea2).mode(GL_QUAD_STRIP).useColor(true).useTexture(true);
 		
 		List<Vector> leftBorder = new ArrayList<>();
 		List<Vector> rightBorder = new ArrayList<>();
@@ -460,29 +461,29 @@ public class Track implements Renderable {
 		if (GameScene.reflections) drawReflections();
 		
 		// Draw track
-		if (trackTexture != null) {
-			glEnable(GL_TEXTURE_2D);
-			glBindTexture(GL_TEXTURE_2D, trackTexture.getTextureID());
-		}
-		splineArea2Buffer.draw();
-		if (trackTexture != null) {
-			glBindTexture(GL_TEXTURE_2D, 0);
-			glDisable(GL_TEXTURE_2D);
-		}
-		// Draw track back-side
-		glCullFace(GL_FRONT);
-		splineArea2Buffer.useColor(false);
-		trackColor.gl();
-		splineArea2Buffer.draw();
-		splineArea2Buffer.useColor(true);
-		glCullFace(GL_BACK);
+			if (trackTexture != null) {
+				glEnable(GL_TEXTURE_2D);
+				glBindTexture(GL_TEXTURE_2D, trackTexture.getTextureID());
+			}
+			splineArea2Buffer.draw();
+			if (trackTexture != null) {
+				glBindTexture(GL_TEXTURE_2D, 0);
+				glDisable(GL_TEXTURE_2D);
+			}
+			// Draw track back-side
+			glCullFace(GL_FRONT);
+			splineArea2Buffer.useColor(false);
+			trackColor.gl();
+			splineArea2Buffer.draw();
+			splineArea2Buffer.useColor(true);
+			glCullFace(GL_BACK);
 		
 		visibleMusicTowers.forEach(MusicTower::render);
 		visibleBlocks.forEach(Block::render);
 		
 		// Draw borders
-		leftBorderVertexBuffer.draw();
-		rightBorderVertexBuffer.draw();
+			leftBorderVertexBuffer.draw();
+			rightBorderVertexBuffer.draw();
 		
 		glDisable(GL_CULL_FACE);
 		glDisable(GL_LIGHTING);
@@ -552,12 +553,12 @@ public class Track implements Renderable {
 			Placement placement = block.placement();
 			Placement originalPlacement = placement.clone();
 			placement.position(placement.position().plus(placement.up().multiplied(-2 * flightHeight)));
-			block.model().setTexture(Block.Reflected);
+			block.model().setTexture(Resources.getReflectedBlockTexture());
 			block.model().transformations().add(flip);
 			block.render();
 			block.model().transformations().remove(flip);
 			block.placement(originalPlacement);
-			block.model().setTexture(Block.Texture);
+			block.model().setTexture(Resources.getBlockTexture());
 		});;
 		
 		// draw player reflection

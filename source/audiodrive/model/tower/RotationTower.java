@@ -1,13 +1,12 @@
 package audiodrive.model.tower;
 
+import audiodrive.Resources;
 import audiodrive.model.geometry.Color;
 import audiodrive.model.loader.Model;
-import audiodrive.model.loader.ModelLoader;
 import audiodrive.ui.components.Scene;
 
 public class RotationTower extends MusicTower {
 	
-	private static final Model model = ModelLoader.loadSingleModel("models/musictower2/musictower2");
 	private double rotation;
 	
 	public RotationTower(int iteration) {
@@ -18,6 +17,7 @@ public class RotationTower extends MusicTower {
 	@Override
 	public void render() {
 		Color tmp_Color = color.clone().itensity(intensity);
+		Model model = Resources.getRotationTowerModel();
 		model.rotation().yAdd(rotation * Scene.deltaTime());
 		model.placement(placement).color(tmp_Color).scale(scale).render();
 	}

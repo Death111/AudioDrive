@@ -1,12 +1,9 @@
 package audiodrive.model.tower;
 
+import audiodrive.Resources;
 import audiodrive.model.geometry.Color;
-import audiodrive.model.loader.Model;
-import audiodrive.model.loader.ModelLoader;
 
 public class TubeTower extends MusicTower {
-	
-	private static final Model model = ModelLoader.loadSingleModel("models/musictower1/musictower1");
 	
 	public TubeTower(int iteration) {
 		this.iteration = iteration;
@@ -22,7 +19,7 @@ public class TubeTower extends MusicTower {
 	@Override
 	public void render() {
 		Color tmp_Color = color.clone().itensity(intensity);
-		model.placement(placement).color(tmp_Color).scale(scale).render();
+		Resources.getTubeTowerModel().placement(placement).color(tmp_Color).scale(scale).render();
 		
 	}
 }

@@ -80,9 +80,10 @@ public class Window {
 		Log.info("creating window...");
 		checkCapabilities();
 		scene.ifPresent(Scene::exiting);
-		System.gc();
-		Text.destroy();
 		Display.destroy();
+		Resources.destroy();
+		Text.destroy();
+		System.gc();
 		Rectangle bounds = monitor.getDefaultConfiguration().getBounds();
 		if (fullscreen) {
 			// use monitor bounds
@@ -112,7 +113,6 @@ public class Window {
 		} catch (LWJGLException exception) {
 			throw new RuntimeException(exception);
 		}
-		Resources.reload();
 		Camera.reset();
 		if (antialiasing) glEnable(GL_MULTISAMPLE);
 		else glDisable(GL_MULTISAMPLE);

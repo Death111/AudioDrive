@@ -1,13 +1,12 @@
 package audiodrive.model.tower;
 
+import audiodrive.Resources;
 import audiodrive.model.geometry.Vector;
 import audiodrive.model.loader.Model;
-import audiodrive.model.loader.ModelLoader;
 import audiodrive.ui.components.Scene;
 
 public class SpectralTower extends MusicTower {
 	
-	private static final Model model = ModelLoader.loadSingleModel("models/musictower3/musictower3");
 	private static final double Radius = 2.0;
 	private static final double Spacing = 0.5;
 	private static final double Speed = 20;
@@ -46,6 +45,7 @@ public class SpectralTower extends MusicTower {
 	
 	@Override
 	public void render() {
+		Model model = Resources.getSpectraTowerModel();
 		Vector up = model.placement().up();
 		model.placement().set(placement);
 		for (int i = 0; i < scales.length; i++) {

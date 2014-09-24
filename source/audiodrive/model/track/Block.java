@@ -3,21 +3,15 @@ package audiodrive.model.track;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.newdawn.slick.opengl.Texture;
-
 import audiodrive.AudioDrive;
+import audiodrive.Resources;
 import audiodrive.model.Renderable;
 import audiodrive.model.geometry.Color;
 import audiodrive.model.geometry.transform.Placement;
 import audiodrive.model.loader.Model;
-import audiodrive.model.loader.ModelLoader;
 
 public class Block implements Renderable {
 	
-	public static final Texture Texture = ModelLoader.getTexture("models/block/block_lod.png");
-	public static final Texture Reflected = ModelLoader.getTexture("models/block/block-reflection.png");
-	
-	private static final List<Model> Models = ModelLoader.loadModels("models/block/block_lod");
 	private static AtomicLong ID = new AtomicLong();
 	
 	private long id;
@@ -28,7 +22,7 @@ public class Block implements Renderable {
 	private boolean glowing;
 	private int iteration;
 	private int rail;
-	private Model Model = Models.get(0);
+	private Model model;
 	
 	public Block(boolean collectable, int iteration, int rail) {
 		id = ID.getAndIncrement();
@@ -42,22 +36,23 @@ public class Block implements Renderable {
 	public void update(int currentIteration) {
 		final int distanceToPlayer = Math.abs(iteration - currentIteration);
 		final int lodRange = 10;
-		int lodIndex = Models.size() - 1 - distanceToPlayer / lodRange;
+		List<Model> models = Resources.getBlockModels();
+		int lodIndex = models.size() - 1 - distanceToPlayer / lodRange;
 		lodIndex = Math.max(0, lodIndex);
-		Model = Models.get(lodIndex);
+		model = models.get(lodIndex);
 	}
 	
 	@Override
 	public void render() {
 		if (destroyed) return;
-		Model.scale(0.1);
-		Model.color(color);
-		Model.placement().set(placement);
-		Model.render();
+		model.scale(0.1);
+		model.color(color);
+		model.placement().set(placement);
+		model.render();
 	}
 	
 	public Model model() {
-		return Model;
+		return model;
 	}
 	
 	public Block placement(Placement placement) {
