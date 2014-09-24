@@ -157,11 +157,13 @@ public class GameScene extends Scene {
 		if (player.damage() >= 100) {
 			state = State.Destroyed;
 			playback.stop();
+			rotate = true;
 			new AudioFile("sounds/Destroyed.mp3").play(volume);
 			return;
 		}
 		if (track.index().integer == track.lastIndex()) {
 			state = State.Ended;
+			rotate = true;
 			return;
 		}
 	}
@@ -278,6 +280,9 @@ public class GameScene extends Scene {
 		case Keyboard.KEY_DOWN:
 			player.zoomOut(10.0 * Scene.deltaTime());
 			break;
+		case Keyboard.KEY_END:
+			rotate = false;
+			break;
 		default:
 			break;
 		}
@@ -335,19 +340,16 @@ public class GameScene extends Scene {
 			sky = !sky;
 			break;
 		case Keyboard.KEY_LEFT:
-			if (state == State.Paused) {
+			if (state != State.Running) {
 				rotationDirection = 1;
-				rotate = true;
+				rotate = !Keyboard.isKeyDown(Keyboard.KEY_RCONTROL);
 			}
 			break;
 		case Keyboard.KEY_RIGHT:
-			if (state == State.Paused) {
+			if (state != State.Running) {
 				rotationDirection = -1;
-				rotate = true;
+				rotate = !Keyboard.isKeyDown(Keyboard.KEY_RCONTROL);
 			}
-			break;
-		case Keyboard.KEY_END:
-			rotate = false;
 			break;
 		default:
 			break;
