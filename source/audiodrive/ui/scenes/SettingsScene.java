@@ -9,7 +9,7 @@ import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.Display;
 
 import audiodrive.AudioDrive;
-import audiodrive.audio.AudioFile;
+import audiodrive.audio.AudioResource;
 import audiodrive.ui.components.Camera;
 import audiodrive.ui.components.Overlay;
 import audiodrive.ui.components.Scene;
@@ -74,7 +74,7 @@ public class SettingsScene extends Scene implements ItemListener {
 	private Text inputSettingsText;
 	private Text gameSettingsText;
 	private Overlay background;
-	private AudioFile selectAudio;
+	private AudioResource selectAudio;
 	
 	private double volume;
 	
@@ -160,7 +160,7 @@ public class SettingsScene extends Scene implements ItemListener {
 		inputMenu.addItem(mouse);
 		gameMenu.addItem(difficulty);
 		
-		selectAudio = new AudioFile("sounds/Select.mp3");
+		selectAudio = new AudioResource("sounds/Select.mp3");
 		volume = AudioDrive.Settings.getDouble("interface.volume");
 		
 		background = new Overlay().shader(new ShaderProgram("shaders/default.vs", "shaders/title.fs"));

@@ -2,7 +2,7 @@ package audiodrive.ui.scenes;
 
 import static org.lwjgl.opengl.GL11.*;
 import audiodrive.AudioDrive;
-import audiodrive.audio.AudioFile;
+import audiodrive.audio.AudioResource;
 import audiodrive.ui.components.Camera;
 import audiodrive.ui.components.Overlay;
 import audiodrive.ui.components.Scene;
@@ -16,7 +16,7 @@ public class TitleScene extends Scene {
 	private Overlay overlay;
 	
 	static {
-		new AudioFile("sounds/Title.mp3").play();
+		new AudioResource("sounds/Title.mp3").play();
 	}
 	
 	@Override

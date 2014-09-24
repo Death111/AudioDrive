@@ -2,8 +2,6 @@ package audiodrive.utilities;
 
 import java.io.BufferedReader;
 import java.io.DataInputStream;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -43,29 +41,23 @@ public class CameraPath {
 	 * @param reverse if true, play the animation backwards
 	 */
 	public CameraPath(String filePath, boolean startsWithFirst) {
-		final File file = Resources.getFile(filePath);
 		
-		try {
-			FileInputStream fstream = new FileInputStream(file);
-			
-			// Get the object of DataInputStream
-			DataInputStream in = new DataInputStream(fstream);
-			BufferedReader br = new BufferedReader(new InputStreamReader(in));
+		try (BufferedReader reader = new BufferedReader(new InputStreamReader(new DataInputStream(Resources.get(filePath).openStream())))) {
 			String currentLine;
 			
 			// Loop through file line by line
-			while ((currentLine = br.readLine()) != null) {
+			while ((currentLine = reader.readLine()) != null) {
 				String[] tokens = currentLine.split("\\t");
 				
 				if (tokens.length == 0) continue;
 				
 				if (tokens[0].equals("Transform")) {
 					if (tokens[1].equals("Position")) {
-						positions = parseVectors(br);
+						positions = parseVectors(reader);
 					} else if (tokens[1].equals("Point of Interest")) {
-						pointOfInterests = parseVectors(br);
+						pointOfInterests = parseVectors(reader);
 					} else if (tokens[1].equals("Orientation")) {
-						orientations = parseVectors(br);
+						orientations = parseVectors(reader);
 					}
 				}
 				if (tokens.length < 2) continue;
@@ -89,11 +81,6 @@ public class CameraPath {
 				}
 				
 			}
-			
-			fstream.close();
-			in.close();
-			br.close();
-			
 		} catch (Exception e) {
 			Log.error(e);
 			throw new RuntimeException("Error while parsing cameraPath: '" + filePath + "'", e);

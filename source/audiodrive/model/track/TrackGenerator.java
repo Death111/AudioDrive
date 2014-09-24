@@ -15,11 +15,16 @@ import audiodrive.utilities.Log;
 
 public class TrackGenerator {
 	
-	private double deltaX = 3.0;
-	private double deltaY = 2.0;
-	private double deltaZ = 1.0;
+	private static final double deltaX = 3.0;
+	private static final double deltaY = 2.0;
+	private static final double deltaZ = 1.0;
 	
-	public Track generate(AnalyzedAudio audio) {
+	/** Private constructor to prevent instantiation. */
+	private TrackGenerator() {
+		throw new IllegalStateException("This class shall not be instantiated.");
+	}
+	
+	public static Track generate(AnalyzedAudio audio) {
 		Log.info("Generating track...");
 		int smoothing = Math.max(10, AudioDrive.Settings.getInteger("track.smoothing"));
 		AnalyzedChannel mixed = audio.getMix();

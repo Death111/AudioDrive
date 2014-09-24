@@ -2,25 +2,27 @@ package audiodrive.ui.scenes;
 
 import static org.lwjgl.opengl.GL11.*;
 import audiodrive.AudioDrive;
+import audiodrive.audio.AnalyzedAudio;
 import audiodrive.audio.AudioAnalyzer;
-import audiodrive.audio.AudioFile;
+import audiodrive.audio.AudioResource;
 import audiodrive.model.buffer.VertexBuffer;
 import audiodrive.ui.components.Camera;
 import audiodrive.ui.components.Scene;
 import audiodrive.ui.components.Text;
 import audiodrive.ui.effects.ShaderProgram;
 import audiodrive.utilities.Buffers;
+import audiodrive.utilities.Log;
 
 public class AnalyzationScene extends Scene {
 	
 	private Text title;
-	private AudioFile file;
+	private AudioResource file;
 	private AudioAnalyzer analyzer;
 	private VertexBuffer canvas;
 	private ShaderProgram shader;
 	private double duration;
 	
-	public void enter(AudioFile file) {
+	public void enter(AudioResource file) {
 		this.file = file;
 		super.enter();
 	}
@@ -42,7 +44,11 @@ public class AnalyzationScene extends Scene {
 	@Override
 	public void update(double elapsed) {
 		duration += elapsed;
-		if (analyzer.isDone()) Scene.get(MenuScene.class).enter(analyzer.getResults());
+		if (analyzer.isDone()) {
+			AnalyzedAudio results = analyzer.getResults();
+			if (results == null) Log.error("Couldn't analyze audio file \"" + file + "\".");
+			Scene.get(MenuScene.class).enter(results);
+		}
 	}
 	
 	@Override

@@ -15,7 +15,7 @@ import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.Display;
 
 import audiodrive.AudioDrive;
-import audiodrive.audio.AudioFile;
+import audiodrive.audio.AudioResource;
 import audiodrive.model.geometry.Color;
 import audiodrive.ui.components.Camera;
 import audiodrive.ui.components.Overlay;
@@ -52,8 +52,8 @@ public class AudioSelectionScene extends Scene implements ItemListener {
 	private Text titleText;
 	private Overlay background;
 	
-	private AudioFile hoverAudio;
-	private AudioFile selectAudio;
+	private AudioResource hoverAudio;
+	private AudioResource selectAudio;
 	private List<String> supportedFileExtensionList = Arrays.asList("mp3", "wav");
 	
 	private File selectedFile = null;
@@ -114,8 +114,8 @@ public class AudioSelectionScene extends Scene implements ItemListener {
 			rootMap.put(fci, file);
 		}
 		
-		hoverAudio = new AudioFile("sounds/Hover.mp3");
-		selectAudio = new AudioFile("sounds/Select.mp3");
+		hoverAudio = new AudioResource("sounds/Hover.mp3");
+		selectAudio = new AudioResource("sounds/Select.mp3");
 	}
 	
 	/**
@@ -257,7 +257,7 @@ public class AudioSelectionScene extends Scene implements ItemListener {
 		
 		if (item == continueMenuItem) {
 			if (selectedFile != null) {
-				Scene.get(AnalyzationScene.class).enter(new AudioFile(selectedFile));
+				Scene.get(AnalyzationScene.class).enter(new AudioResource(selectedFile));
 			} else {
 				Log.warning("No file selected.");
 			}

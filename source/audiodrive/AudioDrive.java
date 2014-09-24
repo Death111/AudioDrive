@@ -7,6 +7,8 @@ import audiodrive.ui.components.Text;
 import audiodrive.ui.components.Window;
 import audiodrive.ui.scenes.TitleScene;
 import audiodrive.utilities.Log;
+import audiodrive.utilities.Natives;
+import audiodrive.utilities.SlickLog;
 
 public class AudioDrive {
 	
@@ -16,7 +18,9 @@ public class AudioDrive {
 	
 	public static void main(String[] args) {
 		Log.info("AudioDrive");
+		SlickLog.bind();
 		Settings.load();
+		Natives.load();
 		Window.useSecondaryMonitor(Settings.getBoolean("window.useSecondaryMonitor"));
 		Window.setBorderless(true);
 		Window.setFullscreen(true);

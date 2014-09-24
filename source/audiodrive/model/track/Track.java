@@ -103,7 +103,7 @@ public class Track implements Renderable {
 	
 	public void build() {
 		trackColor = GameScene.night ? Color.Black : Color.White;
-		trackTexture = ModelLoader.getTexture(GameScene.night ? "textures/track/track-black.png" : "textures/track/track-white.png");
+		trackTexture = Resources.getTexture(GameScene.night ? "textures/track/track-black.png" : "textures/track/track-white.png");
 		glow = new Glow().depthpass(() -> {
 			splineArea2Buffer.draw();
 			leftBorderVertexBuffer.draw();
@@ -115,8 +115,8 @@ public class Track implements Renderable {
 			visibleRings.stream().forEach(Ring::render);
 			visibleMusicTowers.stream().forEach(MusicTower::render);
 		});
-		skybox = ModelLoader.loadSingleModel("models/skybox/skybox").scale(GameScene.Far / 4);
-		skybox.setTexture(ModelLoader.getTexture(GameScene.night ? "models/skybox/night.png" : "models/skybox/day.png"));
+		skybox = ModelLoader.loadModel("models/skybox/skybox").scale(GameScene.Far / 4);
+		skybox.setTexture(Resources.getTexture(GameScene.night ? "models/skybox/night.png" : "models/skybox/day.png"));
 		generateTrack();
 		generateTowers();
 	}
@@ -461,29 +461,29 @@ public class Track implements Renderable {
 		if (GameScene.reflections) drawReflections();
 		
 		// Draw track
-			if (trackTexture != null) {
-				glEnable(GL_TEXTURE_2D);
-				glBindTexture(GL_TEXTURE_2D, trackTexture.getTextureID());
-			}
-			splineArea2Buffer.draw();
-			if (trackTexture != null) {
-				glBindTexture(GL_TEXTURE_2D, 0);
-				glDisable(GL_TEXTURE_2D);
-			}
-			// Draw track back-side
-			glCullFace(GL_FRONT);
-			splineArea2Buffer.useColor(false);
-			trackColor.gl();
-			splineArea2Buffer.draw();
-			splineArea2Buffer.useColor(true);
-			glCullFace(GL_BACK);
+		if (trackTexture != null) {
+			glEnable(GL_TEXTURE_2D);
+			glBindTexture(GL_TEXTURE_2D, trackTexture.getTextureID());
+		}
+		splineArea2Buffer.draw();
+		if (trackTexture != null) {
+			glBindTexture(GL_TEXTURE_2D, 0);
+			glDisable(GL_TEXTURE_2D);
+		}
+		// Draw track back-side
+		glCullFace(GL_FRONT);
+		splineArea2Buffer.useColor(false);
+		trackColor.gl();
+		splineArea2Buffer.draw();
+		splineArea2Buffer.useColor(true);
+		glCullFace(GL_BACK);
 		
 		visibleMusicTowers.forEach(MusicTower::render);
 		visibleBlocks.forEach(Block::render);
 		
 		// Draw borders
-			leftBorderVertexBuffer.draw();
-			rightBorderVertexBuffer.draw();
+		leftBorderVertexBuffer.draw();
+		rightBorderVertexBuffer.draw();
 		
 		glDisable(GL_CULL_FACE);
 		glDisable(GL_LIGHTING);

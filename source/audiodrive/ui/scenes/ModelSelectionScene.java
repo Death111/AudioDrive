@@ -2,13 +2,14 @@ package audiodrive.ui.scenes;
 
 import static org.lwjgl.opengl.GL11.*;
 
-import java.io.File;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 
 import audiodrive.AudioDrive;
+import audiodrive.Resources;
 import audiodrive.model.geometry.ReflectionPlane;
 import audiodrive.model.geometry.Vector;
 import audiodrive.model.geometry.transform.Rotation;
@@ -20,7 +21,6 @@ import audiodrive.ui.components.Scene;
 import audiodrive.ui.components.Text;
 import audiodrive.ui.components.Window;
 import audiodrive.utilities.Buffers;
-import audiodrive.utilities.Files;
 import audiodrive.utilities.Log;
 
 public class ModelSelectionScene extends Scene {
@@ -28,7 +28,7 @@ public class ModelSelectionScene extends Scene {
 	private Text title;
 	
 	private Model model;
-	private List<File> list;
+	private List<String> models;
 	private int index;
 	
 	private Rotation rotation = new Rotation();
@@ -49,9 +49,9 @@ public class ModelSelectionScene extends Scene {
 	@Override
 	protected void entering() {
 		title = new Text("Select a Player-Model").setFont(AudioDrive.Font).setSize(48).setPosition(20, 20);
-		list = Files.list("models/player", ".obj", true);
-		File modelFile = list.stream().filter(file -> file.getName().endsWith(AudioDrive.Settings.get("player.model") + ".obj")).findFirst().orElse(list.get(0));
-		loadModel(list.indexOf(modelFile));
+		models = Resources.list("models/player").stream().filter(path -> path.endsWith(".obj")).collect(Collectors.toList());
+		String modelPath = Resources.find("models/player", AudioDrive.Settings.get("player.model") + ".obj").orElse(models.get(0));
+		loadModel(models.indexOf(modelPath));
 		double y = -0.25;
 		flatPlane = new ReflectionPlane(new Vector(-1, y, 1), new Vector(1, y, 1), new Vector(1, y, -1), new Vector(-1, y, -1));
 		risingPlane = new ReflectionPlane(new Vector(-1, 2 * y, 1), new Vector(1, 2 * y, 1), new Vector(1, y, 0), new Vector(-1, y, 0));
@@ -124,11 +124,10 @@ public class ModelSelectionScene extends Scene {
 	}
 	
 	private void loadModel(int index) {
-		if (index < 0) index = list.size() - 1;
-		if (index > list.size() - 1) index = 0;
+		if (index < 0) index = models.size() - 1;
+		if (index > models.size() - 1) index = 0;
 		this.index = index;
-		File file = list.get(index);
-		model = ModelLoader.loadSingleModel(file.getPath()).scale(0.1);
+		model = ModelLoader.loadModel(models.get(index)).scale(0.1);
 	}
 	
 	@Override

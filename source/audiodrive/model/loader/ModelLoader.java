@@ -2,14 +2,13 @@ package audiodrive.model.loader;
 
 import java.io.BufferedReader;
 import java.io.DataInputStream;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.InputStreamReader;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.newdawn.slick.opengl.Texture;
-import org.newdawn.slick.opengl.TextureLoader;
 
 import audiodrive.Resources;
 import audiodrive.model.geometry.Face;
@@ -37,13 +36,13 @@ public class ModelLoader {
 	 * @param fileName Name of the file to be opened and parsed (without extension, .obj and .png will be automatically set)
 	 * @return Loaded Model or null if an error occured
 	 */
-	public static Model loadSingleModel(String fileName) {
+	public static Model loadModel(String fileName) {
 		List<Model> models = loadModels(fileName);
 		List<Face> faces = new ArrayList<Face>();
 		
 		if (models == null) return null;
 		
-		Log.info("As requested combine '" + models.size() + "' models into one.");
+		Log.debug("As requested combine '" + models.size() + "' models into one.");
 		for (Model model : models) {
 			final List<Face> currentFaces = model.getFaces();
 			faces.addAll(currentFaces);
@@ -65,21 +64,14 @@ public class ModelLoader {
 	public static List<Model> loadModels(String fileName) {
 		// TODO Implement exception handling
 		if (fileName.endsWith(".obj")) fileName = fileName.substring(0, fileName.indexOf(".obj"));
+		
 		final String modelFileName = fileName + ".obj";
 		final String textureFileName = fileName + ".png";
 		
-		Log.info("Model from file '" + fileName + "' shall be loaded.");
-		Log.debug("Loading file '" + modelFileName + "' as Model");
-		File file = Resources.getFile(modelFileName);
+		Log.debug("Loading model '" + modelFileName + "'");
 		
-		// Check if obj exists
-		if (!file.exists()) {
-			Log.error("Could no find file '" + modelFileName + "'.");
-			return null;
-		}
-		
-		// Load texture
-		Texture texture = getTexture(textureFileName);
+		URL resource = Resources.get(modelFileName);
+		Optional<Texture> texture = Resources.getOptional(textureFileName).map(Resources::getTexture);
 		
 		List<Model> models = new ArrayList<Model>();
 		
@@ -89,19 +81,13 @@ public class ModelLoader {
 		
 		List<Face> faces = null;
 		
-		FileInputStream fstream;
 		String modelName = "";
 		int modelCount = 0;
-		try {
-			fstream = new FileInputStream(file);
-			
-			// Get the object of DataInputStream
-			DataInputStream in = new DataInputStream(fstream);
-			BufferedReader br = new BufferedReader(new InputStreamReader(in));
+		try (BufferedReader reader = new BufferedReader(new InputStreamReader(new DataInputStream(resource.openStream())))) {
 			
 			String currentLine;
 			// Loop through file line by line
-			while ((currentLine = br.readLine()) != null) {
+			while ((currentLine = reader.readLine()) != null) {
 				
 				String splitted[] = currentLine.split(" "); // Split at spaces
 				
@@ -165,7 +151,7 @@ public class ModelLoader {
 					if (faces != null) {
 						Log.debug("Saving model '" + modelName + "'.");
 						Model model = new Model(modelName, faces);
-						model.setTexture(texture);
+						texture.ifPresent(model::setTexture);
 						models.add(model);
 					}
 					modelName = newModelName;
@@ -184,16 +170,11 @@ public class ModelLoader {
 			if (faces != null) {
 				Log.debug("Saving model '" + modelName + "'.");
 				Model model = new Model(modelName, faces);
-				model.setTexture(texture);
+				texture.ifPresent(model::setTexture);
 				models.add(model);
 			}
 			
-			Log.info("Successfully loaded '" + modelCount + "' models.");
-			
-			br.close();
-			in.close();
-			fstream.close();
-			
+			Log.debug("Successfully loaded '" + modelCount + "' models.");
 			return models;
 			
 		} catch (Exception e) {
@@ -201,20 +182,6 @@ public class ModelLoader {
 		}
 		
 		return null;
-	}
-	
-	public static Texture getTexture(String fileName) {
-		Texture texture = null;
-		Log.debug("Trying to load texture '" + fileName + "'.");
-		try {
-			final File tryGetFile = Resources.getFile(fileName);
-			texture = TextureLoader.getTexture("PNG", new FileInputStream(tryGetFile));
-			Log.info("Successfully loaded texture '" + fileName + "'");
-		} catch (Exception e) {
-			Log.debug("Could not load texure '" + fileName + "'. Reason: " + e);
-		}
-		
-		return texture;
 	}
 	
 	private static Vertex getVertexObject(final List<Vector> vectors, final List<Vector> normals, final List<TextureCoordinate> textureCoordinates, String[] vertex1) {

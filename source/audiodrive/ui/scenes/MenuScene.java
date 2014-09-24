@@ -6,7 +6,7 @@ import org.lwjgl.input.Keyboard;
 
 import audiodrive.AudioDrive;
 import audiodrive.audio.AnalyzedAudio;
-import audiodrive.audio.AudioFile;
+import audiodrive.audio.AudioResource;
 import audiodrive.audio.Playback;
 import audiodrive.model.track.Track;
 import audiodrive.model.track.TrackGenerator;
@@ -29,7 +29,7 @@ import audiodrive.utilities.Log;
  */
 public class MenuScene extends Scene implements ItemListener {
 	
-	private static Playback playback = new Playback(new AudioFile("sounds/Menu.mp3")).setLooping(true);
+	private static Playback playback = new Playback(new AudioResource("sounds/Menu.mp3")).setLooping(true);
 	
 	private Text title;
 	private Menu menu;
@@ -42,8 +42,8 @@ public class MenuScene extends Scene implements ItemListener {
 	private Overlay background;
 	
 	private AnalyzedAudio audio;
-	private AudioFile hoverAudio;
-	private AudioFile selectAudio;
+	private AudioResource hoverAudio;
+	private AudioResource selectAudio;
 	
 	private boolean silentHovering = true;
 	private double volume;
@@ -77,8 +77,8 @@ public class MenuScene extends Scene implements ItemListener {
 		exitMenuItem = new MenuItem("Exit", this);
 		menu.addItem(exitMenuItem);
 		
-		hoverAudio = new AudioFile("sounds/Hover.mp3");
-		selectAudio = new AudioFile("sounds/Select.mp3");
+		hoverAudio = new AudioResource("sounds/Hover.mp3");
+		selectAudio = new AudioResource("sounds/Select.mp3");
 		
 		background = new Overlay().shader(new ShaderProgram("shaders/default.vs", "shaders/title.fs"));
 		Camera.overlay(getWidth(), getHeight());
@@ -172,8 +172,7 @@ public class MenuScene extends Scene implements ItemListener {
 				Scene.get(AudioSelectionScene.class).enter();
 				return;
 			}
-			TrackGenerator trackGenerator = new TrackGenerator();
-			Track track = trackGenerator.generate(audio);
+			Track track = TrackGenerator.generate(audio);
 			playback.setLooping(false);
 			Scene.get(GameScene.class).enter(track);
 			return;

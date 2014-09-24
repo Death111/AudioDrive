@@ -2,13 +2,15 @@ package audiodrive.ui.scenes;
 
 import static org.lwjgl.opengl.GL11.*;
 
-import java.io.File;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 
 import audiodrive.AudioDrive;
-import audiodrive.audio.AudioFile;
+import audiodrive.Resources;
+import audiodrive.audio.AudioResource;
 import audiodrive.audio.Playback;
 import audiodrive.model.Player;
 import audiodrive.model.geometry.Vector;
@@ -26,7 +28,6 @@ import audiodrive.ui.overlays.GameOverlay;
 import audiodrive.utilities.Arithmetic;
 import audiodrive.utilities.Buffers;
 import audiodrive.utilities.CameraPath;
-import audiodrive.utilities.Files;
 import audiodrive.utilities.Log;
 
 public class GameScene extends Scene {
@@ -93,8 +94,9 @@ public class GameScene extends Scene {
 		volume = AudioDrive.Settings.getDouble("sound.volume");
 		particleEffects = new ParticleEffects();
 		track.build();
-		File model = Files.find("models/player", AudioDrive.Settings.get("player.model") + ".obj").orElse(Files.list("models/player", ".obj", true).get(0));
-		player = new Player(this).model(ModelLoader.loadSingleModel(model.getPath()));
+		List<String> models = Resources.list("models/player").stream().filter(path -> path.endsWith(".obj")).collect(Collectors.toList());
+		String model = Resources.find("models/player", AudioDrive.Settings.get("player.model") + ".obj").orElse(models.get(0));
+		player = new Player(this).model(ModelLoader.loadModel(model));
 		player.model().scale(0.05);
 		overlay = new GameOverlay(this);
 		background = new GameBackground(this);
@@ -159,7 +161,7 @@ public class GameScene extends Scene {
 			state = State.Destroyed;
 			playback.stop();
 			rotate = true;
-			new AudioFile("sounds/Destroyed.mp3").play(volume);
+			new AudioResource("sounds/Destroyed.mp3").play(volume);
 			return;
 		}
 		if (track.index().integer == track.lastIndex()) {

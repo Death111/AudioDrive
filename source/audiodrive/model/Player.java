@@ -2,7 +2,7 @@ package audiodrive.model;
 
 import static org.lwjgl.opengl.GL11.*;
 import audiodrive.AudioDrive;
-import audiodrive.audio.AudioFile;
+import audiodrive.audio.AudioResource;
 import audiodrive.model.geometry.Color;
 import audiodrive.model.geometry.Vector;
 import audiodrive.model.geometry.transform.Rotation;
@@ -19,8 +19,8 @@ import audiodrive.utilities.Range;
 
 public class Player implements Renderable {
 	
-	private static final AudioFile CollectSound = new AudioFile("sounds/Collect.mp3");
-	private static final AudioFile CollideSound = new AudioFile("sounds/Collide.mp3");
+	private static final AudioResource CollectSound = new AudioResource("sounds/Collect.mp3");
+	private static final AudioResource CollideSound = new AudioResource("sounds/Collide.mp3");
 	
 	private GameScene scene;
 	private Model model;

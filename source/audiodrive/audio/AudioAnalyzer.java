@@ -16,7 +16,7 @@ public class AudioAnalyzer {
 	private AtomicBoolean done = new AtomicBoolean();
 	private Stopwatch stopwatch = new Stopwatch();
 	
-	private AudioFile file;
+	private AudioResource file;
 	private DecodedAudio samples;
 	private AnalyzedAudio results;
 	
@@ -56,14 +56,19 @@ public class AudioAnalyzer {
 		return done.get();
 	}
 	
-	public AudioAnalyzer analyze(AudioFile file) {
+	public AudioAnalyzer analyze(AudioResource file) {
 		if (file.equals(this.file)) return null;
 		Log.info("Analyzing audio...");
 		this.file = file;
 		done.set(false);
 		Log.debug("Analyzing \"%s\"...", file.getName());
 		stopwatch.start();
-		samples = new AudioDecoder().decode(file);
+		try {
+			samples = AudioDecoder.decode(file);
+		} catch (Exception exception) {
+			done.set(true);
+			return this;
+		}
 		Log.trace("Decoding took %.3f seconds", stopwatch.getSeconds());
 		double duration = samples.getSampleCount() / samples.getSampleRate();
 		ArrayList<Channel> channels = new ArrayList<>(samples.getChannels());

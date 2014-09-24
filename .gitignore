@@ -1,6 +1,7 @@
 binary/
 music/
-.settings/
 logs/
+.settings/
+!natives/*
 *.orig
 audiodrive.properties

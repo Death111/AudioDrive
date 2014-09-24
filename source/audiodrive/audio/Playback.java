@@ -11,7 +11,7 @@ import javax.sound.sampled.SourceDataLine;
 
 public class Playback {
 	
-	private AudioFile file;
+	private AudioResource resource;
 	private Thread thread;
 	private AudioInputStream stream;
 	private SourceDataLine line;
@@ -25,8 +25,8 @@ public class Playback {
 	private double volume = 1.0;
 	private boolean mute = false;
 	
-	public Playback(AudioFile file) {
-		this.file = file;
+	public Playback(AudioResource resource) {
+		this.resource = resource;
 	}
 	
 	/** Starts or restarts the playback. Also opens the necessary resources. */
@@ -166,8 +166,8 @@ public class Playback {
 		return control.getValue();
 	}
 	
-	public AudioFile getFile() {
-		return file;
+	public AudioResource getFile() {
+		return resource;
 	}
 	
 	public double getTime() {
@@ -219,7 +219,7 @@ public class Playback {
 	private void open() {
 		if (stream != null) close();
 		try {
-			stream = new AudioDecoder().stream(file);
+			stream = resource.open();
 			line = AudioSystem.getSourceDataLine(stream.getFormat());
 			buffer = new byte[1024 * stream.getFormat().getFrameSize()];
 			line.open();

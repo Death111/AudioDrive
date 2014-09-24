@@ -23,8 +23,6 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.newdawn.slick.util.LogSystem;
-
 import sun.misc.JavaLangAccess;
 import sun.misc.SharedSecrets;
 
@@ -40,6 +38,13 @@ public class Log {
 	}
 	
 	static {
+		if (System.getProperty(Log.class.getName()) == null) {
+			System.setProperty(Log.class.getName(), "initialized");
+			initialize();
+		}
+	}
+	
+	private static void initialize() {
 		// initialize levels for the log manager
 		Level.getLevels();
 		// get configuration file
@@ -55,11 +60,12 @@ public class Log {
 						return Collections.enumeration(new TreeSet<Object>(super.keySet()));
 					}
 				};
-				properties.setProperty(".level", "ALL");
+				properties.setProperty(".level", "INFO");
 				properties.setProperty("handlers", ConsoleHandler.class.getName() + ", " + FileHandler.class.getName());
 				properties.setProperty(ConsoleHandler.class.getName() + ".level", "TRACE");
-				properties.setProperty(ConsoleHandler.class.getName() + ".format", "{level}: {message}\n{exception}");
-				properties.setProperty(ConsoleHandler.class.getName() + ".format.time", "HH:mm:ss.SSS");
+				properties.setProperty(ConsoleHandler.class.getName() + ".format", ConsoleHandler.DefaultFormat);
+				properties.setProperty(ConsoleHandler.class.getName() + ".format.origin", ConsoleHandler.DefaultOriginFormat);
+				properties.setProperty(ConsoleHandler.class.getName() + ".format.time", ConsoleHandler.DefaultTimeFormat);
 				properties.setProperty(FileHandler.class.getName() + ".level", "DEBUG");
 				properties.setProperty(FileHandler.class.getName() + ".format", Formatter.DefaultFormat);
 				properties.setProperty(FileHandler.class.getName() + ".format.origin", Formatter.DefaultOriginFormat);
@@ -73,7 +79,9 @@ public class Log {
 			try (FileInputStream inputStream = new FileInputStream(propertyFile)) {
 				LogManager.getLogManager().readConfiguration(inputStream);
 			}
-		} catch (SecurityException | IOException exception) {}
+		} catch (SecurityException | IOException exception) {
+			exception.printStackTrace();
+		}
 		// workaround to create missing folders
 		String pattern = LogManager.getLogManager().getProperty(FileHandler.class.getName() + ".pattern");
 		int index = (pattern != null) ? pattern.lastIndexOf('/') : -1;
@@ -86,8 +94,6 @@ public class Log {
 		for (File file : new File(directory).listFiles()) {
 			if (file.getName().endsWith(".lck")) file.delete();
 		}
-		// set slick log adapter
-		org.newdawn.slick.util.Log.setLogSystem(new SlickLogAdapter());
 	}
 	
 	private static StackTraceElement getCaller() {
@@ -99,7 +105,7 @@ public class Log {
 			// the cost of building the entire stack frame.
 			StackTraceElement frame = Access.getStackTraceElement(throwable, i);
 			String cname = frame.getClassName();
-			boolean isLogger = cname.startsWith(Log.class.getName()) || cname.startsWith(org.newdawn.slick.util.Log.class.getName());
+			boolean isLogger = cname.startsWith(Log.class.getName());
 			if (lookingForLogger) {
 				// Skip all frames until we have found the first logger frame.
 				if (isLogger) {
@@ -265,9 +271,12 @@ public class Log {
 	
 	public static class ConsoleHandler extends java.util.logging.StreamHandler {
 		
+		public static final String DefaultFormat = "{8_level} | {message_80} {time} {origin} \n{exception}";
+		public static final String DefaultOriginFormat = "({class}.java:{line})";
+		public static final String DefaultTimeFormat = "[HH:mm:ss.SSS]";
+		
 		public ConsoleHandler() {
-			setOutputStream(System.out);
-			setFormatter(getFormatterProperty(ConsoleHandler.class.getName()));
+			super(System.out, getFormatterProperty(ConsoleHandler.class.getName()));
 		}
 		
 		@Override
@@ -285,6 +294,9 @@ public class Log {
 	
 	public static class FileHandler extends java.util.logging.FileHandler {
 		
+		public static final String DefaultFormat = "[{time}] {origin}\n{level}: {message}\n{exception}";
+		public static final String DefaultOriginFormat = "{classpath}.{method}():{line}";
+		public static final String DefaultTimeFormat = "yyyy-MM-dd HH:mm:ss.SSS";
 		public static final String DefaultTimePattern = "yyyy-MM-dd_HH-mm-ss-SSS";
 		
 		public FileHandler() throws SecurityException, IOException {
@@ -331,7 +343,7 @@ public class Log {
 	public static class Formatter extends java.util.logging.Formatter {
 		
 		public static final String DefaultFormat = "[{time}] {origin}\n{level}: {message}\n{exception}";
-		public static final String DefaultOriginFormat = "{class}.{method}():{line}";
+		public static final String DefaultOriginFormat = "{classpath}.{method}():{line}";
 		public static final String DefaultTimeFormat = "yyyy-MM-dd HH:mm:ss.SSS";
 		
 		private static final Pattern LogPattern = Pattern.compile("\\{(\\d+_)?(time|origin|level|message|exception)(_\\d+)?\\}");
@@ -472,45 +484,6 @@ public class Log {
 				return sw.toString();
 			}
 			return "";
-		}
-		
-	}
-	
-	private static class SlickLogAdapter implements LogSystem {
-		
-		@Override
-		public void debug(String message) {
-			Log.debug(message);
-		}
-		
-		@Override
-		public void error(Throwable throwable) {
-			Log.error(throwable);
-		}
-		
-		@Override
-		public void error(String message) {
-			Log.error(message);
-		}
-		
-		@Override
-		public void error(String message, Throwable throwable) {
-			Log.error(message, throwable);
-		}
-		
-		@Override
-		public void info(String message) {
-			Log.info(message);
-		}
-		
-		@Override
-		public void warn(String message) {
-			Log.warning(message);
-		}
-		
-		@Override
-		public void warn(String message, Throwable throwable) {
-			Log.warning(message, throwable);
 		}
 		
 	}
