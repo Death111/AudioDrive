@@ -107,7 +107,8 @@ public class Track implements Renderable {
 			splineArea2Buffer.draw();
 			leftBorderVertexBuffer.draw();
 			rightBorderVertexBuffer.draw();
-			visibleBlocks.stream().filter(block -> !block.isCollectable()).forEach(Block::render);
+			visibleBlocks.stream().filter(block -> !block.isGlowing()).forEach(Block::render);
+			player.render();
 		}).renderpass(() -> {
 			visibleBlocks.stream().filter(Block::isGlowing).forEach(Block::render);
 			visibleRings.stream().forEach(Ring::render);
