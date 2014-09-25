@@ -7,6 +7,7 @@ import audiodrive.ui.components.Text;
 import audiodrive.ui.components.Window;
 import audiodrive.ui.scenes.TitleScene;
 import audiodrive.utilities.Log;
+import audiodrive.utilities.Memory;
 import audiodrive.utilities.Natives;
 import audiodrive.utilities.SlickLog;
 
@@ -18,6 +19,7 @@ public class AudioDrive {
 	
 	public static void main(String[] args) {
 		Log.info("AudioDrive");
+		Log.info(Memory.state());
 		SlickLog.bind();
 		Settings.load();
 		Natives.load();

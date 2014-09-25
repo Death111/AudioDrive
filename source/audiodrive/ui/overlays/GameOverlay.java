@@ -21,6 +21,7 @@ import audiodrive.ui.components.Text.Alignment;
 import audiodrive.ui.scenes.GameScene;
 import audiodrive.ui.scenes.GameScene.State;
 import audiodrive.utilities.Format;
+import audiodrive.utilities.Memory;
 
 public class GameOverlay extends Overlay {
 	
@@ -32,7 +33,6 @@ public class GameOverlay extends Overlay {
 	
 	private int width, height;
 	private int collectables;
-	private int obstacles;
 	
 	public GameOverlay(GameScene scene) {
 		this.scene = scene;
@@ -43,14 +43,14 @@ public class GameOverlay extends Overlay {
 		Color color = scene.getTrack().color().inverse();
 		text("title").setColor(color).setText(scene.getTrack().getAudio().getName()).setSize(15).setPosition(width * 0.5, height - 10).setAlignment(Alignment.LowerCenter);
 		text("framerate").setColor(color).setSize(10).setPosition(scene.getWidth() - 10, 125).setAlignment(Alignment.UpperRight);
-		text("time").setColor(color).setSize(10).setPosition(scene.getWidth() - 10, 140).setAlignment(Alignment.UpperRight);
+		text("memory").setColor(color).setSize(10).setPosition(scene.getWidth() - 10, 140).setAlignment(Alignment.UpperRight);
+		text("time").setColor(color).setSize(10).setPosition(scene.getWidth() - 10, 155).setAlignment(Alignment.UpperRight);
 		text("points").setColor(color).setSize(30).setPosition(10, 10);
 		text("damage").setColor(color).setSize(30).setPosition(10, 50);
 		text("collected").setColor(color).setSize(20).setPosition(10, 110);
 		text("collided").setColor(color).setSize(20).setPosition(10, 140);
 		text("notification").setColor(color).setText("Paused").setSize(48).setPosition(width * 0.5, height * 0.5).setAlignment(Alignment.Center).setVisible(false);
 		collectables = scene.getTrack().getNumberOfCollectables();
-		obstacles = scene.getTrack().getNumberOfObstacles();
 	}
 	
 	public void update() {
@@ -58,7 +58,7 @@ public class GameOverlay extends Overlay {
 		List<Block> passed = scene.getTrack().getBlocks().stream().filter(block -> block.iteration() <= scene.getTrack().index().integer).collect(Collectors.toList());
 		int passedCollectables = (int) passed.stream().filter(Block::isCollectable).count();
 		int passedObstacles = passed.size() - passedCollectables;
-		text("time").setText(Format.seconds(scene.playtime()));
+		text("time").setText(Format.seconds(scene.playtime(), 1));
 		text("points").setText(String.format("Points: %d / %d (%.0f%%)", player.points(), collectables, 100.0 * player.points() / collectables));
 		text("damage").setText(String.format("Damage: %d / %d (%d%%)", player.collided(), player.hitpoints(), player.damage()));
 		text("collected").setText(
@@ -86,6 +86,7 @@ public class GameOverlay extends Overlay {
 	@Override
 	public void render() {
 		texts.get("framerate").setText(Scene.getFramerate() + " FPS");
+		text("memory").setText(Memory.used() + "/" + Memory.allocated());
 		Camera.overlay(width, height);
 		super.render();
 		if (GameScene.peaks) drawPeaks();
