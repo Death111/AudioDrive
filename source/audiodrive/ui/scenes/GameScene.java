@@ -220,7 +220,6 @@ public class GameScene extends Scene {
 		background = null;
 		track = null;
 		player = null;
-		System.gc();
 	}
 	
 	public Track getTrack() {
