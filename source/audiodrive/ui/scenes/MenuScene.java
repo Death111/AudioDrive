@@ -95,8 +95,18 @@ public class MenuScene extends Scene implements ItemListener {
 	@Override
 	public void exiting() {
 		if (!Window.isRecreating() && getEntering() == null) playback.stop();
+		title = null;
 		background = null;
 		menu = null;
+		visualizeMenuItem = null;
+		playMenuItem = null;
+		selectAudioMenuItem = null;
+		selectModelMenuItem = null;
+		settingsMenuItem = null;
+		exitMenuItem = null;
+		hoverAudio = null;
+		selectAudio = null;
+		System.gc();
 	}
 	
 	@Override

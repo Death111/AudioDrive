@@ -5,6 +5,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.lwjgl.opengl.Display;
+import org.newdawn.slick.opengl.Texture;
 
 import audiodrive.Resources;
 import audiodrive.model.geometry.Color;
@@ -20,9 +21,9 @@ public class ParticleEffects {
 	
 	private static int rows = 2;
 	private static int columns = 2;
-	
 	private static int particleCount = 10;
 	
+	private Texture texture = Resources.getParticleTexture();
 	private List<Model> models = new ArrayList<>(rows * columns);
 	private List<ParticleWave> particles = new ArrayList<>();
 	
@@ -61,7 +62,7 @@ public class ParticleEffects {
 				faces.add(f1);
 				faces.add(f2);
 				final Model model = new Model(row + "_" + column + "_particle", faces);
-				model.setTexture(Resources.getParticleTexture());
+				model.setTexture(texture);
 				int size = 50;
 				model.position().xAdd(size / 2);
 				model.position().yAdd(size / 2);

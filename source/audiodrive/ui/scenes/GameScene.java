@@ -211,14 +211,16 @@ public class GameScene extends Scene {
 	@Override
 	protected void exiting() {
 		GL.popAttributes();
-		playback.stop();
 		Mouse.setGrabbed(false);
+		playback.stop();
+		playback = null;
 		startCameraPath = null;
 		particleEffects = null;
 		overlay = null;
 		background = null;
 		track = null;
 		player = null;
+		System.gc();
 	}
 	
 	public Track getTrack() {

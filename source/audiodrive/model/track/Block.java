@@ -14,6 +14,8 @@ public class Block implements Renderable {
 	
 	private static AtomicLong ID = new AtomicLong();
 	
+	private List<Model> models = Resources.getBlockModels();
+	
 	private long id;
 	private Placement placement = new Placement();
 	private Color color;
@@ -31,12 +33,13 @@ public class Block implements Renderable {
 		this.rail = rail;
 		color = AudioDrive.Settings.getColor(collectable ? "block.collectable.color" : "block.obstacle.color");
 		glowing = AudioDrive.Settings.getBoolean(collectable ? "block.collectable.glowing" : "block.obstacle.glowing");
+		Resources.getBlockTexture();
+		Resources.getReflectedBlockTexture();
 	}
 	
 	public void update(int currentIteration) {
 		final int distanceToPlayer = Math.abs(iteration - currentIteration);
 		final int lodRange = 10;
-		List<Model> models = Resources.getBlockModels();
 		int lodIndex = models.size() - 1 - distanceToPlayer / lodRange;
 		lodIndex = Math.max(0, lodIndex);
 		model = models.get(lodIndex);

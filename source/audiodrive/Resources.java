@@ -26,6 +26,7 @@ import audiodrive.model.loader.ModelLoader;
 import audiodrive.ui.menu.item.Item.Icon;
 import audiodrive.utilities.Files;
 import audiodrive.utilities.Get;
+import audiodrive.utilities.Log;
 
 public class Resources {
 	
@@ -68,6 +69,7 @@ public class Resources {
 	}
 	
 	public static Texture getTexture(String name) {
+		Log.trace("Loading texture \"" + name + "\"");
 		try {
 			return TextureLoader.getTexture(getType(name), get(name).openStream());
 		} catch (IOException exception) {
@@ -193,14 +195,14 @@ public class Resources {
 		return blockTexture;
 	}
 	
-	public static List<Model> getBlockModels() {
-		if (blockModels == null) blockModels = ModelLoader.loadModels("models/block/block_lod");
-		return blockModels;
-	}
-	
 	public static Texture getReflectedBlockTexture() {
 		if (reflectedBlockTexture == null) reflectedBlockTexture = getTexture("models/block/block-reflection.png");
 		return reflectedBlockTexture;
+	}
+	
+	public static List<Model> getBlockModels() {
+		if (blockModels == null) blockModels = ModelLoader.loadModels("models/block/block_lod");
+		return blockModels;
 	}
 	
 	public static Texture getRingTexture() {
