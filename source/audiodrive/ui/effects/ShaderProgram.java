@@ -1,6 +1,8 @@
 package audiodrive.ui.effects;
 
-import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL11.GL_FALSE;
+import static org.lwjgl.opengl.GL11.GL_NO_ERROR;
+import static org.lwjgl.opengl.GL11.glGetError;
 import static org.lwjgl.opengl.GL20.*;
 
 import java.io.BufferedReader;
@@ -88,7 +90,7 @@ public class ShaderProgram {
 	
 	public void link() {
 		glLinkProgram(program);
-		if (glGetProgrami(program, GL_LINK_STATUS) == 0) throw new ShaderException("Couldn't link shader program \"" + name + "\".", this);
+		if (glGetProgrami(program, GL_LINK_STATUS) == GL_FALSE) throw new ShaderException("Couldn't link shader program \"" + name + "\".", this);
 		uniforms.clear();
 		shaders.forEach(Shader::findUniforms);
 	}
