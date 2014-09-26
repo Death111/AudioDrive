@@ -3,6 +3,7 @@ package audiodrive.model.track;
 import static org.lwjgl.opengl.GL11.*;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -395,24 +396,27 @@ public class Track implements Renderable {
 		double linearIntensity = mix.getBands().get(1).getClamped(iteration);
 		double rotationSpeed = mix.getSpectralSum().getClamped(iteration) * 360;
 		
-		visibleMusicTowers = musicTowers
-			.stream()
-			.filter(musicTower -> musicTower.iteration() > index.integer - review && musicTower.iteration() < index.integer + preview * 5)
-			.collect(Collectors.toList());
-		visibleMusicTowers.forEach(musicTower -> {
-			float f = mix.getSpectrum(musicTower.iteration())[1];
-			Placement a = getPlacement(new Index(musicTower.iteration(), 0), true, 0);
-			if (musicTower instanceof RotationTower) {
-				((RotationTower) musicTower).rotation(rotationSpeed);
-				a.position().yAdd(15);
-			} else {
-				a.position().xAdd((((int) f) % 2 == 0) ? -50 : 50).zAdd(-50);
-			}
-			// a.direction(Vector.Z);
-			if (musicTower instanceof TubeTower) musicTower.intensity(linearIntensity);
-			else if (musicTower instanceof RotationTower) musicTower.intensity(Math.min(linearIntensity + 0.5, 1));
-			musicTower.placement(a).color(borderColor);
-		});
+		if (GameScene.environment) {
+			visibleMusicTowers = musicTowers
+				.stream()
+				.filter(musicTower -> musicTower.iteration() > index.integer - review && musicTower.iteration() < index.integer + preview * 5)
+				.collect(Collectors.toList());
+			visibleMusicTowers.forEach(musicTower -> {
+				float f = mix.getSpectrum(musicTower.iteration())[1];
+				Placement a = getPlacement(new Index(musicTower.iteration(), 0), true, 0);
+				if (musicTower instanceof RotationTower) {
+					((RotationTower) musicTower).rotation(rotationSpeed);
+					a.position().yAdd(15);
+				} else {
+					a.position().xAdd((((int) f) % 2 == 0) ? -50 : 50).zAdd(-50);
+				}
+				if (musicTower instanceof TubeTower) musicTower.intensity(linearIntensity);
+				else if (musicTower instanceof RotationTower) musicTower.intensity(Math.min(linearIntensity + 0.5, 1));
+				musicTower.placement(a).color(borderColor);
+			});
+		} else {
+			visibleMusicTowers = Collections.emptyList();
+		}
 		
 		int combine = 15;
 		double maxIntensity = mix.getMaximum();
@@ -423,7 +427,7 @@ public class Track implements Renderable {
 		SpectralTower.spectrum(intensities);
 	}
 	
-	private Color getColorAtIndex(int index) {
+	public Color getColorAtIndex(int index) {
 		// TODO no hax :D
 		final Color color = leftVertexList.get(index * 2).color.clone();
 		return color;

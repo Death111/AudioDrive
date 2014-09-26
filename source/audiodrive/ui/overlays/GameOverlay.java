@@ -9,8 +9,10 @@ import java.util.stream.Collectors;
 
 import audiodrive.AudioDrive;
 import audiodrive.audio.AnalyzedAudio;
+import audiodrive.audio.AnalyzedChannel;
 import audiodrive.model.Player;
 import audiodrive.model.geometry.Color;
+import audiodrive.model.geometry.Vector;
 import audiodrive.model.track.Block;
 import audiodrive.model.track.Track;
 import audiodrive.ui.components.Camera;
@@ -20,6 +22,7 @@ import audiodrive.ui.components.Text;
 import audiodrive.ui.components.Text.Alignment;
 import audiodrive.ui.scenes.GameScene;
 import audiodrive.ui.scenes.GameScene.State;
+import audiodrive.utilities.Arithmetic;
 import audiodrive.utilities.Format;
 import audiodrive.utilities.Memory;
 
@@ -33,6 +36,15 @@ public class GameOverlay extends Overlay {
 	
 	private int width, height;
 	private int collectables;
+	
+	private AnalyzedAudio audio;
+	private AnalyzedChannel leftChannel;
+	private AnalyzedChannel rightChannel;
+	private int bands;
+	private float[] leftSpectrum;
+	private float[] rightSpectrum;
+	private Color spectrumColor = Color.White;
+	private Color spectrumFadeColor = Color.Transparent;
 	
 	public GameOverlay(GameScene scene) {
 		this.scene = scene;
@@ -51,6 +63,12 @@ public class GameOverlay extends Overlay {
 		text("collided").setColor(color).setSize(20).setPosition(10, 140);
 		text("notification").setColor(color).setText("Paused").setSize(48).setPosition(width * 0.5, height * 0.5).setAlignment(Alignment.Center).setVisible(false);
 		collectables = scene.getTrack().getNumberOfCollectables();
+		audio = scene.getTrack().getAudio();
+		bands = audio.getBandCount();
+		leftChannel = audio.getChannel(0);
+		rightChannel = audio.getChannel(1);
+		leftSpectrum = new float[bands];
+		rightSpectrum = new float[bands];
 	}
 	
 	public void update() {
@@ -81,6 +99,23 @@ public class GameOverlay extends Overlay {
 		default:
 			break;
 		}
+		if (GameScene.visualization && GameScene.spectrum) updateSpectrum();
+	}
+	
+	private void updateSpectrum() {
+		float responsivness = 15;
+		float multiplier = 3;
+		float limit = 0.15f;
+		spectrumColor = scene.getTrack().getColorAtIndex(scene.getTrack().index().integer);
+		int iteration = Arithmetic.clamp((int) (audio.getIterationRate() * scene.playtime()), 0, audio.getIterationCount() - 1);
+		for (int band = 0; band < bands; band++) {
+			double left = leftChannel.clamp(leftChannel.getBands().get(band).get(iteration)) * multiplier;
+			double right = rightChannel.clamp(rightChannel.getBands().get(band).get(iteration)) * multiplier;
+			leftSpectrum[band] += (left - leftSpectrum[band]) * Scene.deltaTime() * responsivness;
+			rightSpectrum[band] += (right - rightSpectrum[band]) * Scene.deltaTime() * responsivness;
+			if (leftSpectrum[band] > limit) leftSpectrum[band] = limit;
+			if (rightSpectrum[band] > limit) rightSpectrum[band] = limit;
+		}
 	}
 	
 	@Override
@@ -89,7 +124,8 @@ public class GameOverlay extends Overlay {
 		text("memory").setText(Memory.used() + "/" + Memory.allocated());
 		Camera.overlay(width, height);
 		super.render();
-		if (GameScene.peaks) drawPeaks();
+		if (GameScene.visualization && GameScene.peaks) drawPeaks();
+		if (GameScene.visualization && GameScene.spectrum) drawSpectrum();
 		if (GameScene.particles && GameScene.sky && scene.getState() != State.Paused) scene.particleEffects().render();
 		trackOverview.render();
 		if (text("notification").isVisible()) drawNotificationBackground();
@@ -116,6 +152,66 @@ public class GameOverlay extends Overlay {
 			texts.put(name, text);
 		}
 		return text;
+	}
+	
+	private void drawSpectrum() {
+		glDisable(GL_CULL_FACE);
+		
+		glBegin(GL_QUADS);
+		double x = 0;
+		double y = height / 2;
+		double width = this.width / 2;
+		double height = (double) this.height / 2 / bands;
+		for (int band = 0; band < bands; band++) {
+			double amplitude = leftSpectrum[band] * width;
+			spectrumColor.gl();
+			new Vector().x(x).y(y - height).glVertex();
+			new Vector().x(x).y(y).glVertex();
+			spectrumFadeColor.gl();
+			new Vector().x(x + amplitude).y(y).glVertex();
+			new Vector().x(x + amplitude).y(y - height).glVertex();
+			y -= height;
+		}
+		x = this.width;
+		y = this.height / 2;
+		for (int band = 0; band < bands; band++) {
+			double amplitude = rightSpectrum[band] * width;
+			spectrumColor.gl();
+			new Vector().x(x).y(y - height).glVertex();
+			new Vector().x(x).y(y).glVertex();
+			spectrumFadeColor.gl();
+			new Vector().x(x - amplitude).y(y).glVertex();
+			new Vector().x(x - amplitude).y(y - height).glVertex();
+			y -= height;
+		}
+		
+		x = 0;
+		y = this.height / 2;
+		for (int band = 0; band < bands; band++) {
+			double amplitude = leftSpectrum[band] * width;
+			spectrumColor.gl();
+			new Vector().x(x).y(y + height).glVertex();
+			new Vector().x(x).y(y).glVertex();
+			spectrumFadeColor.gl();
+			new Vector().x(x + amplitude).y(y).glVertex();
+			new Vector().x(x + amplitude).y(y + height).glVertex();
+			y += height;
+		}
+		x = this.width;
+		y = this.height / 2;
+		for (int band = 0; band < bands; band++) {
+			double amplitude = rightSpectrum[band] * width;
+			spectrumColor.gl();
+			new Vector().x(x).y(y + height).glVertex();
+			new Vector().x(x).y(y).glVertex();
+			spectrumFadeColor.gl();
+			new Vector().x(x - amplitude).y(y).glVertex();
+			new Vector().x(x - amplitude).y(y + height).glVertex();
+			y += height;
+		}
+		glEnd();
+		
+		glEnable(GL_CULL_FACE);
 	}
 	
 	private void drawPeaks() {

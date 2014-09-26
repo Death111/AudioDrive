@@ -44,6 +44,7 @@ public class GameScene extends Scene {
 	public static boolean glow;
 	public static boolean night;
 	public static boolean sky;
+	public static boolean spectrum;
 	public static boolean peaks;
 	public static boolean hitbox;
 	
@@ -82,7 +83,7 @@ public class GameScene extends Scene {
 		Log.info("Starting game...");
 		colorizeCollectables = !AudioDrive.Settings.getBoolean("block.collectable.color.static");
 		colorizeObstacles = !AudioDrive.Settings.getBoolean("block.obstacle.color.static");
-		visualization = AudioDrive.Settings.getBoolean("game.visualization");
+		spectrum = visualization = AudioDrive.Settings.getBoolean("game.visualization");
 		environment = AudioDrive.Settings.getBoolean("game.environment");
 		reflections = AudioDrive.Settings.getBoolean("graphics.reflections");
 		particles = AudioDrive.Settings.getBoolean("graphics.particles");
@@ -325,13 +326,14 @@ public class GameScene extends Scene {
 			player.zoom(1.0);
 			break;
 		case Keyboard.KEY_A:
-			Window.toggleAntialiasing();
+			if (Keyboard.isKeyDown(Keyboard.KEY_RCONTROL) || Keyboard.isKeyDown(Keyboard.KEY_LCONTROL)) Window.toggleAntialiasing();
 			break;
 		case Keyboard.KEY_V:
-			Window.toggleVSync();
+			if (Keyboard.isKeyDown(Keyboard.KEY_RCONTROL) || Keyboard.isKeyDown(Keyboard.KEY_LCONTROL)) Window.toggleVSync();
+			else visualization = !visualization;
 			break;
-		case Keyboard.KEY_D:
-			peaks = !peaks;
+		case Keyboard.KEY_E:
+			environment = !environment;
 			break;
 		case Keyboard.KEY_G:
 			glow = !glow;
@@ -340,13 +342,15 @@ public class GameScene extends Scene {
 			hitbox = !hitbox;
 			break;
 		case Keyboard.KEY_P:
-			particles = !particles;
+			if (Keyboard.isKeyDown(Keyboard.KEY_LSHIFT) || Keyboard.isKeyDown(Keyboard.KEY_RSHIFT)) peaks = !peaks;
+			else particles = !particles;
 			break;
 		case Keyboard.KEY_R:
 			reflections = !reflections;
 			break;
 		case Keyboard.KEY_S:
-			sky = !sky;
+			if (Keyboard.isKeyDown(Keyboard.KEY_LSHIFT) || Keyboard.isKeyDown(Keyboard.KEY_RSHIFT)) spectrum = !spectrum;
+			else sky = !sky;
 			break;
 		case Keyboard.KEY_LEFT:
 			if (state != State.Running) {
