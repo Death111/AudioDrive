@@ -7,21 +7,20 @@ import audiodrive.ui.components.Text;
 import audiodrive.ui.components.Window;
 import audiodrive.ui.scenes.TitleScene;
 import audiodrive.utilities.Log;
-import audiodrive.utilities.Memory;
 import audiodrive.utilities.Natives;
 import audiodrive.utilities.SlickLog;
+import audiodrive.utilities.Versioning;
 
 public class AudioDrive {
 	
 	public static final String Title = "AudioDrive";
-	public static final String Version = "1.0.0";
+	public static final String Version = Versioning.getVersion();
 	public static final String Creators = "Nico Mutter and Thomas Würstle";
 	public static final Settings Settings = new Settings("audiodrive.properties");
 	public static final Font Font = Text.getFont("Shojumaru");
 	
 	public static void main(String[] args) {
-		Log.info("AudioDrive");
-		Log.info(Memory.state());
+		Log.info("AudioDrive " + Version);
 		SlickLog.bind();
 		Settings.load();
 		Natives.load();
