@@ -2,17 +2,22 @@ package audiodrive.audio;
 
 import java.util.List;
 
+import audiodrive.utilities.Arithmetic;
+
 public class AnalyzedChannel extends DecodedChannel {
 	
 	private final List<float[]> spectra;
+	private final List<AnalyzationData> bands;
 	private final AnalyzationData spectralSum;
 	private final AnalyzationData spectralFlux;
 	private final AnalyzationData threshold;
 	private final AnalyzationData prunnedSpectralFlux;
 	private final AnalyzationData peaks;
+	private final float maximum;
 	
 	AnalyzedChannel(Channel channel,
 					List<float[]> spectra,
+					List<AnalyzationData> bands,
 					AnalyzationData spectralSum,
 					AnalyzationData spectralFlux,
 					AnalyzationData threshold,
@@ -20,11 +25,13 @@ public class AnalyzedChannel extends DecodedChannel {
 					AnalyzationData peaks) {
 		super(channel);
 		this.spectra = spectra;
+		this.bands = bands;
 		this.spectralSum = spectralSum;
 		this.spectralFlux = spectralFlux;
 		this.threshold = threshold;
 		this.prunnedSpectralFlux = prunnedSpectralFlux;
 		this.peaks = peaks;
+		maximum = (float) bands.stream().mapToDouble(AnalyzationData::maximum).max().getAsDouble();
 	}
 	
 	/**
@@ -32,6 +39,13 @@ public class AnalyzedChannel extends DecodedChannel {
 	 */
 	public List<float[]> getSpectra() {
 		return spectra;
+	}
+	
+	/**
+	 * Returns a list containing the separate frequency bands.
+	 */
+	public List<AnalyzationData> getBands() {
+		return bands;
 	}
 	
 	/**
@@ -74,6 +88,27 @@ public class AnalyzedChannel extends DecodedChannel {
 	 */
 	public AnalyzationData getPeaks() {
 		return peaks;
+	}
+	
+	/**
+	 * Returns the minimum amplitude of this channel.
+	 */
+	public float getMinimum() {
+		return 0;
+	}
+	
+	/**
+	 * Returns the maximum amplitude of this channel.
+	 */
+	public float getMaximum() {
+		return maximum;
+	}
+	
+	/**
+	 * Clamps an absolute amplitude value to the range [0,1] proportional to the channels amplitude range.
+	 */
+	public float clamp(float amplitude) {
+		return (float) Arithmetic.clamp(amplitude / getMaximum());
 	}
 	
 }

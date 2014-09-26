@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import audiodrive.AudioDrive;
 import audiodrive.audio.analysis.FastFourierTransformation;
@@ -107,6 +108,8 @@ public class AudioAnalyzer {
 		Stopwatch stopwatch = new Stopwatch().start();
 		List<float[]> spectra = calculateSpectra(channel);
 		Log.trace("Spectra calculation of %s took %.3f seconds", channel, stopwatch.getSeconds());
+		List<AnalyzationData> bands = calculateBands(spectra);
+		Log.trace("Band calculation of %s took %.3f seconds", channel, stopwatch.getSeconds());
 		AnalyzationData spectralSum = calculateSpectralSum(spectra, channel);
 		Log.trace("SpectralSum calculation of %s took %.3f seconds", channel, stopwatch.getSeconds());
 		AnalyzationData spectralFlux = calculateSpectralFlux(spectra, channel);
@@ -117,7 +120,7 @@ public class AudioAnalyzer {
 		Log.trace("PrunnedSpectralFlux of %s calculation took %.3f seconds", channel, stopwatch.getSeconds());
 		AnalyzationData peaks = calculatePeaks(prunnedSpectralFlux);
 		Log.trace("Peaks calculation of %s took %.3f seconds", channel, stopwatch.getSeconds());
-		return new AnalyzedChannel(channel, spectra, spectralSum, spectralFlux, threshold, prunnedSpectralFlux, peaks);
+		return new AnalyzedChannel(channel, spectra, bands, spectralSum, spectralFlux, threshold, prunnedSpectralFlux, peaks);
 	}
 	
 	private List<float[]> calculateSpectra(Channel channel) {
@@ -127,6 +130,19 @@ public class AudioAnalyzer {
 			fft.forward(samples);
 			return fft.getSpectrum();
 		}).collect(Collectors.toList());
+	}
+	
+	private List<AnalyzationData> calculateBands(List<float[]> spectra) {
+		int numberOfSpectra = spectra.size();
+		int numberOfBands = spectra.get(0).length;
+		IntStream bands = IntStream.range(0, numberOfBands);
+		return bands.parallel().mapToObj(b -> {
+			float[] band = new float[numberOfSpectra];
+			for (int s = 0; s < numberOfSpectra; s++) {
+				band[s] = spectra.get(s)[b];
+			}
+			return band;
+		}).map(AnalyzationData::new).collect(Collectors.toList());
 	}
 	
 	private AnalyzationData calculateSpectralSum(List<float[]> spectra, Channel channel) {

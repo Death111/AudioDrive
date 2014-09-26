@@ -50,6 +50,14 @@ public class AnalyzationData implements Iterable<Float> {
 		return values.length;
 	}
 	
+	public float minimum() {
+		return minimum;
+	}
+	
+	public float maximum() {
+		return maximum;
+	}
+	
 	@Override
 	public Iterator<Float> iterator() {
 		return new Iterator<Float>() {

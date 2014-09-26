@@ -12,8 +12,6 @@ import audiodrive.AudioDrive;
 import audiodrive.Resources;
 import audiodrive.audio.AnalyzedAudio;
 import audiodrive.audio.AnalyzedChannel;
-import audiodrive.audio.MinMax;
-import audiodrive.audio.SpectraMinMax;
 import audiodrive.model.Player;
 import audiodrive.model.Renderable;
 import audiodrive.model.buffer.VertexBuffer;
@@ -83,7 +81,6 @@ public class Track implements Renderable {
 	
 	private int sight = AudioDrive.Settings.getInteger("game.sight");
 	
-	private List<MinMax> spectraMinMax;
 	private Glow glow;
 	private Model skybox;
 	
@@ -98,7 +95,6 @@ public class Track implements Renderable {
 		numberOfCollectables = (int) blocks.stream().filter(Block::isCollectable).count();
 		numberOfObstacles = blocks.size() - numberOfCollectables;
 		indexRate = spline.size() / audio.getDuration();
-		spectraMinMax = SpectraMinMax.getMinMax(audio.getMix());
 	}
 	
 	public void build() {
@@ -396,10 +392,7 @@ public class Track implements Renderable {
 			visibleRings.add(new Ring(i, ringColor, placement).scale(ringScale).pulse(pulse));
 		}
 		
-		float[] spectrum2 = mix.getSpectrum(iteration);
-		float current = spectrum2[1];
-		MinMax minMax = spectraMinMax.get(1);
-		double linearIntensity = Arithmetic.scaleLinear(current, 0.1, 1.0, minMax.min, minMax.max);
+		double linearIntensity = mix.getBands().get(1).getClamped(iteration);
 		double rotationSpeed = mix.getSpectralSum().getClamped(iteration) * 360;
 		
 		visibleMusicTowers = musicTowers
@@ -422,10 +415,10 @@ public class Track implements Renderable {
 		});
 		
 		int combine = 15;
-		double maxIntensity = spectraMinMax.stream().mapToDouble(v -> v.max).max().orElse(0);
+		double maxIntensity = mix.getMaximum();
 		double[] intensities = new double[audio.getBandCount() / combine + 1];
 		for (int i = 0; i < audio.getBandCount(); i++) {
-			intensities[i / combine] += Arithmetic.scaleLogarithmic(spectrum2[i], 0.0, 1.0 / combine, 0, maxIntensity);
+			intensities[i / combine] += Arithmetic.scaleLogarithmic(mix.getBands().get(i).get(iteration), 0.0, 1.0 / combine, 0, maxIntensity);
 		}
 		SpectralTower.spectrum(intensities);
 	}
