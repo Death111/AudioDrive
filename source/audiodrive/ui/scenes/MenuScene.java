@@ -1,13 +1,24 @@
 package audiodrive.ui.scenes;
 
-import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL11.GL_COLOR_BUFFER_BIT;
+import static org.lwjgl.opengl.GL11.GL_DEPTH_BUFFER_BIT;
+import static org.lwjgl.opengl.GL11.glClear;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import org.lwjgl.input.Keyboard;
 
 import audiodrive.AudioDrive;
+import audiodrive.Resources;
 import audiodrive.audio.AnalyzedAudio;
 import audiodrive.audio.AudioResource;
 import audiodrive.audio.Playback;
+import audiodrive.model.geometry.Vector;
+import audiodrive.model.geometry.transform.Rotation;
+import audiodrive.model.loader.Model;
+import audiodrive.model.loader.ModelLoader;
 import audiodrive.model.track.Track;
 import audiodrive.model.track.TrackGenerator;
 import audiodrive.ui.components.Camera;
@@ -21,6 +32,7 @@ import audiodrive.ui.menu.Menu;
 import audiodrive.ui.menu.item.Item;
 import audiodrive.ui.menu.item.ItemListener;
 import audiodrive.ui.menu.item.MenuItem;
+import audiodrive.ui.menu.item.SettingsItem;
 import audiodrive.utilities.Log;
 
 /**
@@ -36,6 +48,8 @@ public class MenuScene extends Scene implements ItemListener {
 	private Text version;
 	private Text credits;
 	private Menu menu;
+	private Menu modelSelectionMenu;
+	private SettingsItem<Integer> modelValue;
 	private MenuItem visualizeMenuItem;
 	private MenuItem playMenuItem;
 	private MenuItem selectAudioMenuItem;
@@ -51,6 +65,13 @@ public class MenuScene extends Scene implements ItemListener {
 	private boolean silentHovering = true;
 	private double volume;
 	
+	private Model player;
+	
+	private Rotation rotation = new Rotation();
+	private Text audioText;
+	private Text audioText2;
+	List<String> models;
+	
 	public void enter(AnalyzedAudio audio) {
 		this.audio = audio;
 		hierarchy().clear();
@@ -65,18 +86,20 @@ public class MenuScene extends Scene implements ItemListener {
 		Log.trace("Entering MenueScene");
 		
 		title = new Text("AudioDrive").setFont(AudioDrive.Font).setSize(48).setPosition(100, 80);
+		audioText = new Text("Selected Audio").setFont(AudioDrive.Font).setSize(32).setPosition(600, 200);
+		audioText2 = new Text("").setFont(AudioDrive.Font).setSize(24).setPosition(600, 250);
 		version = new Text("Version " + AudioDrive.Version).setFont(AudioDrive.Font).setSize(10).setPosition(10, getHeight() - 10).setAlignment(Alignment.LowerLeft);
 		credits = new Text("Made by " + AudioDrive.Creators).setFont(AudioDrive.Font).setSize(10).setPosition(getWidth() - 10, getHeight() - 10).setAlignment(Alignment.LowerRight);
 		
 		menu = new Menu(100, 200, 400, 600, 25);
-		visualizeMenuItem = new MenuItem("Visualize", this);
-		menu.addItem(visualizeMenuItem);
 		playMenuItem = new MenuItem("Play", this);
 		menu.addItem(playMenuItem);
+		visualizeMenuItem = new MenuItem("Visualize", this);
+		menu.addItem(visualizeMenuItem);
 		selectAudioMenuItem = new MenuItem("Select Audio", this);
 		menu.addItem(selectAudioMenuItem);
 		selectModelMenuItem = new MenuItem("Select Model", this);
-		menu.addItem(selectModelMenuItem);
+		// menu.addItem(selectModelMenuItem);
 		settingsMenuItem = new MenuItem("Settings", this);
 		menu.addItem(settingsMenuItem);
 		exitMenuItem = new MenuItem("Exit", this);
@@ -86,17 +109,48 @@ public class MenuScene extends Scene implements ItemListener {
 		selectAudio = new AudioResource("sounds/Select.mp3");
 		
 		background = new Overlay().shader(new ShaderProgram("shaders/default.vs", "shaders/title.fs"));
-		Camera.overlay(getWidth(), getHeight());
+		
+		models = Resources.list("models/player").stream().filter(path -> path.endsWith(".obj")).collect(Collectors.toList());
+		player = ModelLoader.loadModel(Resources.find("models/player", AudioDrive.Settings.get("player.model") + ".obj").orElse(models.get(0)));
+		modelSelectionMenu = new Menu(600, 400, 600 + 1, 51, 0);
+		List<Integer> modelIndexe = new ArrayList<>();
+		int currentModel = 1;
+		for (int i = 0; i < models.size(); i++) {
+			modelIndexe.add(i + 1);
+			if (models.get(i).contains(AudioDrive.Settings.get("player.model"))) currentModel = i + 1;
+		}
+		modelValue = new SettingsItem<Integer>("Selected Model", modelIndexe, 600, 50, this);
+		modelValue.setValue(currentModel);
+		modelSelectionMenu.addItem(modelValue);
 	}
 	
 	@Override
 	public void render() {
-		glClear(GL_COLOR_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		Camera.overlay(getWidth(), getHeight());
 		background.render();
 		title.render();
+		audioText.render();
+		audioText2.setText("- " + ((audio != null) ? audio.getName() : "Non selected")).render();
 		version.render();
 		credits.render();
 		menu.render();
+		modelSelectionMenu.render();
+		
+		Camera.perspective(45, getWidth(), getHeight(), .1, 100);
+		Camera.position(new Vector(.3, .2, -1));
+		Camera.lookAt(new Vector(0, 0, 1));
+		rotation.apply();
+		// TODO maybe add reflection
+		player.scale(0.05).render();
+	}
+	
+	private double lastTime = System.currentTimeMillis() / 1000;
+	
+	@Override
+	public void update(double time) {
+		rotation.yAdd(10 * time);
+		rotation.y(rotation.y() % 360);
 	}
 	
 	@Override
@@ -150,6 +204,7 @@ public class MenuScene extends Scene implements ItemListener {
 		y = getHeight() - y;
 		
 		menu.mouseMoved(x, y);
+		modelSelectionMenu.mouseMoved(x, y);
 	}
 	
 	@Override
@@ -158,6 +213,7 @@ public class MenuScene extends Scene implements ItemListener {
 		y = getHeight() - y;
 		
 		menu.mousePressed(button, x, y);
+		modelSelectionMenu.mousePressed(button, x, y);
 	}
 	
 	enum MouseButton {
@@ -210,6 +266,11 @@ public class MenuScene extends Scene implements ItemListener {
 		}
 		if (item == settingsMenuItem) {
 			Scene.get(SettingsScene.class).enter();
+		}
+		if (item == modelValue) {
+			final String modelName = models.get(modelValue.getValue() - 1);
+			player = ModelLoader.loadModel(modelName);
+			AudioDrive.Settings.set("player.model", player.getName());
 		}
 	}
 	
