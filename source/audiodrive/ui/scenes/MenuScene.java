@@ -14,6 +14,7 @@ import audiodrive.ui.components.Camera;
 import audiodrive.ui.components.Overlay;
 import audiodrive.ui.components.Scene;
 import audiodrive.ui.components.Text;
+import audiodrive.ui.components.Text.Alignment;
 import audiodrive.ui.components.Window;
 import audiodrive.ui.effects.ShaderProgram;
 import audiodrive.ui.menu.Menu;
@@ -32,6 +33,8 @@ public class MenuScene extends Scene implements ItemListener {
 	private static Playback playback = new Playback(new AudioResource("sounds/Menu.mp3")).setLooping(true);
 	
 	private Text title;
+	private Text version;
+	private Text credits;
 	private Menu menu;
 	private MenuItem visualizeMenuItem;
 	private MenuItem playMenuItem;
@@ -62,6 +65,8 @@ public class MenuScene extends Scene implements ItemListener {
 		Log.trace("Entering MenueScene");
 		
 		title = new Text("AudioDrive").setFont(AudioDrive.Font).setSize(48).setPosition(100, 80);
+		version = new Text("Version " + AudioDrive.Version).setFont(AudioDrive.Font).setSize(10).setPosition(10, getHeight() - 10).setAlignment(Alignment.LowerLeft);
+		credits = new Text("Made by " + AudioDrive.Creators).setFont(AudioDrive.Font).setSize(10).setPosition(getWidth() - 10, getHeight() - 10).setAlignment(Alignment.LowerRight);
 		
 		menu = new Menu(100, 200, 400, 600, 25);
 		visualizeMenuItem = new MenuItem("Visualize", this);
@@ -89,6 +94,8 @@ public class MenuScene extends Scene implements ItemListener {
 		glClear(GL_COLOR_BUFFER_BIT);
 		background.render();
 		title.render();
+		version.render();
+		credits.render();
 		menu.render();
 	}
 	
@@ -96,6 +103,8 @@ public class MenuScene extends Scene implements ItemListener {
 	public void exiting() {
 		if (!Window.isRecreating() && getEntering() == null) playback.stop();
 		title = null;
+		version = null;
+		credits = null;
 		background = null;
 		menu = null;
 		visualizeMenuItem = null;

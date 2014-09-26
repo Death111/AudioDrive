@@ -14,6 +14,8 @@ import audiodrive.utilities.SlickLog;
 public class AudioDrive {
 	
 	public static final String Title = "AudioDrive";
+	public static final String Version = "1.0.0";
+	public static final String Creators = "Nico Mutter and Thomas Würstle";
 	public static final Settings Settings = new Settings("audiodrive.properties");
 	public static final Font Font = Text.getFont("Shojumaru");
 	
