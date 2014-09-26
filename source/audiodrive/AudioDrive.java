@@ -20,7 +20,9 @@ public class AudioDrive {
 	public static final Font Font = Text.getFont("Shojumaru");
 	
 	public static void main(String[] args) {
-		Log.info("AudioDrive " + Version);
+		Log.info("AudioDrive");
+		Log.info("Version: " + Version);
+		Log.info("Creators: " + Creators);
 		SlickLog.bind();
 		Settings.load();
 		Natives.load();
