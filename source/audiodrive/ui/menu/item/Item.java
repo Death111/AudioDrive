@@ -116,7 +116,7 @@ public abstract class Item {
 		this.state = state;
 	}
 	
-	private void fireStateChange(State state, boolean activated) {
+	protected void fireStateChange(State state, boolean activated) {
 		switch (state) {
 		case Hovering:
 			itemListeners.forEach(itemListener -> itemListener.onHover(this, activated));
@@ -174,7 +174,7 @@ public abstract class Item {
 		setState(hover ? State.Hovering : State.Normal);
 	}
 	
-	public void setSelected(boolean selected) {
+	public void setSelected(boolean selected, int x, int y) {
 		setState(selected ? State.Selected : State.Normal);
 	}
 	

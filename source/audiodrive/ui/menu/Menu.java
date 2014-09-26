@@ -6,7 +6,6 @@ import java.util.List;
 import audiodrive.ui.menu.item.FileChooserItem;
 import audiodrive.ui.menu.item.Item;
 import audiodrive.ui.menu.item.ItemListener;
-import audiodrive.ui.menu.item.SettingsItem;
 
 public class Menu implements ItemListener {
 	
@@ -70,7 +69,7 @@ public class Menu implements ItemListener {
 			final int y = posY + currentRow * (item.getHeight() + spacing);
 			previousPage.setX(x);
 			previousPage.setY(y);
-			previousPage.setSelected(false);
+			previousPage.setSelected(false, x, y);
 			visibleItems.add(previousPage);
 		}
 		
@@ -87,7 +86,7 @@ public class Menu implements ItemListener {
 				// Add a nextPage button
 				nextPage.setX(x);
 				nextPage.setY(y);
-				nextPage.setSelected(false);
+				nextPage.setSelected(false, x, y);
 				visibleItems.add(nextPage);
 				return;
 			}
@@ -152,11 +151,7 @@ public class Menu implements ItemListener {
 	 */
 	private void setSelected(int x, int y, Item item) {
 		final boolean selected = inBounds(item, x, y);
-		item.setSelected(selected);
-		if (item instanceof SettingsItem<?>) {
-			SettingsItem<?> setItem = (SettingsItem<?>) item;
-			setItem.setSelected(selected, x, y);
-		}
+		item.setSelected(selected, x, y);
 	}
 	
 	private boolean inBounds(Item item, int x, int y) {

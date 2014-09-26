@@ -25,6 +25,11 @@ public class SettingsItem<T> extends Item {
 		recalculate(name, width - length + iconWidth);
 	}
 	
+	public SettingsItem(String name, List<T> values, int width, int height, ItemListener itemListener) {
+		this(name, values, width, height);
+		this.addItemListener(itemListener);
+	}
+	
 	@Override
 	public void render() {
 		Colors colors = getColors();
@@ -60,6 +65,7 @@ public class SettingsItem<T> extends Item {
 		Resources.getIconModel().scale(iconWidth / 2).color(color).setTexture(Resources.getIconTextures().get(Icon.Next)).render();
 	}
 	
+	@Override
 	public void setSelected(boolean selected, int x, int y) {
 		if (!selected) return;
 		
@@ -74,6 +80,8 @@ public class SettingsItem<T> extends Item {
 				currentValueIndex = 0;
 			}
 		}
+		
+		this.fireStateChange(State.Selected, true);
 	}
 	
 	private boolean inBounds(int itemX, int itemY, int x, int y) {
