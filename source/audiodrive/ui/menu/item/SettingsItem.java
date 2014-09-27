@@ -77,13 +77,14 @@ public class SettingsItem<T> extends Item {
 	public void setSelected(boolean selected, int x, int y) {
 		if (!selected) return;
 		
-		if (inBounds(this.x + width - length, this.y, x, y)) {
+		if (values.size() == 2) {
+			currentValueIndex = Math.abs(currentValueIndex - 1);
+			this.fireStateChange(State.Selected, true);
+		} else if (inBounds(this.x + width - length, this.y, x, y)) {
 			decrement();
 		} else if (inBounds(this.x + width - iconWidth, this.y, x, y)) {
 			increment();
 		}
-		
-		this.fireStateChange(State.Selected, true);
 	}
 	
 	@Override
