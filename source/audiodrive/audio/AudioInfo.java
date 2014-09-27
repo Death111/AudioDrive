@@ -19,11 +19,11 @@ import org.farng.mp3.id3.AbstractID3v2;
 import org.farng.mp3.id3.ID3v1;
 
 public class AudioInfo {
-	public String title;
-	public String artist;
-	public String album;
+	public String title = "";
+	public String artist = "";
+	public String album = "";
 	
-	public String duration;
+	public String duration = "";
 	
 	public AudioInfo(String path) throws Exception {
 		this(new File(new URL(path).getFile()));

@@ -1,7 +1,10 @@
 package audiodrive.ui.control;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -73,18 +76,34 @@ public class Input {
 	}
 	
 	public static void fire(Consumer<? super Observer> action) {
-		observers.forEach(action);
+		new ArrayList<>(observers).forEach(action);
 	}
 	
 	public static void addObserver(Observer observer) {
 		observers.add(observer);
 	}
 	
+	public static void addObservers(Observer... observers) {
+		addObservers(Arrays.asList(observers));
+	}
+	
+	public static void addObservers(List<Observer> observers) {
+		Input.observers.addAll(observers);
+	}
+	
 	public static void removeObserver(Observer observer) {
 		observers.remove(observer);
 	}
 	
-	public interface Observer {
+	public static void removeObservers(Observer... observers) {
+		removeObservers(Arrays.asList(observers));
+	}
+	
+	public static void removeObservers(List<Observer> observers) {
+		Input.observers.removeAll(observers);
+	}
+	
+	public static interface Observer {
 		
 		default void mouseMoved(int x, int y, int dx, int dy) {}
 		

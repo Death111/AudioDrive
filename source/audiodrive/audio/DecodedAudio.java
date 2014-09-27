@@ -11,7 +11,7 @@ import audiodrive.utilities.Arithmetic;
 public class DecodedAudio implements Audio {
 	
 	private final String name;
-	private final AudioResource file;
+	private final AudioResource resource;
 	private final int sampleCount;
 	private final double sampleRate;
 	private final int channelCount;
@@ -22,7 +22,7 @@ public class DecodedAudio implements Audio {
 	
 	DecodedAudio(AudioResource file, FloatSampleBuffer buffer) {
 		name = file.getName().substring(0, file.getName().lastIndexOf("."));
-		this.file = file;
+		this.resource = file;
 		sampleCount = buffer.getSampleCount();
 		sampleRate = buffer.getSampleRate();
 		channelCount = buffer.getChannelCount();
@@ -45,7 +45,7 @@ public class DecodedAudio implements Audio {
 	
 	protected DecodedAudio(Audio audio) {
 		name = audio.getName();
-		file = audio.getFile();
+		resource = audio.getResource();
 		sampleCount = audio.getSampleCount();
 		sampleRate = audio.getSampleRate();
 		iteration = audio.getIteration();
@@ -61,8 +61,8 @@ public class DecodedAudio implements Audio {
 	}
 	
 	@Override
-	public AudioResource getFile() {
-		return file;
+	public AudioResource getResource() {
+		return resource;
 	}
 	
 	@Override
@@ -118,7 +118,7 @@ public class DecodedAudio implements Audio {
 	
 	@Override
 	public String toString() {
-		return "Decoded " + file.getName();
+		return "Decoded " + resource.getName();
 	}
 	
 }

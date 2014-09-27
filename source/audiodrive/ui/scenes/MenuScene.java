@@ -13,8 +13,8 @@ import org.lwjgl.input.Keyboard;
 import audiodrive.AudioDrive;
 import audiodrive.Resources;
 import audiodrive.audio.AnalyzedAudio;
-import audiodrive.audio.AudioResource;
 import audiodrive.audio.AudioInfo;
+import audiodrive.audio.AudioResource;
 import audiodrive.audio.Playback;
 import audiodrive.model.geometry.Vector;
 import audiodrive.model.geometry.transform.Rotation;
@@ -28,6 +28,7 @@ import audiodrive.ui.components.Scene;
 import audiodrive.ui.components.Text;
 import audiodrive.ui.components.Text.Alignment;
 import audiodrive.ui.components.Window;
+import audiodrive.ui.control.Input;
 import audiodrive.ui.effects.ShaderProgram;
 import audiodrive.ui.menu.Menu;
 import audiodrive.ui.menu.item.Item;
@@ -49,6 +50,7 @@ public class MenuScene extends Scene implements ItemListener {
 	private Text version;
 	private Text credits;
 	private Menu menu;
+	private Menu audioSelectionMenu;
 	private Menu modelSelectionMenu;
 	private SettingsItem<Integer> modelValue;
 	private MenuItem visualizeMenuItem;
@@ -96,8 +98,6 @@ public class MenuScene extends Scene implements ItemListener {
 		menu.addItem(playMenuItem);
 		visualizeMenuItem = new MenuItem("Visualize", this);
 		menu.addItem(visualizeMenuItem);
-		selectAudioMenuItem = new MenuItem("Select Audio", this);
-		menu.addItem(selectAudioMenuItem);
 		selectModelMenuItem = new MenuItem("Select Model", this);
 		// menu.addItem(selectModelMenuItem);
 		settingsMenuItem = new MenuItem("Settings", this);
@@ -109,6 +109,11 @@ public class MenuScene extends Scene implements ItemListener {
 		selectAudio = new AudioResource("sounds/Select.mp3");
 		
 		background = new Overlay().shader(new ShaderProgram("shaders/default.vs", "shaders/title.fs"));
+		
+		audioSelectionMenu = new Menu(958, 200, 600 + 1, 51, 0);
+		selectAudioMenuItem = new MenuItem("(Change)", this);
+		selectAudioMenuItem.setIcon(null);
+		audioSelectionMenu.addItem(selectAudioMenuItem);
 		
 		models = Resources.getAvailablePlayerModelPaths();
 		playerModel = Resources.getCurrentPlayerModel();
@@ -122,6 +127,7 @@ public class MenuScene extends Scene implements ItemListener {
 		modelValue = new SettingsItem<Integer>("Selected Model", modelIndexe, 600, 50, this);
 		modelValue.setValue(currentModel);
 		modelSelectionMenu.addItem(modelValue);
+		Input.addObservers(menu, audioSelectionMenu, modelSelectionMenu);
 		
 		// Test if audio was selected
 		if (audio == null) {
@@ -130,7 +136,7 @@ public class MenuScene extends Scene implements ItemListener {
 		}
 		// Try to parse tags
 		try {
-			final AudioInfo audioInfo = new AudioInfo(audio.getFile().getPath());
+			final AudioInfo audioInfo = new AudioInfo(audio.getResource().getPath());
 			int offset = 25; // Spacing between text
 			final List<String> infos = audioInfo.getInfos();
 			audioInformationText.clear();
@@ -158,6 +164,7 @@ public class MenuScene extends Scene implements ItemListener {
 		version.render();
 		credits.render();
 		menu.render();
+		audioSelectionMenu.render();
 		modelSelectionMenu.render();
 		
 		Camera.perspective(45, getWidth(), getHeight(), .1, 100);
@@ -165,25 +172,27 @@ public class MenuScene extends Scene implements ItemListener {
 		Camera.lookAt(new Vector(0, 0, 1));
 		rotation.apply();
 		// TODO maybe add reflection
-		playerModel.scale(0.05).render();
+		double factor = getHeight() / 1080.0;
+		playerModel.position().y(-0.15 * (1.1 - factor));
+		playerModel.scale(0.05 * factor).render();
 	}
-	
-	private double lastTime = System.currentTimeMillis() / 1000;
 	
 	@Override
 	public void update(double time) {
 		rotation.yAdd(10 * time);
-		rotation.y(rotation.y() % 360);
 	}
 	
 	@Override
 	public void exiting() {
 		if (!Window.isRecreating() && getEntering() == null) playback.stop();
+		Input.removeObservers(menu, audioSelectionMenu, modelSelectionMenu);
 		title = null;
 		version = null;
 		credits = null;
 		background = null;
 		menu = null;
+		audioSelectionMenu = null;
+		modelSelectionMenu = null;
 		visualizeMenuItem = null;
 		playMenuItem = null;
 		selectAudioMenuItem = null;
@@ -193,6 +202,10 @@ public class MenuScene extends Scene implements ItemListener {
 		hoverAudio = null;
 		selectAudio = null;
 		System.gc();
+	}
+	
+	public AnalyzedAudio getAudio() {
+		return audio;
 	}
 	
 	@Override
@@ -219,24 +232,6 @@ public class MenuScene extends Scene implements ItemListener {
 		default:
 			break;
 		}
-	}
-	
-	@Override
-	public void mouseMoved(int x, int y, int dx, int dy) {
-		// yCoordinates start in left bottom corner, instead left top
-		y = getHeight() - y;
-		
-		menu.mouseMoved(x, y);
-		modelSelectionMenu.mouseMoved(x, y);
-	}
-	
-	@Override
-	public void mouseButtonReleased(int button, int x, int y) {
-		// yCoordinates start in left bottom corner, instead left top
-		y = getHeight() - y;
-		
-		menu.mousePressed(button, x, y);
-		modelSelectionMenu.mousePressed(button, x, y);
 	}
 	
 	enum MouseButton {
