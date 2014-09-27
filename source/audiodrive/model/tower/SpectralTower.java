@@ -53,7 +53,7 @@ public class SpectralTower extends MusicTower {
 			double targetScale = spectrum[i] * Radius;
 			double delta = targetScale - scales[i];
 			scales[i] += delta * Scene.deltaTime() * Speed;
-			double scale = Math.min(scales[i], Radius);
+			double scale = Math.max(0, Math.min(scales[i], Radius));
 			model.scaling().x(scale);
 			model.scaling().z(scale);
 			model.placement().position().add(up.multiplied(Spacing));
