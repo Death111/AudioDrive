@@ -147,7 +147,6 @@ public class MenuScene extends Scene implements ItemListener {
 		Camera.lookAt(new Vector(0, 0, 1));
 		rotation.apply();
 		// TODO maybe add reflection
-		playerModel.scale(0.05).render();
 		double factor = getHeight() / 1080.0;
 		playerModel.position().y(-0.15 * (1.1 - factor));
 		playerModel.scale(0.05 * factor).render();
