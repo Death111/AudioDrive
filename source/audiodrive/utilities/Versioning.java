@@ -44,7 +44,8 @@ public class Versioning {
 	 */
 	public static String getVersion() {
 		if (version != null) return version;
-		if (gitDirectory().exists()) {
+		boolean developing = gitDirectory().exists();
+		if (developing) {
 			update();
 			write();
 		} else {
@@ -52,7 +53,7 @@ public class Versioning {
 		}
 		if (version == null) {
 			version = Unspecified;
-			versionFile().delete();
+			if (developing) versionFile().delete();
 		}
 		return version;
 	}
