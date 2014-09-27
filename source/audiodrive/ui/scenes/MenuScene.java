@@ -6,7 +6,6 @@ import static org.lwjgl.opengl.GL11.glClear;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.lwjgl.input.Keyboard;
 
@@ -65,7 +64,7 @@ public class MenuScene extends Scene implements ItemListener {
 	private boolean silentHovering = true;
 	private double volume;
 	
-	private Model player;
+	private Model playerModel;
 	
 	private Rotation rotation = new Rotation();
 	private Text audioText;
@@ -110,8 +109,8 @@ public class MenuScene extends Scene implements ItemListener {
 		
 		background = new Overlay().shader(new ShaderProgram("shaders/default.vs", "shaders/title.fs"));
 		
-		models = Resources.list("models/player").stream().filter(path -> path.endsWith(".obj")).collect(Collectors.toList());
-		player = ModelLoader.loadModel(Resources.find("models/player", AudioDrive.Settings.get("player.model") + ".obj").orElse(models.get(0)));
+		models = Resources.getAvailablePlayerModelPaths();
+		playerModel = Resources.getCurrentPlayerModel();
 		modelSelectionMenu = new Menu(600, 400, 600 + 1, 51, 0);
 		List<Integer> modelIndexe = new ArrayList<>();
 		int currentModel = 1;
@@ -142,7 +141,7 @@ public class MenuScene extends Scene implements ItemListener {
 		Camera.lookAt(new Vector(0, 0, 1));
 		rotation.apply();
 		// TODO maybe add reflection
-		player.scale(0.05).render();
+		playerModel.scale(0.05).render();
 	}
 	
 	private double lastTime = System.currentTimeMillis() / 1000;
@@ -268,9 +267,9 @@ public class MenuScene extends Scene implements ItemListener {
 			Scene.get(SettingsScene.class).enter();
 		}
 		if (item == modelValue) {
-			final String modelName = models.get(modelValue.getValue() - 1);
-			player = ModelLoader.loadModel(modelName);
-			AudioDrive.Settings.set("player.model", player.getName());
+			final String modelPath = models.get(modelValue.getValue() - 1);
+			playerModel = ModelLoader.loadModel(modelPath);
+			AudioDrive.Settings.set("player.model", playerModel.getName());
 		}
 	}
 	

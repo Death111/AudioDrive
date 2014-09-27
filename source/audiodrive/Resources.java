@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 
 import org.newdawn.slick.opengl.Texture;
@@ -233,6 +234,17 @@ public class Resources {
 	public static Model getSpectraTowerModel() {
 		if (spectraTowerModel == null) spectraTowerModel = ModelLoader.loadModel("models/musictower3/musictower3");
 		return spectraTowerModel;
+	}
+	
+	public static Model getCurrentPlayerModel() {
+		List<String> models = getAvailablePlayerModelPaths();
+		String model = Resources.find("models/player", AudioDrive.Settings.get("player.model") + ".obj").orElse(models.get(0));
+		return ModelLoader.loadModel(model);
+	}
+	
+	public static List<String> getAvailablePlayerModelPaths() {
+		List<String> models = Resources.list("models/player").stream().filter(path -> path.endsWith(".obj")).collect(Collectors.toList());
+		return models;
 	}
 	
 }
