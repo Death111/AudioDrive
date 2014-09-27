@@ -67,7 +67,7 @@ public class Player implements Renderable {
 		track = scene.getTrack();
 		double difficulty = Arithmetic.clamp(AudioDrive.Settings.getDouble("game.difficulty"));
 		hitpoints = Math.max(1, (int) (track.getNumberOfObstacles() * (1 - difficulty)));
-		Log.debug("track \"" + track.getAudio().getFile().getName() + "\"");
+		Log.debug("track \"" + track.getAudio().getResource().getName() + "\"");
 		Log.debug("difficulty " + difficulty);
 		Log.debug("collectables " + track.getNumberOfCollectables());
 		Log.debug("obstacles " + track.getNumberOfObstacles());

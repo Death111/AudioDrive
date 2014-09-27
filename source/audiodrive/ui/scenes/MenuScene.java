@@ -1,8 +1,6 @@
 package audiodrive.ui.scenes;
 
-import static org.lwjgl.opengl.GL11.GL_COLOR_BUFFER_BIT;
-import static org.lwjgl.opengl.GL11.GL_DEPTH_BUFFER_BIT;
-import static org.lwjgl.opengl.GL11.glClear;
+import static org.lwjgl.opengl.GL11.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,6 +24,7 @@ import audiodrive.ui.components.Scene;
 import audiodrive.ui.components.Text;
 import audiodrive.ui.components.Text.Alignment;
 import audiodrive.ui.components.Window;
+import audiodrive.ui.control.Input;
 import audiodrive.ui.effects.ShaderProgram;
 import audiodrive.ui.menu.Menu;
 import audiodrive.ui.menu.item.Item;
@@ -47,6 +46,7 @@ public class MenuScene extends Scene implements ItemListener {
 	private Text version;
 	private Text credits;
 	private Menu menu;
+	private Menu audioSelectionMenu;
 	private Menu modelSelectionMenu;
 	private SettingsItem<Integer> modelValue;
 	private MenuItem visualizeMenuItem;
@@ -68,7 +68,7 @@ public class MenuScene extends Scene implements ItemListener {
 	
 	private Rotation rotation = new Rotation();
 	private Text audioText;
-	private Text audioText2;
+	private Text selectedAudioText;
 	List<String> models;
 	
 	public void enter(AnalyzedAudio audio) {
@@ -86,7 +86,7 @@ public class MenuScene extends Scene implements ItemListener {
 		
 		title = new Text("AudioDrive").setFont(AudioDrive.Font).setSize(48).setPosition(100, 80);
 		audioText = new Text("Selected Audio").setFont(AudioDrive.Font).setSize(32).setPosition(600, 200);
-		audioText2 = new Text("").setFont(AudioDrive.Font).setSize(24).setPosition(600, 250);
+		selectedAudioText = new Text().setFont(AudioDrive.Font).setSize(22).setPosition(600, 260);
 		version = new Text("Version " + AudioDrive.Version).setFont(AudioDrive.Font).setSize(10).setPosition(10, getHeight() - 10).setAlignment(Alignment.LowerLeft);
 		credits = new Text("Made by " + AudioDrive.Creators).setFont(AudioDrive.Font).setSize(10).setPosition(getWidth() - 10, getHeight() - 10).setAlignment(Alignment.LowerRight);
 		
@@ -95,8 +95,6 @@ public class MenuScene extends Scene implements ItemListener {
 		menu.addItem(playMenuItem);
 		visualizeMenuItem = new MenuItem("Visualize", this);
 		menu.addItem(visualizeMenuItem);
-		selectAudioMenuItem = new MenuItem("Select Audio", this);
-		menu.addItem(selectAudioMenuItem);
 		selectModelMenuItem = new MenuItem("Select Model", this);
 		// menu.addItem(selectModelMenuItem);
 		settingsMenuItem = new MenuItem("Settings", this);
@@ -108,6 +106,12 @@ public class MenuScene extends Scene implements ItemListener {
 		selectAudio = new AudioResource("sounds/Select.mp3");
 		
 		background = new Overlay().shader(new ShaderProgram("shaders/default.vs", "shaders/title.fs"));
+		
+		audioSelectionMenu = new Menu(958, 200, 600 + 1, 51, 0);
+		selectAudioMenuItem = new MenuItem("(Change)", this);
+		selectedAudioText.setText(((audio != null) ? "\"" + audio.getName() + "\"" : "None selected"));
+		selectAudioMenuItem.setIcon(null);
+		audioSelectionMenu.addItem(selectAudioMenuItem);
 		
 		models = Resources.getAvailablePlayerModelPaths();
 		playerModel = Resources.getCurrentPlayerModel();
@@ -121,6 +125,7 @@ public class MenuScene extends Scene implements ItemListener {
 		modelValue = new SettingsItem<Integer>("Selected Model", modelIndexe, 600, 50, this);
 		modelValue.setValue(currentModel);
 		modelSelectionMenu.addItem(modelValue);
+		Input.addObservers(menu, audioSelectionMenu, modelSelectionMenu);
 	}
 	
 	@Override
@@ -130,10 +135,11 @@ public class MenuScene extends Scene implements ItemListener {
 		background.render();
 		title.render();
 		audioText.render();
-		audioText2.setText("- " + ((audio != null) ? audio.getName() : "Non selected")).render();
 		version.render();
 		credits.render();
 		menu.render();
+		audioSelectionMenu.render();
+		selectedAudioText.render();
 		modelSelectionMenu.render();
 		
 		Camera.perspective(45, getWidth(), getHeight(), .1, 100);
@@ -142,24 +148,27 @@ public class MenuScene extends Scene implements ItemListener {
 		rotation.apply();
 		// TODO maybe add reflection
 		playerModel.scale(0.05).render();
+		double factor = getHeight() / 1080.0;
+		playerModel.position().y(-0.15 * (1.1 - factor));
+		playerModel.scale(0.05 * factor).render();
 	}
-	
-	private double lastTime = System.currentTimeMillis() / 1000;
 	
 	@Override
 	public void update(double time) {
 		rotation.yAdd(10 * time);
-		rotation.y(rotation.y() % 360);
 	}
 	
 	@Override
 	public void exiting() {
 		if (!Window.isRecreating() && getEntering() == null) playback.stop();
+		Input.removeObservers(menu, audioSelectionMenu, modelSelectionMenu);
 		title = null;
 		version = null;
 		credits = null;
 		background = null;
 		menu = null;
+		audioSelectionMenu = null;
+		modelSelectionMenu = null;
 		visualizeMenuItem = null;
 		playMenuItem = null;
 		selectAudioMenuItem = null;
@@ -169,6 +178,10 @@ public class MenuScene extends Scene implements ItemListener {
 		hoverAudio = null;
 		selectAudio = null;
 		System.gc();
+	}
+	
+	public AnalyzedAudio getAudio() {
+		return audio;
 	}
 	
 	@Override
@@ -195,24 +208,6 @@ public class MenuScene extends Scene implements ItemListener {
 		default:
 			break;
 		}
-	}
-	
-	@Override
-	public void mouseMoved(int x, int y, int dx, int dy) {
-		// yCoordinates start in left bottom corner, instead left top
-		y = getHeight() - y;
-		
-		menu.mouseMoved(x, y);
-		modelSelectionMenu.mouseMoved(x, y);
-	}
-	
-	@Override
-	public void mouseButtonReleased(int button, int x, int y) {
-		// yCoordinates start in left bottom corner, instead left top
-		y = getHeight() - y;
-		
-		menu.mousePressed(button, x, y);
-		modelSelectionMenu.mousePressed(button, x, y);
 	}
 	
 	enum MouseButton {

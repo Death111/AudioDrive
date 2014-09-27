@@ -7,6 +7,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.swing.filechooser.FileSystemView;
@@ -15,6 +17,7 @@ import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.Display;
 
 import audiodrive.AudioDrive;
+import audiodrive.audio.AnalyzedAudio;
 import audiodrive.audio.AudioResource;
 import audiodrive.model.geometry.Color;
 import audiodrive.ui.components.Camera;
@@ -22,6 +25,7 @@ import audiodrive.ui.components.Overlay;
 import audiodrive.ui.components.Scene;
 import audiodrive.ui.components.Text;
 import audiodrive.ui.components.Text.Alignment;
+import audiodrive.ui.control.Input;
 import audiodrive.ui.effects.ShaderProgram;
 import audiodrive.ui.menu.Menu;
 import audiodrive.ui.menu.item.FileChooserItem;
@@ -39,12 +43,12 @@ public class AudioSelectionScene extends Scene implements ItemListener {
 	
 	private static final String PARENT_FILENAME = "..";
 	
-	private Menu itemMenu;
 	private Menu rootMenu;
-	private Menu nextMenu;
+	private Menu itemMenu;
+	private Menu continueMenu;
 	private MenuItem continueMenuItem;
-	private Map<FileChooserItem, File> itemMap = new HashMap<FileChooserItem, File>();
-	private Map<FileChooserItem, File> rootMap = new HashMap<FileChooserItem, File>();
+	private Map<FileChooserItem, File> rootMap;
+	private Map<FileChooserItem, File> itemMap;
 	private FileSystemView fsv = FileSystemView.getFileSystemView();
 	
 	private Text currentFolderText;
@@ -56,6 +60,7 @@ public class AudioSelectionScene extends Scene implements ItemListener {
 	private AudioResource selectAudio;
 	private List<String> supportedFileExtensionList = Arrays.asList("mp3", "wav");
 	
+	private File rootFile = new File(AudioDrive.Settings.get("music.directory"));
 	private File selectedFile = null;
 	private Item selectedItem = null;
 	
@@ -75,16 +80,27 @@ public class AudioSelectionScene extends Scene implements ItemListener {
 		
 		rootMenu = new Menu(20, 180, 151, Display.getHeight() - 180, 1);
 		itemMenu = new Menu(30 + 151, 180, Display.getWidth() - 151 - 50, Display.getHeight() - 2 * 180 + currentFolderText.getHeight(), 1);
-		nextMenu = new Menu(20, Display.getHeight() - MenuItem.MENU_ITEM_HEIGHT - 20, Display.getWidth() - 50, MenuItem.MENU_ITEM_HEIGHT + 1, 1);
+		continueMenu = new Menu(20, Display.getHeight() - MenuItem.MENU_ITEM_HEIGHT - 20, Display.getWidth() - 50, MenuItem.MENU_ITEM_HEIGHT + 1, 1);
 		
 		continueMenuItem = new MenuItem("Continue", this);
 		continueMenuItem.colorMapping().put(Item.State.Normal, new Item.Colors(Color.Green, Color.White, Color.TransparentGreen));
 		continueMenuItem.setFilled(true);
 		continueMenuItem.setDisabled(true);
-		nextMenu.addItem(continueMenuItem);
+		continueMenu.addItem(continueMenuItem);
+		
+		rootMap = new HashMap<FileChooserItem, File>();
+		itemMap = new HashMap<FileChooserItem, File>();
 		
 		// Setup start node
-		updateItemExplorer(new File(AudioDrive.Settings.get("music.directory")));
+		updateItemExplorer(rootFile);
+		if (selectedFile != null) {
+			setSelected(selectedFile);
+			Optional<FileChooserItem> item = itemMap.entrySet().stream().filter(entry -> entry.getValue().equals(selectedFile)).findAny().map(Entry::getKey);
+			if (item.isPresent()) {
+				FileChooserItem selected = item.get();
+				selected.setSelected(true, selected.getX(), selected.getY());
+			}
+		}
 		
 		// Adding default item do list
 		final File defaultFile = new File("music");
@@ -116,6 +132,7 @@ public class AudioSelectionScene extends Scene implements ItemListener {
 		
 		hoverAudio = new AudioResource("sounds/Hover.mp3");
 		selectAudio = new AudioResource("sounds/Select.mp3");
+		Input.addObservers(rootMenu, itemMenu, continueMenu);
 	}
 	
 	/**
@@ -160,14 +177,9 @@ public class AudioSelectionScene extends Scene implements ItemListener {
 	public void render() {
 		glClear(GL_COLOR_BUFFER_BIT);
 		background.render();
-		if (selectedItem != null) {
-			checkItemExplorer(itemMap);
-			checkItemExplorer(rootMap);
-		}
-		selectedItem = null;
 		rootMenu.render();
 		itemMenu.render();
-		nextMenu.render();
+		continueMenu.render();
 		currentFolderText.render();
 		selectedFileText.render();
 		titleText.render();
@@ -176,20 +188,17 @@ public class AudioSelectionScene extends Scene implements ItemListener {
 	private void checkItemExplorer(Map<FileChooserItem, File> map) {
 		final Set<FileChooserItem> keySet = map.keySet();
 		boolean update = false;
-		File rootFile = null;
 		
 		for (FileChooserItem fileChooserItem : keySet) {
 			
 			if (selectedItem == fileChooserItem) {
 				final File file = map.get(fileChooserItem);
-				update = true;
-				rootFile = file;
 				if (!fileChooserItem.isDirectory()) {
-					Log.debug("An item was selected: '" + rootFile.getName() + "'.");
-					selectedFile = rootFile;
-					selectedFileText.setText("File selected: '" + selectedFile.getName() + "'");
-					continueMenuItem.setDisabled(false);
+					setSelected(file);
 					update = false;
+				} else {
+					rootFile = file;
+					update = true;
 				}
 			}
 		}
@@ -199,30 +208,32 @@ public class AudioSelectionScene extends Scene implements ItemListener {
 		}
 	}
 	
+	private void setSelected(File file) {
+		selectedFile = file;
+		if (file == null) {
+			continueMenuItem.setDisabled(true);
+			selectedFileText.setText(null);
+			return;
+		}
+		Log.debug("An item was selected: '" + file.getName() + "'.");
+		selectedFileText.setText("File selected: '" + selectedFile.getName() + "'");
+		continueMenuItem.setDisabled(false);
+	}
+	
 	@Override
 	public void exiting() {
+		Input.removeObservers(rootMenu, itemMenu, continueMenu);
+		rootMap = null;
+		itemMap = null;
+		rootMenu = null;
+		itemMenu = null;
+		continueMenu = null;
+		titleText = null;
+		currentFolderText = null;
+		selectedFileText = null;
+		continueMenuItem = null;
 		background = null;
-		selectedFile = null;
-	}
-	
-	@Override
-	public void mouseMoved(int x, int y, int dx, int dy) {
-		// yCoordinates start in left bottom corner, instead left top
-		y = getHeight() - y;
-		
-		itemMenu.mouseMoved(x, y);
-		rootMenu.mouseMoved(x, y);
-		nextMenu.mouseMoved(x, y);
-	}
-	
-	@Override
-	public void mouseButtonReleased(int button, int x, int y) {
-		// yCoordinates start in left bottom corner, instead left top
-		y = getHeight() - y;
-		
-		itemMenu.mousePressed(button, x, y);
-		rootMenu.mousePressed(button, x, y);
-		nextMenu.mousePressed(button, x, y);
+		selectedItem = null;
 	}
 	
 	@Override
@@ -257,12 +268,18 @@ public class AudioSelectionScene extends Scene implements ItemListener {
 		
 		if (item == continueMenuItem) {
 			if (selectedFile != null) {
-				Scene.get(AnalyzationScene.class).enter(new AudioResource(selectedFile));
+				AudioResource audio = new AudioResource(selectedFile);
+				MenuScene menuScene = Scene.get(MenuScene.class);
+				AnalyzedAudio analyzedAudio = menuScene.getAudio();
+				if (analyzedAudio != null && analyzedAudio.getResource().equals(audio)) menuScene.enter(analyzedAudio);
+				else Scene.get(AnalyzationScene.class).enter(audio);
 			} else {
 				Log.warning("No file selected.");
 			}
 		} else {
 			selectedItem = item;
+			checkItemExplorer(itemMap);
+			checkItemExplorer(rootMap);
 		}
 	}
 	

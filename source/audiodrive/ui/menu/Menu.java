@@ -3,11 +3,15 @@ package audiodrive.ui.menu;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.lwjgl.input.Keyboard;
+
+import audiodrive.ui.components.Window;
+import audiodrive.ui.control.Input;
 import audiodrive.ui.menu.item.FileChooserItem;
 import audiodrive.ui.menu.item.Item;
 import audiodrive.ui.menu.item.ItemListener;
 
-public class Menu implements ItemListener {
+public class Menu implements ItemListener, Input.Observer {
 	
 	private List<Item> items = new ArrayList<Item>();
 	private List<Item> visibleItems = new ArrayList<Item>();
@@ -121,7 +125,11 @@ public class Menu implements ItemListener {
 		items = new ArrayList<Item>();
 	}
 	
-	public void mouseMoved(int x, int y) {
+	@Override
+	public void mouseMoved(int x, int y, int dx, int dy) {
+		// yCoordinates start in left bottom corner, instead left top
+		y = Window.getHeight() - y;
+		
 		// Loop through all MenuItems to check onHover
 		for (Item item : visibleItems) {
 			if (item.isDisabled()) continue;
@@ -129,7 +137,11 @@ public class Menu implements ItemListener {
 		}
 	}
 	
-	public void mousePressed(int button, int x, int y) {
+	@Override
+	public void mouseButtonPressed(int button, int x, int y) {
+		// yCoordinates start in left bottom corner, instead left top
+		y = Window.getHeight() - y;
+		
 		if (button == 0) {
 			for (Item item : visibleItems) {
 				if (item.isDisabled()) continue;
@@ -138,12 +150,36 @@ public class Menu implements ItemListener {
 		}
 	}
 	
+	@Override
+	public void mouseWheelRotated(int rotation, int x, int y) {
+		visibleItems.stream().filter(Item::isHovering).forEach(rotation > 0 ? Item::increment : Item::decrement);
+	}
+	
+	@Override
+	public void keyPressed(int key, char character) {
+		switch (key) {
+		case Keyboard.KEY_UP:
+		case Keyboard.KEY_RIGHT:
+		case Keyboard.KEY_ADD:
+			visibleItems.stream().filter(Item::isHovering).forEach(Item::increment);
+			break;
+		case Keyboard.KEY_DOWN:
+		case Keyboard.KEY_LEFT:
+		case Keyboard.KEY_SUBTRACT:
+			visibleItems.stream().filter(Item::isHovering).forEach(Item::decrement);
+			break;
+		default:
+			break;
+		}
+	}
+	
 	/**
 	 * Set hovering if mouse is in bounds.
 	 */
 	private void setHovering(int x, int y, Item item) {
 		if (item.isSelected()) return;
-		item.setHovering(inBounds(item, x, y));
+		boolean hovering = inBounds(item, x, y);
+		item.setHovering(hovering, x, y);
 	}
 	
 	/**

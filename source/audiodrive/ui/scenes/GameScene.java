@@ -95,7 +95,7 @@ public class GameScene extends Scene {
 		player.model().scale(0.05);
 		overlay = new GameOverlay(this);
 		background = new GameBackground(this);
-		playback = new Playback(track.getAudio().getFile()).setVolume(AudioDrive.Settings.getDouble("music.volume"));
+		playback = new Playback(track.getAudio().getResource()).setVolume(AudioDrive.Settings.getDouble("music.volume"));
 		translation.reset();
 		rotation = 0;
 		time = 0;

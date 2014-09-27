@@ -8,6 +8,7 @@ import audiodrive.Resources;
 import audiodrive.model.geometry.Color;
 import audiodrive.model.geometry.Vector;
 import audiodrive.ui.components.Text;
+import audiodrive.utilities.Arithmetic;
 
 public class SettingsItem<T> extends Item {
 	
@@ -32,6 +33,7 @@ public class SettingsItem<T> extends Item {
 	
 	@Override
 	public void render() {
+		Colors normalColors = getColors(State.Normal);
 		Colors colors = getColors();
 		if (box) {
 			colors.background.gl();
@@ -43,26 +45,32 @@ public class SettingsItem<T> extends Item {
 			glVertex2f(x + width, y);
 			glEnd();
 		}
-		final Color color = box ? colors.foreground : colors.text;
+		final Color textColor = box ? normalColors.foreground : normalColors.text;
+		Color settingsColor = box ? colors.foreground : colors.text;
 		
 		// Setting name
-		text.setColor(color).setPosition(x, y).render();
+		text.setColor(textColor).setPosition(x, y).render();
 		
 		int xOffset = width - length;
 		// Previous arrow
 		Resources.getIconModel().position(new Vector(x + xOffset, y, 0)).position().xAdd(iconWidth / 2).yAdd(iconWidth / 2);
-		Resources.getIconModel().scale(-1 * iconWidth / 2).color(color).setTexture(Resources.getIconTextures().get(Icon.Previous)).render();
+		Resources.getIconModel().scale(-1 * iconWidth / 2).color(settingsColor).setTexture(Resources.getIconTextures().get(Icon.Previous)).render();
 		
 		// Setting value
 		Text valueText = new Text(valueAsString());
 		valueText.setSize(text.getSize());
 		xOffset += length / 2 - valueText.getWidth() / 2;
-		valueText.setColor(color).setPosition(x + xOffset, y).render();
+		valueText.setColor(settingsColor).setPosition(x + xOffset, y).render();
 		
 		// Next arrow
 		xOffset = width - iconWidth;
 		Resources.getIconModel().position(new Vector(x + xOffset, y, 0)).position().xAdd(iconWidth / 2).yAdd(iconWidth / 2);
-		Resources.getIconModel().scale(iconWidth / 2).color(color).setTexture(Resources.getIconTextures().get(Icon.Next)).render();
+		Resources.getIconModel().scale(iconWidth / 2).color(settingsColor).setTexture(Resources.getIconTextures().get(Icon.Next)).render();
+	}
+	
+	@Override
+	public void setHovering(boolean hovering, int x, int y) {
+		super.setHovering(hovering && x > this.x + width - length, x, y);
 	}
 	
 	@Override
@@ -70,17 +78,27 @@ public class SettingsItem<T> extends Item {
 		if (!selected) return;
 		
 		if (inBounds(this.x + width - length, this.y, x, y)) {
-			currentValueIndex--;
-			if (currentValueIndex < 0) {
-				currentValueIndex = values.size() - 1;
-			}
+			decrement();
 		} else if (inBounds(this.x + width - iconWidth, this.y, x, y)) {
-			currentValueIndex++;
-			if (currentValueIndex > values.size() - 1) {
-				currentValueIndex = 0;
-			}
+			increment();
 		}
 		
+		this.fireStateChange(State.Selected, true);
+	}
+	
+	@Override
+	public void increment() {
+		int index = Arithmetic.clamp(currentValueIndex + 1, 0, values.size() - 1);
+		if (index == currentValueIndex) return;
+		currentValueIndex = index;
+		this.fireStateChange(State.Selected, true);
+	}
+	
+	@Override
+	public void decrement() {
+		int index = Arithmetic.clamp(currentValueIndex - 1, 0, values.size() - 1);
+		if (index == currentValueIndex) return;
+		currentValueIndex = index;
 		this.fireStateChange(State.Selected, true);
 	}
 	

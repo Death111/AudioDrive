@@ -68,7 +68,7 @@ public class VisualizerScene extends Scene {
 	@Override
 	protected void entering() {
 		Log.info("visualizing audio...");
-		title = new Text("Visualizing \"" + audio.getFile().getName() + "\"").setFont(AudioDrive.Font).setSize(32).setPosition(20, 20);
+		title = new Text("Visualizing \"" + audio.getResource().getName() + "\"").setFont(AudioDrive.Font).setSize(32).setPosition(20, 20);
 		info = new Text().setFont(AudioDrive.Font).setSize(10).setPosition(20, 70).setAlignment(Alignment.UpperLeft);
 		canvas = new VertexBuffer(Buffers.create(0, 0, 0, getHeight(), getWidth(), getHeight(), getWidth(), 0), 2).mode(GL_QUADS);
 		shader = new ShaderProgram("shaders/default.vs", "shaders/spectrum.fs");
@@ -80,7 +80,7 @@ public class VisualizerScene extends Scene {
 		rightSpectrum = new float[audio.getBandCount()];
 		newLeftSpectrum = new float[audio.getBandCount()];
 		newRightSpectrum = new float[audio.getBandCount()];
-		playback = new Playback(audio.getFile()).start();
+		playback = new Playback(audio.getResource()).start();
 		
 		Camera.overlay(getWidth(), getHeight());
 		glDisable(GL_CULL_FACE);

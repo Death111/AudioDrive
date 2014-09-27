@@ -129,7 +129,7 @@ public abstract class Item {
 		}
 	}
 	
-	protected Item setIcon(Icon icon) {
+	public Item setIcon(Icon icon) {
 		this.icon = icon;
 		return this;
 	}
@@ -170,8 +170,8 @@ public abstract class Item {
 		return text.getText();
 	}
 	
-	public void setHovering(boolean hover) {
-		setState(hover ? State.Hovering : State.Normal);
+	public void setHovering(boolean hovering, int x, int y) {
+		setState(hovering ? State.Hovering : State.Normal);
 	}
 	
 	public void setSelected(boolean selected, int x, int y) {
@@ -181,6 +181,10 @@ public abstract class Item {
 	public void setDisabled(boolean disabled) {
 		setState(disabled ? State.Disabled : State.Normal);
 	}
+	
+	public void increment() {}
+	
+	public void decrement() {}
 	
 	public boolean isHovering() {
 		return state == State.Hovering;
@@ -204,6 +208,10 @@ public abstract class Item {
 	}
 	
 	public Colors getColors() {
+		return getColors(state);
+	}
+	
+	public Colors getColors(State state) {
 		return colorMapping != null ? colorMapping.get(state) : DefaultColors.get(state);
 	}
 	

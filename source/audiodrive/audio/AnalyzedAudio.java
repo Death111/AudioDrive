@@ -75,7 +75,7 @@ public class AnalyzedAudio extends DecodedAudio {
 	
 	@Override
 	public String toString() {
-		return "Analyzed " + getFile().getName();
+		return "Analyzed " + getResource().getName();
 	}
 	
 }

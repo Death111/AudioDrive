@@ -62,11 +62,11 @@ public class Rotation extends Transformation {
 	public Rotation add(double angle, Vector axis) {
 		assertModifiable();
 		if (!isMultiplex()) {
-			if (axis.equals(Vector.X) || axis.equals(Vector.X.negated())) x += angle;
-			else if (axis.equals(Vector.Y) || axis.equals(Vector.Y.negated())) y += angle;
-			else if (axis.equals(Vector.Z) || axis.equals(Vector.Z.negated())) z += angle;
+			if (axis.equals(Vector.X) || axis.equals(Vector.X.negated())) x = unify(x + angle);
+			else if (axis.equals(Vector.Y) || axis.equals(Vector.Y.negated())) y = unify(y + angle);
+			else if (axis.equals(Vector.Z) || axis.equals(Vector.Z.negated())) z = unify(z + angle);
 		}
-		matrix.rotate(unify180(angle), axis);
+		matrix.rotate(unify(angle), axis);
 		return this;
 	}
 	

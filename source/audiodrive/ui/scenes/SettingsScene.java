@@ -16,6 +16,7 @@ import audiodrive.ui.components.Scene;
 import audiodrive.ui.components.Text;
 import audiodrive.ui.components.Text.Alignment;
 import audiodrive.ui.components.Window;
+import audiodrive.ui.control.Input;
 import audiodrive.ui.effects.ShaderProgram;
 import audiodrive.ui.menu.Menu;
 import audiodrive.ui.menu.item.Item;
@@ -31,7 +32,7 @@ import audiodrive.utilities.Log;
  */
 public class SettingsScene extends Scene implements ItemListener {
 	
-	private static final List<Boolean> booleanValues = Arrays.asList(true, false);
+	private static final List<Boolean> booleanValues = Arrays.asList(false, true);
 	private static final List<Integer> multisamplingValues = Arrays.asList(0, 2, 4, 8);
 	private static final List<Integer> sightValues = Arrays.asList(50, 100, 150, 200, 250, 300);
 	private static final List<Double> difficultyValues = Arrays.asList(.1, .2, .3, .4, .5, .6, .7, .8, .9, 1.);
@@ -166,6 +167,7 @@ public class SettingsScene extends Scene implements ItemListener {
 		background = new Overlay().shader(new ShaderProgram("shaders/default.vs", "shaders/title.fs"));
 		updateSettings();
 		Camera.overlay(getWidth(), getHeight());
+		Input.addObservers(saveMenu, graphicMenu, soundMenu, inputMenu, gameMenu);
 	}
 	
 	private void updateSettings() {
@@ -209,28 +211,8 @@ public class SettingsScene extends Scene implements ItemListener {
 	}
 	
 	@Override
-	public void exiting() {}
-	
-	@Override
-	public void mouseMoved(int x, int y, int dx, int dy) {
-		// yCoordinates start in left bottom corner, instead left top
-		y = getHeight() - y;
-		graphicMenu.mouseMoved(x, y);
-		soundMenu.mouseMoved(x, y);
-		inputMenu.mouseMoved(x, y);
-		gameMenu.mouseMoved(x, y);
-		saveMenu.mouseMoved(x, y);
-	}
-	
-	@Override
-	public void mouseButtonReleased(int button, int x, int y) {
-		// yCoordinates start in left bottom corner, instead left top
-		y = getHeight() - y;
-		graphicMenu.mousePressed(button, x, y);
-		soundMenu.mousePressed(button, x, y);
-		inputMenu.mousePressed(button, x, y);
-		gameMenu.mousePressed(button, x, y);
-		saveMenu.mousePressed(button, x, y);
+	public void exiting() {
+		Input.removeObservers(saveMenu, graphicMenu, soundMenu, inputMenu, gameMenu);
 	}
 	
 	@Override

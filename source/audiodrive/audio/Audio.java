@@ -12,7 +12,7 @@ public interface Audio {
 	/**
 	 * Returns the original audio file.
 	 */
-	AudioResource getFile();
+	AudioResource getResource();
 	
 	/**
 	 * Indicates the total number of samples.
