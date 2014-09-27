@@ -19,11 +19,12 @@ import org.farng.mp3.id3.AbstractID3v2;
 import org.farng.mp3.id3.ID3v1;
 
 public class AudioInfo {
-	public String title = "";
-	public String artist = "";
-	public String album = "";
+	public static final String notAvailable = "N/A";
 	
-	public String duration = "";
+	public String title = notAvailable;
+	public String artist = notAvailable;
+	public String album = notAvailable;
+	public String duration = notAvailable;
 	
 	public AudioInfo(String path) throws Exception {
 		this(new File(new URL(path).getFile()));
@@ -42,16 +43,17 @@ public class AudioInfo {
 			}
 			
 			if (id3v1Tag != null) {
-				title = title.isEmpty() ? id3v1Tag.getTitle() : title;
-				artist = artist.isEmpty() ? id3v1Tag.getArtist() : artist;
-				album = album.isEmpty() ? id3v1Tag.getAlbum() : album;
+				title = isEmptyOrNA(title) ? id3v1Tag.getTitle() : title;
+				artist = isEmptyOrNA(artist) ? id3v1Tag.getArtist() : artist;
+				album = isEmptyOrNA(album) ? id3v1Tag.getAlbum() : album;
 			}
 			
-			if (title.isEmpty()) title = file.getName();
+			// Use file name if no title was found
+			if (isEmptyOrNA(title)) title = file.getName();
+			
 		} catch (IOException | TagException e) {}
 		// Try get duration
 		try {
-			
 			AudioFileFormat baseFileFormat = new MpegAudioFileReader().getAudioFileFormat(file);
 			Map properties = baseFileFormat.properties();
 			Long duration = (Long) properties.get("duration");
@@ -60,26 +62,39 @@ public class AudioInfo {
 				TimeUnit.MICROSECONDS.toMinutes(duration),
 				TimeUnit.MICROSECONDS.toSeconds(duration) - TimeUnit.MINUTES.toSeconds(TimeUnit.MICROSECONDS.toMinutes(duration)));
 		} catch (UnsupportedAudioFileException | IOException e) {}
+		
+		validateElements();
+	}
+	
+	private void validateElements() {
+		if (title.isEmpty()) title = notAvailable;
+		if (artist.isEmpty()) artist = notAvailable;
+		if (album.isEmpty()) album = notAvailable;
+		if (duration.isEmpty()) duration = notAvailable;
 	}
 	
 	public List<String> getInfos() {
 		List<String> infos = new ArrayList<>();
 		
-		if (artist != null && !artist.isEmpty()) infos.add("Artist: " + artist);
-		if (title != null && !title.isEmpty()) infos.add("Title: " + title);
-		if (album != null && !album.isEmpty()) infos.add("Album: " + album);
-		if (duration != null && !duration.isEmpty()) infos.add("Duration: " + duration);
+		infos.add("Artist: " + artist);
+		infos.add("Title: " + title);
+		infos.add("Album: " + album);
+		infos.add("Duration: " + duration);
 		
 		return infos;
+	}
+	
+	public boolean isEmptyOrNA(String string) {
+		return string.isEmpty() || string.equals(notAvailable);
 	}
 	
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
-		if (artist != null && !artist.isEmpty()) builder.append(artist + ", ");
-		if (title != null && !title.isEmpty()) builder.append(title + ", ");
-		if (album != null && !album.isEmpty()) builder.append(album + ", ");
-		if (duration != null && !duration.isEmpty()) builder.append("Duration: " + duration);
+		builder.append(artist + ", ");
+		builder.append(title + ", ");
+		builder.append(album + ", ");
+		builder.append("Duration: " + duration);
 		return builder.toString();
 	}
 }

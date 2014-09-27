@@ -205,7 +205,7 @@ public class AudioSelectionScene extends Scene implements ItemListener {
 					
 					// Try to get some informations about selected file
 					AudioInfo audioInfo = new AudioInfo(file);
-					String duration = "Duration: " + ((audioInfo.duration.isEmpty()) ? "N/A" : audioInfo.duration);
+					String duration = "Duration: " + audioInfo.duration;
 					selectedFileInfoText.setText(duration); // Only set duration due to little space
 					
 					continueMenuItem.setDisabled(false);
