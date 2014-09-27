@@ -6,6 +6,7 @@ import static org.lwjgl.opengl.GL11.glClear;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.IntStream;
 
 import org.lwjgl.input.Keyboard;
 
@@ -13,6 +14,7 @@ import audiodrive.AudioDrive;
 import audiodrive.Resources;
 import audiodrive.audio.AnalyzedAudio;
 import audiodrive.audio.AudioResource;
+import audiodrive.audio.AudioInfo;
 import audiodrive.audio.Playback;
 import audiodrive.model.geometry.Vector;
 import audiodrive.model.geometry.transform.Rotation;
@@ -68,7 +70,7 @@ public class MenuScene extends Scene implements ItemListener {
 	
 	private Rotation rotation = new Rotation();
 	private Text audioText;
-	private Text audioText2;
+	private List<Text> audioInformationText = new ArrayList<>();
 	List<String> models;
 	
 	public void enter(AnalyzedAudio audio) {
@@ -86,7 +88,6 @@ public class MenuScene extends Scene implements ItemListener {
 		
 		title = new Text("AudioDrive").setFont(AudioDrive.Font).setSize(48).setPosition(100, 80);
 		audioText = new Text("Selected Audio").setFont(AudioDrive.Font).setSize(32).setPosition(600, 200);
-		audioText2 = new Text("").setFont(AudioDrive.Font).setSize(24).setPosition(600, 250);
 		version = new Text("Version " + AudioDrive.Version).setFont(AudioDrive.Font).setSize(10).setPosition(10, getHeight() - 10).setAlignment(Alignment.LowerLeft);
 		credits = new Text("Made by " + AudioDrive.Creators).setFont(AudioDrive.Font).setSize(10).setPosition(getWidth() - 10, getHeight() - 10).setAlignment(Alignment.LowerRight);
 		
@@ -121,6 +122,28 @@ public class MenuScene extends Scene implements ItemListener {
 		modelValue = new SettingsItem<Integer>("Selected Model", modelIndexe, 600, 50, this);
 		modelValue.setValue(currentModel);
 		modelSelectionMenu.addItem(modelValue);
+		
+		// Test if audio was selected
+		if (audio == null) {
+			audioInformationText.add(new Text("Non selected").setFont(AudioDrive.Font).setSize(24).setPosition(600, 250));
+			return;
+		}
+		// Try to parse tags
+		try {
+			final AudioInfo audioInfo = new AudioInfo(audio.getFile().getPath());
+			int offset = 25; // Spacing between text
+			final List<String> infos = audioInfo.getInfos();
+			audioInformationText.clear();
+			IntStream.range(0, infos.size()).forEach(idx -> {
+				audioInformationText.add(new Text(infos.get(idx)).setFont(AudioDrive.Font).setSize(24).setPosition(600, 250 + idx * offset));
+			});
+			
+		} catch (Exception e) {
+			// Something went wrong i.e. no tags available use file name
+			Log.warning("Error while parsing tags: " + e);
+			audioInformationText.clear();
+			audioInformationText.add(new Text(audio.getName()).setFont(AudioDrive.Font).setSize(24).setPosition(600, 250));
+		}
 	}
 	
 	@Override
@@ -130,7 +153,8 @@ public class MenuScene extends Scene implements ItemListener {
 		background.render();
 		title.render();
 		audioText.render();
-		audioText2.setText("- " + ((audio != null) ? audio.getName() : "Non selected")).render();
+		audioInformationText.stream().forEach(Text::render);
+		
 		version.render();
 		credits.render();
 		menu.render();

@@ -1,6 +1,7 @@
 package audiodrive.ui.scenes;
 
-import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL11.GL_COLOR_BUFFER_BIT;
+import static org.lwjgl.opengl.GL11.glClear;
 
 import java.io.File;
 import java.util.Arrays;
@@ -16,6 +17,7 @@ import org.lwjgl.opengl.Display;
 
 import audiodrive.AudioDrive;
 import audiodrive.audio.AudioResource;
+import audiodrive.audio.AudioInfo;
 import audiodrive.model.geometry.Color;
 import audiodrive.ui.components.Camera;
 import audiodrive.ui.components.Overlay;
@@ -49,6 +51,7 @@ public class AudioSelectionScene extends Scene implements ItemListener {
 	
 	private Text currentFolderText;
 	private Text selectedFileText;
+	private Text selectedFileInfoText;
 	private Text titleText;
 	private Overlay background;
 	
@@ -71,7 +74,8 @@ public class AudioSelectionScene extends Scene implements ItemListener {
 		
 		titleText = new Text("Select an AudioFile").setFont(AudioDrive.Font).setSize(48).setPosition(20, 20);
 		currentFolderText = new Text().setFont(AudioDrive.Font).setPosition(20, 125).setSize(22).setAlignment(Alignment.Left);
-		selectedFileText = new Text().setFont(AudioDrive.Font).setPosition(20, Display.getHeight() - 100).setSize(22).setAlignment(Alignment.Left);
+		selectedFileText = new Text().setFont(AudioDrive.Font).setPosition(20, Display.getHeight() - 125).setSize(22).setAlignment(Alignment.Left);
+		selectedFileInfoText = new Text().setFont(AudioDrive.Font).setPosition(20, Display.getHeight() - 100).setSize(22).setAlignment(Alignment.Left);
 		
 		rootMenu = new Menu(20, 180, 151, Display.getHeight() - 180, 1);
 		itemMenu = new Menu(30 + 151, 180, Display.getWidth() - 151 - 50, Display.getHeight() - 2 * 180 + currentFolderText.getHeight(), 1);
@@ -170,6 +174,7 @@ public class AudioSelectionScene extends Scene implements ItemListener {
 		nextMenu.render();
 		currentFolderText.render();
 		selectedFileText.render();
+		selectedFileInfoText.render();
 		titleText.render();
 	}
 	
@@ -187,7 +192,11 @@ public class AudioSelectionScene extends Scene implements ItemListener {
 				if (!fileChooserItem.isDirectory()) {
 					Log.debug("An item was selected: '" + rootFile.getName() + "'.");
 					selectedFile = rootFile;
+					// Try to get some informations about selected file
+					AudioInfo audioInfo = new AudioInfo(rootFile);
+					String duration = "Duration: " + ((audioInfo.duration.isEmpty()) ? "N/A" : audioInfo.duration);
 					selectedFileText.setText("File selected: '" + selectedFile.getName() + "'");
+					selectedFileInfoText.setText(duration);
 					continueMenuItem.setDisabled(false);
 					update = false;
 				}

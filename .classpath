@@ -12,5 +12,6 @@
 	<classpathentry kind="lib" path="libraries/game/lwjgl.jar" sourcepath="libraries/game/lwjgl.zip"/>
 	<classpathentry kind="lib" path="libraries/game/slick-util.jar" sourcepath="libraries/game/slick-util.zip"/>
 	<classpathentry kind="lib" path="libraries/audio/tritonus-share.jar" sourcepath="libraries/audio/tritonus-share.zip"/>
+	<classpathentry kind="lib" path="libraries/audio/mp3/jid3lib-0.5.4.jar"/>
 	<classpathentry kind="output" path="binary"/>
 </classpath>
