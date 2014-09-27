@@ -394,7 +394,7 @@ public class Track implements Renderable {
 		}
 		
 		double linearIntensity = mix.getBands().get(1).getClamped(iteration);
-		double rotationSpeed = mix.getSpectralSum().getClamped(iteration) * 360;
+		double rotationSpeed = mix.getSpectralSum().getClamped(iteration) * 180;
 		
 		if (GameScene.environment) {
 			visibleMusicTowers = musicTowers
@@ -410,7 +410,7 @@ public class Track implements Renderable {
 				} else {
 					a.position().xAdd((((int) f) % 2 == 0) ? -50 : 50).zAdd(-50);
 				}
-				if (musicTower instanceof TubeTower) musicTower.intensity(linearIntensity);
+				if (musicTower instanceof TubeTower) musicTower.intensity(.1 + linearIntensity);
 				else if (musicTower instanceof RotationTower) musicTower.intensity(Math.min(linearIntensity + 0.5, 1));
 				musicTower.placement(a).color(borderColor);
 			});
