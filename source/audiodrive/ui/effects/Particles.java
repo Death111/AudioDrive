@@ -5,6 +5,7 @@ import static org.lwjgl.opengl.GL15.*;
 import static org.lwjgl.opengl.GL20.glUniform1i;
 
 import java.util.Arrays;
+import java.util.stream.IntStream;
 
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL13;
@@ -40,7 +41,7 @@ class Particle implements Comparable<Particle> {
 
 public class Particles implements Renderable {
 	
-	private static final int maxParticles = 10000;
+	private static final int maxParticles = 5000;
 	Particle particles[] = new Particle[maxParticles];
 	int lastUsedParticle = 0;
 	
@@ -49,7 +50,6 @@ public class Particles implements Renderable {
 	float particlePositionData[] = new float[maxParticles * 4];
 	float particleColorData[] = new float[maxParticles * 4];
 	
-	// int VertexArrayID = GL30.glGenVertexArrays();
 	int vertexArray_buffer = glGenBuffers();
 	int particle_vertex_buffer = glGenBuffers();
 	int particles_position_buffer = glGenBuffers();
@@ -59,11 +59,13 @@ public class Particles implements Renderable {
 	
 	public Particles() {
 		texture = Resources.getTexture("textures/particle/particle.png");
-		// GL30.glBindVertexArray(VertexArrayID);
 		for (int i = 0; i < maxParticles; i++) {
 			particles[i] = new Particle();
 			particles[i].life = -1.0f;
 			particles[i].cameraDistance = -1.0f;
+			particles[i].color = Color.Black;
+			particles[i].position = new Vector();
+			particles[i].speed = new Vector();
 		}
 		
 		System.out.println(GL20.GL_MAX_VERTEX_ATTRIBS);
@@ -89,69 +91,77 @@ public class Particles implements Renderable {
 	}
 	
 	private double lastTime = System.currentTimeMillis() / 1000;
-	int particlesCount = 0;
 	
-	@Override
-	public void update(double time) {
-		double delta = time - lastTime;
-		lastTime = time;
-		
-		final Vector cameraPosition = Camera.position();
+	int particlesCount = 0;
+	final float particleLifetime = 5.0f;
+	
+	public void createParticles(Vector position, Color color, double amount) {
 		// Calc how many particles per second
-		int newParticles = (int) Math.min(delta * maxParticles, .0001f * maxParticles);
-		final float particleLifetime = 10.0f;
+		int newParticles = (int) Math.min(amount * delta * maxParticles, .16f * maxParticles);
 		
-		for (int i = 0; i < newParticles; i++) {
+		// Create new particles
+		IntStream.range(0, newParticles).parallel().forEach(idx -> {
 			int particleIndex = findUnusedParticle();
 			particles[particleIndex].life = particleLifetime; // This particle will live 5 seconds.
-			particles[particleIndex].position = new Vector(0, 0, 0.0f);
+			particles[particleIndex].position = position.clone();
 			
 			float spread = 8f;
 			Vector maindir = new Vector(Math.random() - .5f, 10f + Math.random(), Math.random() - .5f);
 			// Very bad way to generate a random direction;
 			// See for instance http://stackoverflow.com/questions/5408276/python-uniform-spherical-distribution instead,
 			// combined with some user-controlled parameters (main direction, spread, etc)
-			Vector randomdir = new Vector(Math.random() - .5, Math.random() - .5, Math.random() - .5);
+			Vector randomdir = new Vector(Math.random() - .5, Math.random() - .5, Math.random() - .5f);
 			
 			particles[particleIndex].speed = maindir.add(randomdir.multiplied(spread));
 			
 			// Very bad way to generate a random color
-			particles[particleIndex].color = Color.generateRandomColor(Color.Green);
-			
-			particles[particleIndex].size = (float) 1;// (Math.random() % 1000) / 2000.0f + 0.1f;
-		}
+			particles[particleIndex].color = Color.generateRandomColor(color);
+			particles[particleIndex].size = (float) Math.random();// (Math.random() % 1000) / 2000.0f + 0.1f;
+		});
+	}
+	
+	double delta = 0;
+	
+	@Override
+	public void update(double time) {
+		delta = time - lastTime;
+		lastTime = time;
+		
+		final Vector cameraPosition = Camera.position();
+		
+		createParticles(
+			new Vector((Math.random() - .5) * 30, (Math.random() - .5) * 30, (Math.random() - .5) * 30),
+			new Color(Math.random(), Math.random(), Math.random(), 1),
+			Math.random());
 		
 		// Simulate all particles
 		particlesCount = 0;
-		for (int i = 0; i < maxParticles; i++) {
-			
-			Particle p = particles[i];
-			
+		Arrays.stream(particles).parallel().forEach(p -> {
 			if (p.life > 0.0f) {
 				
 				// Decrease life
-				p.life -= delta;
-				if (p.life > 0.0f) {
-					// Simulate simple physics : gravity only, no collisions
-					p.speed.add(new Vector(0.0f, -9.81f, 0.0f).multiply(delta * 0.5f));
-					p.position.add(p.speed.multiplied(delta));
-					p.cameraDistance = p.position.minus(cameraPosition).length();
-					particlesCount++;
-				} else {
-					// Particles that just died will be put at the end of the buffer in SortParticles();
-					p.cameraDistance = -1.0f;
-				}
+			p.life -= delta;
+			if (p.life > 0.0f) {
+				// Simulate simple physics : gravity only, no collisions
+				p.speed.add(new Vector(0.0f, -9.81f, 0.0f).multiply(delta * 0.5f));
+				p.position.add(p.speed.multiplied(delta));
+				p.cameraDistance = p.position.minus(cameraPosition).length();
+				particlesCount++;
+			} else {
+				// Particles that just died will be put at the end of the buffer in SortParticles();
+				p.cameraDistance = -1.0f;
 			}
 		}
+	}	);
 		
 		sortParticles();
 		
 		// fill gpu buffer, farest particles first
+		// TODO error while drawing
 		for (int i = 0; i < particlesCount; i++) {
 			Particle p = particles[i]; // shortcut
-			
 			// fade transparency
-			// p.color = p.color.alpha(p.life * 1 / particleLifetime);
+			p.color = p.color.alpha(p.life * 1 / particleLifetime);
 			
 			particlePositionData[4 * i + 0] = (float) p.position.x();
 			particlePositionData[4 * i + 1] = (float) p.position.y();
@@ -163,13 +173,14 @@ public class Particles implements Renderable {
 			particleColorData[4 * i + 2] = (float) p.color.b;
 			particleColorData[4 * i + 3] = (float) p.color.a;
 		}
+		
 	}
 	
 	private void sortParticles() {
 		Arrays.sort(particles);
 	}
 	
-	private int findUnusedParticle() {
+	private synchronized int findUnusedParticle() {
 		
 		for (int i = lastUsedParticle; i < maxParticles; i++) {
 			if (particles[i].life < 0) {
@@ -225,6 +236,7 @@ public class Particles implements Renderable {
 		glBindBuffer(GL_ARRAY_BUFFER, particle_vertex_buffer);
 		GL20.glVertexAttribPointer(0, 3, GL11.GL_FLOAT, false, 0, 0);
 		
+		// TODO why cant i use code above in shader (location = 0)
 		GL20.glEnableVertexAttribArray(3);
 		glBindBuffer(GL_ARRAY_BUFFER, particle_vertex_buffer);
 		GL20.glVertexAttribPointer(3, 3, GL11.GL_FLOAT, false, 0, 0);

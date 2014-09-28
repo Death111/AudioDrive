@@ -33,7 +33,7 @@ public class ParticleScene extends Scene {
 	public void render() {
 		glClearColor(.5f, .5f, .5f, 1f);
 		glClear(GL_COLOR_BUFFER_BIT);
-		Camera.position(new Vector(0, 0, -20));
+		Camera.position(new Vector(0, 0, -60));
 		Camera.lookAt(new Vector(0, 0, 0));
 		rotation.apply();
 		particles.render();
