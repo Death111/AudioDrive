@@ -129,22 +129,19 @@ public class Particles implements Renderable {
 		
 		final Vector cameraPosition = Camera.position();
 		
-		createParticles(
-			new Vector((Math.random() - .5) * 30, (Math.random() - .5) * 30, (Math.random() - .5) * 30),
-			new Color(Math.random(), Math.random(), Math.random(), 1),
-			Math.random());
-		
+		createParticles(new Vector((Math.random() - .5) * 30, 0, (Math.random() - .5) * 30), new Color(Math.random(), Math.random(), Math.random(), 1), Math.random());
 		// Simulate all particles
 		particlesCount = 0;
+		// TODO why particles flicker when using parallel
 		Arrays.stream(particles).parallel().forEach(p -> {
 			if (p.life > 0.0f) {
-				
 				// Decrease life
 			p.life -= delta;
 			if (p.life > 0.0f) {
 				// Simulate simple physics : gravity only, no collisions
 				p.speed.add(new Vector(0.0f, -9.81f, 0.0f).multiply(delta * 0.5f));
 				p.position.add(p.speed.multiplied(delta));
+				p.color = p.color.alpha(p.life * 1 / particleLifetime);
 				p.cameraDistance = p.position.minus(cameraPosition).length();
 				particlesCount++;
 			} else {
@@ -161,7 +158,6 @@ public class Particles implements Renderable {
 		for (int i = 0; i < particlesCount; i++) {
 			Particle p = particles[i]; // shortcut
 			// fade transparency
-			p.color = p.color.alpha(p.life * 1 / particleLifetime);
 			
 			particlePositionData[4 * i + 0] = (float) p.position.x();
 			particlePositionData[4 * i + 1] = (float) p.position.y();
