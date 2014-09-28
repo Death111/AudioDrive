@@ -69,7 +69,7 @@ public class MenuScene extends Scene implements ItemListener {
 		menu.addItem(visualizeMenuItem);
 		playMenuItem = new MenuItem("Play", this);
 		menu.addItem(playMenuItem);
-		selectAudioMenuItem = new MenuItem("Select Audio", this);
+		selectAudioMenuItem = new MenuItem("Particles", this);
 		menu.addItem(selectAudioMenuItem);
 		selectModelMenuItem = new MenuItem("Select Model", this);
 		menu.addItem(selectModelMenuItem);
