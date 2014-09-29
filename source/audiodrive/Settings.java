@@ -50,8 +50,8 @@ public class Settings {
 		set("player.model", "xwing");
 		set("sound.volume", "1.0");
 		set("track.smoothing", "15");
-		set("window.antialiasing", "true");
-		set("window.multisampling", "2");
+		set("window.antialiasing", "false");
+		set("window.multisampling", "0");
 		set("window.framerate", "0");
 		set("window.useSecondaryMonitor", "false");
 		set("window.vsync", "true");
