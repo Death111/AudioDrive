@@ -79,6 +79,7 @@ public class Framebuffer {
 	protected Framebuffer render(List<? extends Renderable> renderables) {
 		glBindFramebuffer(GL_FRAMEBUFFER, framebufferID);
 		
+		glDisable(GL_LIGHTING);
 		glEnable(GL_TEXTURE_2D);
 		glViewport(0, 0, width, height);
 		glClearColor(0, 0, 0, 0);
@@ -92,6 +93,7 @@ public class Framebuffer {
 			renderpass.run();
 		}
 		renderables.forEach(Renderable::render);
+		glEnable(GL_LIGHTING);
 		
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		return this;

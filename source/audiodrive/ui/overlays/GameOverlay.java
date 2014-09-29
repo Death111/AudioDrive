@@ -123,6 +123,7 @@ public class GameOverlay extends Overlay {
 		texts.get("framerate").setText(Scene.getFramerate() + " FPS");
 		text("memory").setText(Memory.used() + "/" + Memory.allocated());
 		Camera.overlay(width, height);
+		glDisable(GL_LIGHTING);
 		super.render();
 		if (GameScene.visualization && GameScene.peaks) drawPeaks();
 		if (GameScene.visualization && GameScene.spectrum) drawSpectrum();
@@ -130,6 +131,7 @@ public class GameOverlay extends Overlay {
 		trackOverview.render();
 		if (text("notification").isVisible()) drawNotificationBackground();
 		texts.values().forEach(Text::render);
+		glEnable(GL_LIGHTING);
 	}
 	
 	private void drawNotificationBackground() {

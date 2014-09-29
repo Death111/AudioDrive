@@ -35,7 +35,7 @@ public class Glow extends Framebuffer {
 		glViewport(0, 0, Window.getWidth(), Window.getHeight());
 		glEnable(GL_TEXTURE_2D);
 		glEnable(GL_BLEND);
-		texture().bind();
+		glBindTexture(GL_TEXTURE_2D, textureID);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 		glBegin(GL_QUADS);
 		for (int i = 0; i < times; i++) {
