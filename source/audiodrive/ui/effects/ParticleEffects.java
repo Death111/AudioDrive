@@ -79,11 +79,11 @@ public class ParticleEffects {
 	 */
 	public void createParticles(Block block) {
 		
-		final ArrayList<Particle> particleList = new ArrayList<Particle>(particleCount);
+		final ArrayList<Particle2> particleList = new ArrayList<Particle2>(particleCount);
 		final int x = Display.getWidth() / 2 + Display.getWidth() / 3 * block.rail();
 		final Vector startPosition = new Vector(x, -50, 0);
 		for (int i = 0; i < particleCount; i++) {
-			Particle particle = new Particle();
+			Particle2 particle = new Particle2();
 			particle.color = Color.generateRandomColor(block.color());
 			particle.model = models.get(i % models.size());
 			particle.startPosition = startPosition;
@@ -117,7 +117,7 @@ public class ParticleEffects {
 	
 }
 
-class Particle {
+class Particle2 {
 	Model model;
 	Vector startPosition;
 	Color color;
@@ -182,12 +182,12 @@ class Particle {
 }
 
 class ParticleWave {
-	List<Particle> particles;
+	List<Particle2> particles;
 	double startTime;
 	double lifeTime = 2;
 	double elapsedTime;
 	
-	public ParticleWave(List<Particle> particles) {
+	public ParticleWave(List<Particle2> particles) {
 		startTime = Scene.time();
 		this.particles = particles;
 	}
@@ -195,7 +195,7 @@ class ParticleWave {
 	public void render() {
 		elapsedTime = Scene.time() - startTime;
 		final double d = (1f / lifeTime); // multiplicator for alpha fading
-		for (Particle particle : particles) {
+		for (Particle2 particle : particles) {
 			final double factor = particle.speed * elapsedTime;
 			Vector newPos = particle.startPosition.clone().add(particle.velocity.multiplied(factor));
 			final Color color = particle.getColor();

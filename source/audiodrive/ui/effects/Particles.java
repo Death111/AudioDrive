@@ -1,0 +1,258 @@
+package audiodrive.ui.effects;
+
+import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL15.*;
+import static org.lwjgl.opengl.GL20.glUniform1i;
+
+import java.util.Arrays;
+import java.util.stream.IntStream;
+
+import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL13;
+import org.lwjgl.opengl.GL20;
+import org.lwjgl.opengl.GL30;
+import org.lwjgl.opengl.GL31;
+import org.lwjgl.opengl.GL33;
+import org.newdawn.slick.opengl.Texture;
+
+import audiodrive.Resources;
+import audiodrive.model.Renderable;
+import audiodrive.model.geometry.Color;
+import audiodrive.model.geometry.Vector;
+import audiodrive.ui.components.Camera;
+import audiodrive.ui.effects.ShaderProgram.Uniform;
+import audiodrive.utilities.Buffers;
+
+class Particle implements Comparable<Particle> {
+	Vector position;
+	Vector speed;
+	Color color;
+	float size, angle, width;
+	float life;
+	double cameraDistance;
+	
+	@Override
+	public int compareTo(Particle that) {
+		if (this.cameraDistance > that.cameraDistance) return -1;
+		if (this.cameraDistance < that.cameraDistance) return 1;
+		return 0;
+	}
+}
+
+public class Particles implements Renderable {
+	
+	private static final int maxParticles = 3000;
+	Particle particles[] = new Particle[maxParticles];
+	int lastUsedParticle = 0;
+	
+	Texture texture;
+	
+	float particlePositionData[] = new float[maxParticles * 4];
+	float particleColorData[] = new float[maxParticles * 4];
+	
+	int vertexArray_buffer = glGenBuffers();
+	int particle_vertex_buffer = glGenBuffers();
+	int particles_position_buffer = glGenBuffers();
+	int particles_color_buffer = glGenBuffers();
+	
+	ShaderProgram shader;
+	
+	public Particles() {
+		texture = Resources.getTexture("textures/particle/particle.png");
+		for (int i = 0; i < maxParticles; i++) {
+			particles[i] = new Particle();
+			particles[i].life = -1.0f;
+			particles[i].cameraDistance = -1.0f;
+			particles[i].color = Color.Black;
+			particles[i].position = new Vector();
+			particles[i].speed = new Vector();
+		}
+		
+		shader = new ShaderProgram("shaders/Particle.vs", "shaders/Particle.fs");
+		final float scale = .5f;
+		float g_vertex_buffer_data[] = {-scale, -scale, 0.0f, scale, -scale, 0.0f, -scale, scale, 0.0f, scale, scale, 0.0f,};
+		
+		glBindBuffer(GL_ARRAY_BUFFER, particle_vertex_buffer);
+		glBufferData(GL_ARRAY_BUFFER, Buffers.create(g_vertex_buffer_data), GL_STATIC_DRAW);
+		
+		// The VBO containing the positions and sizes of the particles
+		glBindBuffer(GL_ARRAY_BUFFER, particles_position_buffer);
+		// Initialize with empty (NULL) buffer : it will be updated later, each frame.
+		glBufferData(GL_ARRAY_BUFFER, maxParticles * 4 * 4, GL_STREAM_DRAW);
+		
+		// The VBO containing the colors of the particles
+		glBindBuffer(GL_ARRAY_BUFFER, particles_color_buffer);
+		// Initialize with empty (NULL) buffer : it will be updated later, each frame.
+		glBufferData(GL_ARRAY_BUFFER, maxParticles * 4 * 4, GL_STREAM_DRAW);
+		
+		GL30.glBindVertexArray(0);
+		
+	}
+	
+	private double lastTime = System.currentTimeMillis() / 1000;
+	
+	int particlesCount = 0;
+	final float particleLifetime = 2.0f;
+	
+	public void createParticles(Vector position, Color color, double amount) {
+		// Calc how many particles per second
+		int newParticles = (int) Math.min(amount * delta * maxParticles, .16f * maxParticles);
+		// Create new particles
+		IntStream.range(0, newParticles).parallel().forEach(idx -> {
+			int particleIndex = findUnusedParticle();
+			particles[particleIndex].life = particleLifetime;
+			particles[particleIndex].position = position.clone();
+			
+			float spread = 8f;
+			Vector maindir = new Vector(Math.random() - .5f, 10f, Math.random() - .5f);
+			// Very bad way to generate a random direction;
+			// See for instance http://stackoverflow.com/questions/5408276/python-uniform-spherical-distribution instead,
+			// combined with some user-controlled parameters (main direction, spread, etc)
+			Vector randomdir = new Vector(Math.random() - .5, Math.random() - .5, Math.random() - .5f);
+			
+			particles[particleIndex].speed = maindir.add(randomdir.multiplied(spread * 2 * amount));
+			
+			// Very bad way to generate a random color
+			particles[particleIndex].color = Color.generateRandomColor(color);
+			particles[particleIndex].size = (float) Math.random();// (Math.random() % 1000) / 2000.0f + 0.1f;
+		});
+	}
+	
+	double delta = 0;
+	
+	@Override
+	public void update(double time) {
+		delta = time - lastTime;
+		lastTime = time;
+		
+		final Vector cameraPosition = Camera.position();
+		
+		// createParticles(new Vector((Math.random() - .5) * 30, 0, (Math.random() - .5) * 30), new Color(Math.random(), Math.random(), Math.random(), 1), Math.random());
+		// Simulate all particles
+		particlesCount = 0;
+		// TODO why particles flicker when using parallel
+		Arrays.stream(particles).parallel().forEach(p -> {
+			if (p.life > 0.0f) {
+				// Decrease life
+			p.life -= delta;
+			if (p.life > 0.0f) {
+				// Simulate simple physics : gravity only, no collisions
+				p.speed.add(new Vector(0.0f, -9.81f, 0.0f).multiply(delta * 0.5f));
+				p.position.add(p.speed.multiplied(delta));
+				p.color = p.color.alpha(p.life * 1 / particleLifetime);
+				p.cameraDistance = p.position.minus(cameraPosition).length();
+				particlesCount++;
+			} else {
+				// Particles that just died will be put at the end of the buffer in SortParticles();
+				p.cameraDistance = -1.0f;
+			}
+		}
+	}	);
+		
+		sortParticles();
+		
+		// fill gpu buffer, farest particles first
+		// TODO error while drawing
+		for (int i = 0; i < particlesCount; i++) {
+			Particle p = particles[i]; // shortcut
+			// fade transparency
+			
+			particlePositionData[4 * i + 0] = (float) p.position.x();
+			particlePositionData[4 * i + 1] = (float) p.position.y();
+			particlePositionData[4 * i + 2] = (float) p.position.z();
+			particlePositionData[4 * i + 3] = p.size;
+			
+			particleColorData[4 * i + 0] = (float) p.color.r;
+			particleColorData[4 * i + 1] = (float) p.color.g;
+			particleColorData[4 * i + 2] = (float) p.color.b;
+			particleColorData[4 * i + 3] = (float) p.color.a;
+		}
+		
+	}
+	
+	private void sortParticles() {
+		Arrays.sort(particles);
+	}
+	
+	private synchronized int findUnusedParticle() {
+		
+		for (int i = lastUsedParticle; i < maxParticles; i++) {
+			if (particles[i].life < 0) {
+				lastUsedParticle = i;
+				return i;
+			}
+		}
+		
+		for (int i = 0; i < lastUsedParticle; i++) {
+			if (particles[i].life < 0) {
+				lastUsedParticle = i;
+				return i;
+			}
+		}
+		
+		return 0; // All particles are taken, override the first one
+	}
+	
+	@Override
+	public void render() {
+		
+		if (particlesCount <= 0) return;
+		
+		glDisable(GL_CULL_FACE);
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		
+		shader.bind();
+		
+		final Uniform uniform = shader.uniform("myTextureSampler");
+		glUniform1i(uniform.location, 0);
+		GL13.glActiveTexture(GL13.GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, texture.getTextureID());
+		
+		glBindBuffer(GL_ARRAY_BUFFER, particles_position_buffer);
+		glBufferData(GL_ARRAY_BUFFER, maxParticles * 4 * 4, GL_STREAM_DRAW);// Buffer orphaning, a common way to improve streaming perf. See above link for
+		glBufferSubData(GL_ARRAY_BUFFER, 0, Buffers.create(particlePositionData));
+		
+		glBindBuffer(GL_ARRAY_BUFFER, particles_color_buffer);
+		glBufferData(GL_ARRAY_BUFFER, maxParticles * 4 * 4, GL_STREAM_DRAW); // Buffer orphaning, a common way to improve streaming perf. See above link for
+		glBufferSubData(GL_ARRAY_BUFFER, 0, Buffers.create(particleColorData));
+		
+		GL20.glEnableVertexAttribArray(0);
+		glBindBuffer(GL_ARRAY_BUFFER, particle_vertex_buffer);
+		GL20.glVertexAttribPointer(0, 3, GL11.GL_FLOAT, false, 0, 0);
+		
+		// TODO why cant i use code above in shader (location = 0)
+		GL20.glEnableVertexAttribArray(3);
+		glBindBuffer(GL_ARRAY_BUFFER, particle_vertex_buffer);
+		GL20.glVertexAttribPointer(3, 3, GL11.GL_FLOAT, false, 0, 0);
+		
+		// 2nd attribute buffer : positions of particles' centers
+		GL20.glEnableVertexAttribArray(1);
+		glBindBuffer(GL_ARRAY_BUFFER, particles_position_buffer);
+		GL20.glVertexAttribPointer(1, 4, GL11.GL_FLOAT, false, 0, 0);
+		
+		// 3rd attribute buffer : particles' colors
+		GL20.glEnableVertexAttribArray(2);
+		glBindBuffer(GL_ARRAY_BUFFER, particles_color_buffer);
+		GL20.glVertexAttribPointer(2, 4, GL11.GL_FLOAT, true, 0, 0);
+		
+		// These functions are specific to glDrawArrays*Instanced*.
+		// The first parameter is the attribute buffer we're talking about.
+		// The second parameter is the "rate at which generic vertex attributes advance when rendering multiple instances"
+		// http://www.opengl.org/sdk/docs/man/xhtml/glVertexAttribDivisor.xml
+		GL33.glVertexAttribDivisor(0, 0); // particles vertices : always reuse the same 4 vertices -> 0
+		GL33.glVertexAttribDivisor(3, 0); // particles vertices : always reuse the same 4 vertices -> 0
+		GL33.glVertexAttribDivisor(1, 1); // positions : one per quad (its center) -> 1
+		GL33.glVertexAttribDivisor(2, 1); // color : one per quad -> 1
+		
+		GL31.glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, particlesCount);
+		
+		GL20.glDisableVertexAttribArray(0);
+		GL20.glDisableVertexAttribArray(1);
+		GL20.glDisableVertexAttribArray(2);
+		GL20.glDisableVertexAttribArray(3);
+		shader.unbind();
+		
+		glEnable(GL_CULL_FACE);
+		
+	}
+}

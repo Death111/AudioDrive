@@ -33,6 +33,7 @@ import audiodrive.model.tower.TubeTower;
 import audiodrive.ui.GL;
 import audiodrive.ui.components.Viewport;
 import audiodrive.ui.effects.Glow;
+import audiodrive.ui.effects.Particles;
 import audiodrive.ui.scenes.GameScene;
 import audiodrive.utilities.Arithmetic;
 import audiodrive.utilities.Range;
@@ -87,6 +88,7 @@ public class Track implements Renderable {
 	
 	private Player player;
 	private Index index;
+	private Particles particles;
 	
 	public Track(AnalyzedAudio audio, List<Vector> spline, List<Block> blocks, int smoothing) {
 		this.audio = audio;
@@ -96,6 +98,7 @@ public class Track implements Renderable {
 		numberOfCollectables = (int) blocks.stream().filter(Block::isCollectable).count();
 		numberOfObstacles = blocks.size() - numberOfCollectables;
 		indexRate = spline.size() / audio.getDuration();
+		particles = new Particles();
 	}
 	
 	public void build() {
@@ -425,6 +428,14 @@ public class Track implements Renderable {
 			intensities[i / combine] += Arithmetic.scaleLogarithmic(mix.getBands().get(i).get(iteration), 0.0, 1.0 / combine, 0, maxIntensity);
 		}
 		SpectralTower.spectrum(intensities);
+		
+		if (GameScene.particles) {
+			if (linearIntensity > .5) {
+				final int xOffset = (int) (20 + Math.random() * 10);
+				particles.createParticles(getPlacement(time + 2).position().yAdd(-5).xAdd((Math.random() < .5) ? xOffset : -xOffset), borderColor, linearIntensity);
+			}
+		}
+		particles.update(time);
 	}
 	
 	public Color getColorAtIndex(int index) {
@@ -488,6 +499,7 @@ public class Track implements Renderable {
 		visibleRings.forEach(Ring::render);
 		glEnable(GL_LIGHTING);
 		glEnable(GL_CULL_FACE);
+		particles.render();
 		
 		// drawBorderNormals(leftVertexList);
 		// drawBorderNormals(rightVertexList);
