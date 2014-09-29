@@ -1,4 +1,5 @@
-#version 330 core
+#version 150 compatibility
+#extension GL_ARB_explicit_attrib_location : enable
 
 // Interpolated values from the vertex shaders
 in vec4 particleColor;

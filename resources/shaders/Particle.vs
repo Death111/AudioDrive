@@ -1,4 +1,5 @@
-#version 330 core
+#version 150 compatibility
+#extension GL_ARB_explicit_attrib_location : enable
 
 // Input vertex data, different for all executions of this shader.
 layout(location = 0) in vec3 a; //TODO dunno why i cant us that
