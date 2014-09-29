@@ -229,6 +229,9 @@ public class MenuScene extends Scene implements ItemListener {
 		case Keyboard.KEY_M:
 			onSelect(selectModelMenuItem, true);
 			break;
+		case Keyboard.KEY_S:
+			onSelect(settingsMenuItem, true);
+			break;
 		default:
 			break;
 		}
