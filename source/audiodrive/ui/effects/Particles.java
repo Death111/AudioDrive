@@ -68,7 +68,6 @@ public class Particles implements Renderable {
 			particles[i].speed = new Vector();
 		}
 		
-		System.out.println(GL20.GL_MAX_VERTEX_ATTRIBS);
 		shader = new ShaderProgram("shaders/Particle.vs", "shaders/Particle.fs");
 		final float scale = .5f;
 		float g_vertex_buffer_data[] = {-scale, -scale, 0.0f, scale, -scale, 0.0f, -scale, scale, 0.0f, scale, scale, 0.0f,};
@@ -93,12 +92,11 @@ public class Particles implements Renderable {
 	private double lastTime = System.currentTimeMillis() / 1000;
 	
 	int particlesCount = 0;
-	final float particleLifetime = 5.0f;
+	final float particleLifetime = 2.0f;
 	
 	public void createParticles(Vector position, Color color, double amount) {
 		// Calc how many particles per second
 		int newParticles = (int) Math.min(amount * delta * maxParticles, .16f * maxParticles);
-		
 		// Create new particles
 		IntStream.range(0, newParticles).parallel().forEach(idx -> {
 			int particleIndex = findUnusedParticle();
@@ -129,7 +127,7 @@ public class Particles implements Renderable {
 		
 		final Vector cameraPosition = Camera.position();
 		
-		createParticles(new Vector((Math.random() - .5) * 30, 0, (Math.random() - .5) * 30), new Color(Math.random(), Math.random(), Math.random(), 1), Math.random());
+		// createParticles(new Vector((Math.random() - .5) * 30, 0, (Math.random() - .5) * 30), new Color(Math.random(), Math.random(), Math.random(), 1), Math.random());
 		// Simulate all particles
 		particlesCount = 0;
 		// TODO why particles flicker when using parallel
@@ -197,16 +195,11 @@ public class Particles implements Renderable {
 	
 	@Override
 	public void render() {
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		// glDisable(GL_LIGHTING);
 		glDisable(GL_CULL_FACE);
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-		drawCoordinateSystem(1);
 		
 		shader.bind();
-		// GL30.glBindVertexArray(VertexArrayID);
-		// shader.uniform("CameraRight_worldspace");
-		// shader.uniform("CameraUp_worldspace");
+		
 		final Uniform uniform = shader.uniform("myTextureSampler");
 		glUniform1i(uniform.location, 0);
 		GL13.glActiveTexture(GL13.GL_TEXTURE0);
@@ -220,14 +213,6 @@ public class Particles implements Renderable {
 		glBufferData(GL_ARRAY_BUFFER, maxParticles * 4 * 4, GL_STREAM_DRAW); // Buffer orphaning, a common way to improve streaming perf. See above link for
 		glBufferSubData(GL_ARRAY_BUFFER, 0, Buffers.create(particleColorData));
 		
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		
-		// Bind our texture in Texture Unit 0
-		// texture.bind();
-		// Same as the billboards tutorial
-		// System.out.println("attrib");
-		// 1rst attribute buffer : vertices
 		GL20.glEnableVertexAttribArray(0);
 		glBindBuffer(GL_ARRAY_BUFFER, particle_vertex_buffer);
 		GL20.glVertexAttribPointer(0, 3, GL11.GL_FLOAT, false, 0, 0);
@@ -256,46 +241,15 @@ public class Particles implements Renderable {
 		GL33.glVertexAttribDivisor(1, 1); // positions : one per quad (its center) -> 1
 		GL33.glVertexAttribDivisor(2, 1); // color : one per quad -> 1
 		
-		// Draw the particules !
-		// This draws many times a small triangle_strip (which looks like a quad).
-		// This is equivalent to :
-		// for(i in ParticlesCount) : glDrawArrays(GL_TRIANGLE_STRIP, 0, 4),
-		// but faster.
 		GL31.glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, particlesCount);
 		
 		GL20.glDisableVertexAttribArray(0);
 		GL20.glDisableVertexAttribArray(1);
 		GL20.glDisableVertexAttribArray(2);
 		GL20.glDisableVertexAttribArray(3);
-		// GL30.glBindVertexArray(0);
 		shader.unbind();
 		
-		// Color.White.gl();
-		// glPointSize(6);
-		// glBegin(GL_POINTS);
-		//
-		// for (Particle particle : particles) {
-		// final Vector position = particle.position;
-		// System.out.println(position);
-		// if (position != null) position.glVertex();
-		// }
-		//
-		// glEnd();
+		glEnable(GL_CULL_FACE);
 		
 	}
-	
-	private void drawCoordinateSystem(int length) {
-		glBegin(GL_LINES);
-		glColor4d(length, 0, 0, length);
-		glVertex3d(length, 0, 0);
-		glVertex3d(-length, 0, 0);
-		glColor4d(0, length, 0, length);
-		glVertex3d(0, length, 0);
-		glVertex3d(0, -length, 0);
-		glColor4d(0, 0, length, length);
-		glVertex3d(0, 0, length);
-		glVertex3d(0, 0, -length);
-		glEnd();
-	}
-	
 }
