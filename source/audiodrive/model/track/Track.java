@@ -555,7 +555,14 @@ public class Track implements Renderable {
 		
 		// draw ring reflections
 		glDisable(GL_CULL_FACE);
-		rings.forEach(Ring::render);
+		rings.forEach(ring -> {
+			double distance = ring.iteration() - index.integer;
+			double alpha = 1 - (1f / range) * distance;
+			final Color color = ring.color();
+			ring.color(color.alpha(alpha));
+			ring.render();
+			ring.color(color);
+		});
 		glEnable(GL_CULL_FACE);
 		
 		// draw block reflections
@@ -587,6 +594,7 @@ public class Track implements Renderable {
 		glDisable(GL_STENCIL_TEST);
 	}
 	
+	// TODO improve dat performance thief
 	private boolean isVisible(Viewport viewport, Vector leftScreenspaceVector, Vector rightScreenspaceVector) {
 		boolean leftVisible = viewport.contains(leftScreenspaceVector);
 		boolean rightVisible = viewport.contains(rightScreenspaceVector);

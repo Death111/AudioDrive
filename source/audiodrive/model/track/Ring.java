@@ -63,4 +63,13 @@ public class Ring implements Renderable {
 		return scale + scale * 0.15 * pulse;
 	}
 	
+	public Color color() {
+		return this.color;
+	}
+	
+	public Ring color(Color color) {
+		this.color = color;
+		return this;
+	}
+	
 }
