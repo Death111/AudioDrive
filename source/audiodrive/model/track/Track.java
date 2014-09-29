@@ -113,8 +113,8 @@ public class Track implements Renderable {
 		}).renderpass(() -> {
 			visibleBlocks.stream().filter(Block::isGlowing).forEach(Block::render);
 			visibleMusicTowers.stream().forEach(MusicTower::render);
-			particles.render();
 			visibleRings.stream().forEach(Ring::render);
+			particles.render();
 		});
 		skybox = ModelLoader.loadModel("models/skybox/skybox").scale(GameScene.Far / 4);
 		skybox.setTexture(Resources.getTexture(GameScene.night ? "models/skybox/night.png" : "models/skybox/day.png"));
