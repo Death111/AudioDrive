@@ -94,7 +94,7 @@ public class TrackOverview {
 		glEnd();
 		
 		// Draw player position on screen
-		Color.White.clone().alpha(.9).gl();
+		color.alpha(.9).gl();
 		// glBegin(GL_LINES);
 		// {
 		// final int index = indexToCompressedIndex(playerIndex);
