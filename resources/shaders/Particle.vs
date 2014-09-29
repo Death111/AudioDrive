@@ -2,8 +2,7 @@
 #extension GL_ARB_explicit_attrib_location : enable
 
 // Input vertex data, different for all executions of this shader.
-layout(location = 0) in vec3 a; //TODO dunno why i cant us that
-layout(location = 3) in vec3 squareVertices; // same as above
+layout(location = 0) in vec3 squareVertices;
 layout(location = 1) in vec4 xyzs; 
 layout(location = 2) in vec4 color; 
 

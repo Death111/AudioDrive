@@ -220,11 +220,6 @@ public class Particles implements Renderable {
 		glBindBuffer(GL_ARRAY_BUFFER, particle_vertex_buffer);
 		GL20.glVertexAttribPointer(0, 3, GL11.GL_FLOAT, false, 0, 0);
 		
-		// TODO why cant i use code above in shader (location = 0)
-		GL20.glEnableVertexAttribArray(3);
-		glBindBuffer(GL_ARRAY_BUFFER, particle_vertex_buffer);
-		GL20.glVertexAttribPointer(3, 3, GL11.GL_FLOAT, false, 0, 0);
-		
 		// 2nd attribute buffer : positions of particles' centers
 		GL20.glEnableVertexAttribArray(1);
 		glBindBuffer(GL_ARRAY_BUFFER, particles_position_buffer);
@@ -240,7 +235,6 @@ public class Particles implements Renderable {
 		// The second parameter is the "rate at which generic vertex attributes advance when rendering multiple instances"
 		// http://www.opengl.org/sdk/docs/man/xhtml/glVertexAttribDivisor.xml
 		GL33.glVertexAttribDivisor(0, 0); // particles vertices : always reuse the same 4 vertices -> 0
-		GL33.glVertexAttribDivisor(3, 0); // particles vertices : always reuse the same 4 vertices -> 0
 		GL33.glVertexAttribDivisor(1, 1); // positions : one per quad (its center) -> 1
 		GL33.glVertexAttribDivisor(2, 1); // color : one per quad -> 1
 		
@@ -249,7 +243,6 @@ public class Particles implements Renderable {
 		GL20.glDisableVertexAttribArray(0);
 		GL20.glDisableVertexAttribArray(1);
 		GL20.glDisableVertexAttribArray(2);
-		GL20.glDisableVertexAttribArray(3);
 		shader.unbind();
 		
 		glEnable(GL_CULL_FACE);
