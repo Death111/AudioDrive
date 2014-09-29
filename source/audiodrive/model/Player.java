@@ -1,6 +1,9 @@
 package audiodrive.model;
 
 import static org.lwjgl.opengl.GL11.*;
+
+import java.util.concurrent.locks.Condition;
+
 import audiodrive.AudioDrive;
 import audiodrive.audio.AudioResource;
 import audiodrive.model.geometry.Color;
@@ -21,7 +24,9 @@ public class Player implements Renderable {
 	
 	private static final AudioResource CollectSound = new AudioResource("sounds/Collect.mp3");
 	private static final AudioResource CollideSound = new AudioResource("sounds/Collide.mp3");
+	private static final Color CollisionColor = new Color(0.8, 0.2, 0.2, 1);
 	
+	private Condition condition;
 	private GameScene scene;
 	private Model model;
 	private Track track;
@@ -58,6 +63,9 @@ public class Player implements Renderable {
 	private int hitboxEnd;
 	private double hitboxSide;
 	
+	private boolean hit;
+	private boolean destroyed;
+	
 	private double volume = AudioDrive.Settings.getDouble("sound.volume");
 	
 	private Rotation inclination = new Rotation();
@@ -75,7 +83,8 @@ public class Player implements Renderable {
 	}
 	
 	public void update() {
-		if (damage >= 100) model.wireframe(true).color(Color.TransparentRed);
+		if (damage >= 100) destroyed = true;
+		else hit = !inclination.isNull();
 		zoom(true);
 	}
 	
@@ -189,7 +198,14 @@ public class Player implements Renderable {
 	
 	@Override
 	public void render() {
-		model.render();
+		if (!destroyed) {
+			model.wireframe(false).color(hit ? CollisionColor : Color.White);
+			model.render();
+		}
+		if (destroyed | hit) {
+			model.wireframe(true).color(Color.TransparentRed);
+			model.render();
+		}
 		if (GameScene.hitbox) renderHitbox();
 	}
 	

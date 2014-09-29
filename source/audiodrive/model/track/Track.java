@@ -578,7 +578,7 @@ public class Track implements Renderable {
 		model.rotation().invert();
 		player.inclination().invert();
 		model.transformations().add(flip);
-		model.render();
+		player.render();
 		model.transformations().remove(flip);
 		player.inclination().invert();
 		model.rotation().invert();
