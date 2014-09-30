@@ -96,6 +96,9 @@ public class AudioSelectionScene extends Scene implements ItemListener {
 		itemMap = new HashMap<FileChooserItem, File>();
 		
 		// Setup start node
+		if (!rootFile.exists()) {
+			rootFile = new File("music");
+		}
 		updateItemExplorer(rootFile);
 		if (selectedFile != null) {
 			setSelected(selectedFile);
