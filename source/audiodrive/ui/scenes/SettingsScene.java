@@ -35,7 +35,7 @@ public class SettingsScene extends Scene implements ItemListener {
 	private static final List<Boolean> booleanValues = Arrays.asList(false, true);
 	private static final List<Integer> multisamplingValues = Arrays.asList(0, 2, 4, 8);
 	private static final List<Integer> sightValues = Arrays.asList(50, 100, 150, 200, 250, 300);
-	private static final List<Double> difficultyValues = Arrays.asList(.1, .2, .3, .4, .5, .6, .7, .8, .9, 1.);
+	private static final List<Double> difficultyValues = Arrays.asList(.1, .2, .3, .4, .5, .6, .7, .8, .9, .95, .96, .97, .98, .99, 1.);
 	private static final List<Double> controlValues = Arrays.asList(.5, .6, .7, .8, .9, 1., 1.2, 1.4, 1.6, 1.8, 2.0);
 	private static final List<Double> volumeValues = Arrays.asList(0., .1, .2, .3, .4, .5, .6, .7, .8, .9, 1.);
 	
