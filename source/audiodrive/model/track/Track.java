@@ -16,12 +16,7 @@ import audiodrive.audio.AnalyzedChannel;
 import audiodrive.model.Player;
 import audiodrive.model.Renderable;
 import audiodrive.model.buffer.VertexBuffer;
-import audiodrive.model.geometry.Color;
-import audiodrive.model.geometry.CuboidStripRenderer;
-import audiodrive.model.geometry.Matrix;
-import audiodrive.model.geometry.TextureCoordinate;
-import audiodrive.model.geometry.Vector;
-import audiodrive.model.geometry.Vertex;
+import audiodrive.model.geometry.*;
 import audiodrive.model.geometry.transform.Placement;
 import audiodrive.model.geometry.transform.Rotation;
 import audiodrive.model.loader.Model;
@@ -557,7 +552,7 @@ public class Track implements Renderable {
 		glDisable(GL_CULL_FACE);
 		rings.forEach(ring -> {
 			double distance = ring.iteration() - index.integer;
-			double alpha = 1 - (1f / range) * distance;
+			double alpha = Arithmetic.scaleLinear(distance, 1, 0, 0, range * 1.5);
 			final Color color = ring.color();
 			ring.color(color.alpha(alpha));
 			ring.render();

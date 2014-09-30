@@ -20,7 +20,7 @@ public class TubeTower extends MusicTower {
 	
 	@Override
 	public void render() {
-		model.placement(placement).color(color.itensity(intensity)).scale(scale).render();
+		model.placement(placement).color(color.intensity(intensity)).scale(scale).render();
 		
 	}
 }

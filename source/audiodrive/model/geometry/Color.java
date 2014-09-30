@@ -72,7 +72,7 @@ public class Color implements FloatData {
 	 * @param itensity [0.0, 1.0]
 	 * @return the derived color
 	 */
-	public Color itensity(double intensity) {
+	public Color intensity(double intensity) {
 		intensity = Arithmetic.clamp(intensity);
 		return new Color(r * intensity, g * intensity, b * intensity);
 	}

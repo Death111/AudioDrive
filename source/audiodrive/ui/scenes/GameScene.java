@@ -10,19 +10,20 @@ import audiodrive.Resources;
 import audiodrive.audio.AudioResource;
 import audiodrive.audio.Playback;
 import audiodrive.model.Player;
+import audiodrive.model.geometry.Color;
 import audiodrive.model.geometry.Vector;
 import audiodrive.model.geometry.transform.Rotation;
 import audiodrive.model.geometry.transform.Translation;
 import audiodrive.model.track.Track;
 import audiodrive.ui.GL;
 import audiodrive.ui.components.Camera;
+import audiodrive.ui.components.Light;
 import audiodrive.ui.components.Scene;
 import audiodrive.ui.components.Window;
 import audiodrive.ui.effects.ParticleEffects;
 import audiodrive.ui.overlays.GameBackground;
 import audiodrive.ui.overlays.GameOverlay;
 import audiodrive.utilities.Arithmetic;
-import audiodrive.utilities.Buffers;
 import audiodrive.utilities.CameraPath;
 import audiodrive.utilities.Log;
 
@@ -104,13 +105,13 @@ public class GameScene extends Scene {
 		player.update(0);
 		Camera.perspective(45, getWidth(), getHeight(), Near, Far);
 		GL.pushAttributes();
+		Light.enable();
+		Light.Zero.diffuse(Color.White).on();
+		Light.One.direction(Vector.Y).ambient(Color.White.intensity(0.3)).diffuse(Color.White).on();
+		Light.Two.direction(Vector.Y.negated()).ambient(Color.White.intensity(0.3)).diffuse(Color.White).on();
 		glEnable(GL_CULL_FACE);
 		glEnable(GL_NORMALIZE);
-		glEnable(GL_LIGHT0);
-		glLight(GL_LIGHT0, GL_DIFFUSE, Buffers.create(1f, 1f, 1f, 1f));
-		final float ambientAmount = .3f;
-		glLight(GL_LIGHT0, GL_AMBIENT, Buffers.create(ambientAmount, ambientAmount, ambientAmount, 1f));
-		glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
+		glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
 		glEnable(GL_COLOR_MATERIAL);
 		glShadeModel(GL_SMOOTH);
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -126,6 +127,7 @@ public class GameScene extends Scene {
 	
 	@Override
 	protected void update(double elapsed) {
+		Light.Zero.position(player.model().position());
 		checkState();
 		updateRotation(elapsed);
 		overlay.update();

@@ -17,7 +17,7 @@ public class RotationTower extends MusicTower {
 	@Override
 	public void render() {
 		model.rotation().yAdd(rotation * Scene.deltaTime());
-		model.placement(placement).color(color.itensity(intensity)).scale(scale).render();
+		model.placement(placement).color(color.intensity(intensity)).scale(scale).render();
 	}
 	
 	@Override

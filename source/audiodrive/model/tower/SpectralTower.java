@@ -57,7 +57,7 @@ public class SpectralTower extends MusicTower {
 			model.scaling().x(scale);
 			model.scaling().z(scale);
 			model.placement().position().add(up.multiplied(Spacing));
-			model.color(color.itensity(spectrum[i] * intensity)).render();
+			model.color(color.intensity(spectrum[i] * intensity)).render();
 		}
 	}
 	
