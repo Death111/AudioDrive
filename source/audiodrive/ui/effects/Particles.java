@@ -204,18 +204,19 @@ public class Particles implements Renderable {
 		shader.bind();
 		
 		final Uniform uniform = shader.uniform("myTextureSampler");
-		glUniform1i(uniform.location, 0);
-		GL13.glActiveTexture(GL13.GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, texture.getTextureID());
+		GL13.glActiveTexture(GL13.GL_TEXTURE0); // Tell gl that next texture will be bound to unit 0
+		glBindTexture(GL_TEXTURE_2D, texture.getTextureID()); // bind texture
+		glUniform1i(uniform.location, 0); // Set to same number as glActiveTexture used (shader will use this texture unit to get data)
 		
 		glBindBuffer(GL_ARRAY_BUFFER, particles_position_buffer);
-		glBufferData(GL_ARRAY_BUFFER, maxParticles * 4 * 4, GL_STREAM_DRAW);// Buffer orphaning, a common way to improve streaming perf. See above link for
+		glBufferData(GL_ARRAY_BUFFER, maxParticles * 4 * 4, GL_STREAM_DRAW); // Buffer orphaning
 		glBufferSubData(GL_ARRAY_BUFFER, 0, Buffers.create(particlePositionData));
 		
 		glBindBuffer(GL_ARRAY_BUFFER, particles_color_buffer);
-		glBufferData(GL_ARRAY_BUFFER, maxParticles * 4 * 4, GL_STREAM_DRAW); // Buffer orphaning, a common way to improve streaming perf. See above link for
+		glBufferData(GL_ARRAY_BUFFER, maxParticles * 4 * 4, GL_STREAM_DRAW); // Buffer orphaning
 		glBufferSubData(GL_ARRAY_BUFFER, 0, Buffers.create(particleColorData));
 		
+		// 1st attribute: particle vertices
 		GL20.glEnableVertexAttribArray(0);
 		glBindBuffer(GL_ARRAY_BUFFER, particle_vertex_buffer);
 		GL20.glVertexAttribPointer(0, 3, GL11.GL_FLOAT, false, 0, 0);
@@ -238,11 +239,14 @@ public class Particles implements Renderable {
 		GL33.glVertexAttribDivisor(1, 1); // positions : one per quad (its center) -> 1
 		GL33.glVertexAttribDivisor(2, 1); // color : one per quad -> 1
 		
+		// Draw quad particlesCount times
 		GL31.glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, particlesCount);
 		
+		// Disable buffers and attributes again
 		GL20.glDisableVertexAttribArray(0);
 		GL20.glDisableVertexAttribArray(1);
 		GL20.glDisableVertexAttribArray(2);
+		glBindTexture(GL_TEXTURE_2D, 0);
 		shader.unbind();
 		
 		glEnable(GL_CULL_FACE);
