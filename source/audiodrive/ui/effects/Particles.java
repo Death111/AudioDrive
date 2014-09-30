@@ -1,10 +1,13 @@
 package audiodrive.ui.effects;
 
 import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.opengl.GL13.*;
+import static org.lwjgl.opengl.GL13.GL_TEXTURE0;
+import static org.lwjgl.opengl.GL13.glActiveTexture;
 import static org.lwjgl.opengl.GL15.*;
-import static org.lwjgl.opengl.GL20.*;
-import static org.lwjgl.opengl.GL30.glBindVertexArray;
+import static org.lwjgl.opengl.GL20.glDisableVertexAttribArray;
+import static org.lwjgl.opengl.GL20.glEnableVertexAttribArray;
+import static org.lwjgl.opengl.GL20.glUniform1i;
+import static org.lwjgl.opengl.GL20.glVertexAttribPointer;
 import static org.lwjgl.opengl.GL31.glDrawArraysInstanced;
 import static org.lwjgl.opengl.GL33.glVertexAttribDivisor;
 
@@ -57,6 +60,7 @@ public class Particles implements Renderable {
 	
 	public Particles() {
 		texture = Resources.getTexture("textures/particle/particle.png");
+		// Create particles
 		for (int i = 0; i < maxParticles; i++) {
 			particles[i] = new Particle();
 			particles[i].life = -1.0f;
@@ -83,8 +87,6 @@ public class Particles implements Renderable {
 		// Initialize with empty (NULL) buffer : it will be updated later, each frame.
 		glBufferData(GL_ARRAY_BUFFER, maxParticles * 4 * 4, GL_STREAM_DRAW);
 		
-		glBindVertexArray(0);
-		
 	}
 	
 	private double lastTime = System.currentTimeMillis() / 1000;
@@ -93,8 +95,10 @@ public class Particles implements Renderable {
 	final float particleLifetime = 2.0f;
 	
 	public void createParticles(Vector position, Color color, double amount) {
-		// Calc how many particles per second
-		int newParticles = (int) Math.min(amount * delta * maxParticles, .16f * maxParticles);
+		
+		// Calculate how many particles but limit that we could spawn one second long new ones
+		int newParticles = (int) Math.min(amount * delta * maxParticles, .016f * maxParticles);
+		
 		// Create new particles
 		IntStream.range(0, newParticles).parallel().forEach(idx -> {
 			int particleIndex = findUnusedParticle();
@@ -103,16 +107,11 @@ public class Particles implements Renderable {
 			
 			float spread = 8f;
 			Vector maindir = new Vector(Math.random() - .5f, 10f, Math.random() - .5f);
-			// Very bad way to generate a random direction;
-			// See for instance http://stackoverflow.com/questions/5408276/python-uniform-spherical-distribution instead,
-			// combined with some user-controlled parameters (main direction, spread, etc)
 			Vector randomdir = new Vector(Math.random() - .5, Math.random() - .5, Math.random() - .5f);
 			
 			particles[particleIndex].speed = maindir.add(randomdir.multiplied(spread * 2 * amount));
-			
-			// Very bad way to generate a random color
 			particles[particleIndex].color = Color.generateRandomColor(color);
-			particles[particleIndex].size = (float) Math.random();// (Math.random() % 1000) / 2000.0f + 0.1f;
+			particles[particleIndex].size = (float) Math.random();
 		});
 	}
 	
@@ -125,7 +124,6 @@ public class Particles implements Renderable {
 		
 		final Vector cameraPosition = Camera.position();
 		
-		// createParticles(new Vector((Math.random() - .5) * 30, 0, (Math.random() - .5) * 30), new Color(Math.random(), Math.random(), Math.random(), 1), Math.random());
 		// Simulate all particles
 		particlesCount = 0;
 		// TODO why particles flicker when using parallel
@@ -134,26 +132,24 @@ public class Particles implements Renderable {
 				// Decrease life
 			p.life -= delta;
 			if (p.life > 0.0f) {
-				// Simulate simple physics : gravity only, no collisions
-				p.speed.add(new Vector(0.0f, -9.81f, 0.0f).multiply(delta * 0.5f));
+				// add gravity
+				p.speed.yAdd(-9.81f * delta);
 				p.position.add(p.speed.multiplied(delta));
-				p.color = p.color.alpha(p.life * 1 / particleLifetime);
+				p.color = p.color.alpha(p.life * 1 / particleLifetime); // fade transparency
 				p.cameraDistance = p.position.minus(cameraPosition).length();
 				particlesCount++;
 			} else {
-				// Particles that just died will be put at the end of the buffer in SortParticles();
 				p.cameraDistance = -1.0f;
 			}
 		}
 	}	);
 		
+		// sort particles: Farthest particles first (needs to be drawn first)
 		sortParticles();
 		
-		// fill gpu buffer, farest particles first
-		// TODO error while drawing
+		// fill gpu buffer
 		for (int i = 0; i < particlesCount; i++) {
-			Particle p = particles[i]; // shortcut
-			// fade transparency
+			Particle p = particles[i];
 			
 			particlePositionData[4 * i + 0] = (float) p.position.x();
 			particlePositionData[4 * i + 1] = (float) p.position.y();
