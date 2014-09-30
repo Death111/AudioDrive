@@ -106,9 +106,8 @@ public class GameScene extends Scene {
 		Camera.perspective(45, getWidth(), getHeight(), Near, Far);
 		GL.pushAttributes();
 		Light.enable();
-		Light.Zero.diffuse(Color.White).on();
-		Light.One.direction(Vector.Y).ambient(Color.White.intensity(0.3)).diffuse(Color.White).on();
-		Light.Two.direction(Vector.Y.negated()).ambient(Color.White.intensity(0.3)).diffuse(Color.White).on();
+		Light.Zero.diffuse(Color.White).ambient(Color.White.intensity(0.15)).on();
+		Light.One.direction(Vector.Y.negated()).diffuse(Color.White.intensity(0.5)).on();
 		glEnable(GL_CULL_FACE);
 		glEnable(GL_NORMALIZE);
 		glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);

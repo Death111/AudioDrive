@@ -1,18 +1,16 @@
 package audiodrive.ui.effects;
 
 import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL13.*;
 import static org.lwjgl.opengl.GL15.*;
-import static org.lwjgl.opengl.GL20.glUniform1i;
+import static org.lwjgl.opengl.GL20.*;
+import static org.lwjgl.opengl.GL30.glBindVertexArray;
+import static org.lwjgl.opengl.GL31.glDrawArraysInstanced;
+import static org.lwjgl.opengl.GL33.glVertexAttribDivisor;
 
 import java.util.Arrays;
 import java.util.stream.IntStream;
 
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL13;
-import org.lwjgl.opengl.GL20;
-import org.lwjgl.opengl.GL30;
-import org.lwjgl.opengl.GL31;
-import org.lwjgl.opengl.GL33;
 import org.newdawn.slick.opengl.Texture;
 
 import audiodrive.Resources;
@@ -33,8 +31,8 @@ class Particle implements Comparable<Particle> {
 	
 	@Override
 	public int compareTo(Particle that) {
-		if (this.cameraDistance > that.cameraDistance) return -1;
-		if (this.cameraDistance < that.cameraDistance) return 1;
+		if (cameraDistance > that.cameraDistance) return -1;
+		if (cameraDistance < that.cameraDistance) return 1;
 		return 0;
 	}
 }
@@ -85,7 +83,7 @@ public class Particles implements Renderable {
 		// Initialize with empty (NULL) buffer : it will be updated later, each frame.
 		glBufferData(GL_ARRAY_BUFFER, maxParticles * 4 * 4, GL_STREAM_DRAW);
 		
-		GL30.glBindVertexArray(0);
+		glBindVertexArray(0);
 		
 	}
 	
@@ -204,7 +202,7 @@ public class Particles implements Renderable {
 		shader.bind();
 		
 		final Uniform uniform = shader.uniform("myTextureSampler");
-		GL13.glActiveTexture(GL13.GL_TEXTURE0); // Tell gl that next texture will be bound to unit 0
+		glActiveTexture(GL_TEXTURE0); // Tell gl that next texture will be bound to unit 0
 		glBindTexture(GL_TEXTURE_2D, texture.getTextureID()); // bind texture
 		glUniform1i(uniform.location, 0); // Set to same number as glActiveTexture used (shader will use this texture unit to get data)
 		
@@ -217,38 +215,41 @@ public class Particles implements Renderable {
 		glBufferSubData(GL_ARRAY_BUFFER, 0, Buffers.create(particleColorData));
 		
 		// 1st attribute: particle vertices
-		GL20.glEnableVertexAttribArray(0);
+		glEnableVertexAttribArray(0);
 		glBindBuffer(GL_ARRAY_BUFFER, particle_vertex_buffer);
-		GL20.glVertexAttribPointer(0, 3, GL11.GL_FLOAT, false, 0, 0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
 		
 		// 2nd attribute buffer : positions of particles' centers
-		GL20.glEnableVertexAttribArray(1);
+		glEnableVertexAttribArray(1);
 		glBindBuffer(GL_ARRAY_BUFFER, particles_position_buffer);
-		GL20.glVertexAttribPointer(1, 4, GL11.GL_FLOAT, false, 0, 0);
+		glVertexAttribPointer(1, 4, GL_FLOAT, false, 0, 0);
 		
 		// 3rd attribute buffer : particles' colors
-		GL20.glEnableVertexAttribArray(2);
+		glEnableVertexAttribArray(2);
 		glBindBuffer(GL_ARRAY_BUFFER, particles_color_buffer);
-		GL20.glVertexAttribPointer(2, 4, GL11.GL_FLOAT, true, 0, 0);
+		glVertexAttribPointer(2, 4, GL_FLOAT, true, 0, 0);
 		
 		// These functions are specific to glDrawArrays*Instanced*.
 		// The first parameter is the attribute buffer we're talking about.
 		// The second parameter is the "rate at which generic vertex attributes advance when rendering multiple instances"
 		// http://www.opengl.org/sdk/docs/man/xhtml/glVertexAttribDivisor.xml
-		GL33.glVertexAttribDivisor(0, 0); // particles vertices : always reuse the same 4 vertices -> 0
-		GL33.glVertexAttribDivisor(1, 1); // positions : one per quad (its center) -> 1
-		GL33.glVertexAttribDivisor(2, 1); // color : one per quad -> 1
+		glVertexAttribDivisor(0, 0); // particles vertices : always reuse the same 4 vertices -> 0
+		glVertexAttribDivisor(1, 1); // positions : one per quad (its center) -> 1
+		glVertexAttribDivisor(2, 1); // color : one per quad -> 1
 		
 		// Draw quad particlesCount times
-		GL31.glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, particlesCount);
+		glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, particlesCount);
 		
 		// Disable buffers and attributes again
-		GL20.glDisableVertexAttribArray(0);
-		GL20.glDisableVertexAttribArray(1);
-		GL20.glDisableVertexAttribArray(2);
+		glVertexAttribDivisor(0, 0);
+		glVertexAttribDivisor(1, 0);
+		glVertexAttribDivisor(2, 0);
+		glDisableVertexAttribArray(0);
+		glDisableVertexAttribArray(1);
+		glDisableVertexAttribArray(2);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		glBindTexture(GL_TEXTURE_2D, 0);
 		shader.unbind();
-		
 		glEnable(GL_CULL_FACE);
 		
 	}
