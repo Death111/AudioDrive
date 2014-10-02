@@ -69,6 +69,9 @@ public class AudioAnalyzer {
 		} catch (Exception exception) {
 			done.set(true);
 			return this;
+		} catch (OutOfMemoryError ome) {
+			Log.error("Error while decoding file '%s': %s", file.getName(), ome);
+			System.exit(1);
 		}
 		Log.trace("Decoding took %.3f seconds", stopwatch.getSeconds());
 		double duration = samples.getSampleCount() / samples.getSampleRate();
