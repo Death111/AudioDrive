@@ -69,15 +69,19 @@ public class AudioAnalyzer {
 		} catch (Exception exception) {
 			done.set(true);
 			return this;
-		} catch (OutOfMemoryError ome) {
-			Log.error("Error while decoding file '%s': %s", file.getName(), ome);
-			System.exit(1);
 		}
 		Log.trace("Decoding took %.3f seconds", stopwatch.getSeconds());
 		double duration = samples.getSampleCount() / samples.getSampleRate();
 		ArrayList<Channel> channels = new ArrayList<>(samples.getChannels());
 		channels.add(samples.getMix());
-		List<AnalyzedChannel> analyzedChannels = channels.stream().parallel().map(this::analyze).collect(Collectors.toList());
+		List<AnalyzedChannel> analyzedChannels;
+		try {
+			analyzedChannels = channels.stream().parallel().map(this::analyze).collect(Collectors.toList());
+		} catch (OutOfMemoryError error) {
+			Log.debug("Not enough memory available to analyze file \"%s\"", error, file.getName());
+			done.set(true);
+			return this;
+		}
 		AnalyzedChannel analyzedMix = analyzedChannels.remove(analyzedChannels.size() - 1);
 		results = new AnalyzedAudio(samples, duration, analyzedChannels, analyzedMix);
 		Log.debug("Analyzation took %.3f seconds total", stopwatch.stop());
