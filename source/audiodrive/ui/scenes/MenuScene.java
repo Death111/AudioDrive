@@ -129,6 +129,7 @@ public class MenuScene extends Scene implements ItemListener {
 		modelSelectionMenu.addItem(modelValue);
 		Input.addObservers(menu, audioSelectionMenu, modelSelectionMenu);
 		
+		audioInformationText.clear();
 		// Test if audio was selected
 		if (audio == null) {
 			audioInformationText.add(new Text("Non selected").setFont(AudioDrive.Font).setSize(24).setPosition(600, 250));
@@ -139,7 +140,6 @@ public class MenuScene extends Scene implements ItemListener {
 			final AudioInfo audioInfo = new AudioInfo(audio.getResource().getPath());
 			int offset = 25; // Spacing between text
 			final List<String> infos = audioInfo.getInfos();
-			audioInformationText.clear();
 			IntStream.range(0, infos.size()).forEach(idx -> {
 				audioInformationText.add(new Text(infos.get(idx)).setFont(AudioDrive.Font).setSize(24).setPosition(600, 250 + idx * offset));
 			});
