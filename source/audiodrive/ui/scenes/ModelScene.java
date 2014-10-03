@@ -23,7 +23,7 @@ import audiodrive.ui.components.Window;
 import audiodrive.utilities.Buffers;
 import audiodrive.utilities.Log;
 
-public class ModelSelectionScene extends Scene {
+public class ModelScene extends Scene {
 	
 	private Text title;
 	
@@ -180,12 +180,12 @@ public class ModelSelectionScene extends Scene {
 			translate.set(Vector.Null);
 			break;
 		case Keyboard.KEY_ESCAPE:
-			back();
+			Scene.get(MenuScene.class).enter();
 			break;
 		case Keyboard.KEY_RETURN:
 			AudioDrive.Settings.set("player.model", model.getName());
 			Log.debug("selected model " + model.getName());
-			back();
+			Scene.get(MenuScene.class).enter();
 			break;
 		case Keyboard.KEY_V:
 			Window.toggleVSync();

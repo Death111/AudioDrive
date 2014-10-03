@@ -26,6 +26,7 @@ public class TrackGenerator {
 	
 	public static Track generate(AnalyzedAudio audio) {
 		Log.info("Generating track...");
+		Log.debug("Generating \"%s\"...", audio.getName());
 		int smoothing = Math.max(10, AudioDrive.Settings.getInteger("track.smoothing"));
 		AnalyzedChannel mixed = audio.getMix();
 		AnalyzedChannel left = audio.getChannel(0);

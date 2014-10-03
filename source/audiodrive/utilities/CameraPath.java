@@ -32,7 +32,7 @@ public class CameraPath {
 	private Vector offsetLookAt;
 	private Vector offsetPosition;
 	
-	double time;
+	private double time;
 	
 	/**
 	 * Creates a camera path from the given filename
@@ -139,6 +139,10 @@ public class CameraPath {
 	
 	public boolean isFinished() {
 		return time >= duration;
+	}
+	
+	public boolean isSkippable() {
+		return time < duration - 0.8;
 	}
 	
 	public void skip() {

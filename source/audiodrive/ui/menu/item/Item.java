@@ -182,6 +182,10 @@ public abstract class Item {
 		setState(disabled ? State.Disabled : State.Normal);
 	}
 	
+	public void reset() {
+		setState(State.Normal);
+	}
+	
 	public void increment() {}
 	
 	public void decrement() {}

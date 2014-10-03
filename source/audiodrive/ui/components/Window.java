@@ -77,7 +77,7 @@ public class Window {
 		recreate = false;
 		recreating = true;
 		Optional<Scene> scene = Get.optional(Scene.getActive());
-		Log.info("creating window...");
+		Log.info("Creating window...");
 		checkCapabilities();
 		scene.ifPresent(Scene::exiting);
 		Display.destroy();

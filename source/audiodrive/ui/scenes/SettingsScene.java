@@ -23,7 +23,6 @@ import audiodrive.ui.menu.item.Item;
 import audiodrive.ui.menu.item.ItemListener;
 import audiodrive.ui.menu.item.MenuItem;
 import audiodrive.ui.menu.item.SettingsItem;
-import audiodrive.utilities.Log;
 
 /**
  * 
@@ -218,10 +217,9 @@ public class SettingsScene extends Scene implements ItemListener {
 	@Override
 	public void keyReleased(int key, char character) {
 		super.keyReleased(key, character);
-		Log.trace("Key '" + character + "' was realeased,");
 		switch (key) {
 		case Keyboard.KEY_ESCAPE:
-			back();
+			Scene.get(MenuScene.class).enter();
 			break;
 		default:
 			break;
@@ -236,9 +234,9 @@ public class SettingsScene extends Scene implements ItemListener {
 		selectAudio.play(volume);
 		if (item == saveItem) {
 			saveSettings();
-			back();
+			Scene.get(MenuScene.class).enter();
 		} else if (item == closeItem) {
-			back();
+			Scene.get(MenuScene.class).enter();
 		}
 	}
 	

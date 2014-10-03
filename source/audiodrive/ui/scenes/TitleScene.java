@@ -13,7 +13,7 @@ import audiodrive.ui.effects.ShaderProgram;
 public class TitleScene extends Scene {
 	
 	private Text title;
-	private Overlay overlay;
+	private Overlay background;
 	
 	static {
 		new AudioResource("sounds/Title.mp3").play();
@@ -22,7 +22,7 @@ public class TitleScene extends Scene {
 	@Override
 	public void entering() {
 		title = new Text(AudioDrive.Title).setFont(AudioDrive.Font).setSize(48).setPosition(getWidth() / 2, getHeight() / 2).setAlignment(Alignment.Center);
-		overlay = new Overlay().shader(new ShaderProgram("shaders/default.vs", "shaders/title.fs"));
+		background = new Overlay().shader(new ShaderProgram("shaders/Default.vs", "shaders/Title.fs"));
 		Camera.overlay(getWidth(), getHeight());
 	}
 	
@@ -34,13 +34,13 @@ public class TitleScene extends Scene {
 	@Override
 	public void render() {
 		glClear(GL_COLOR_BUFFER_BIT);
-		overlay.render();
+		background.render();
 		title.render();
 	}
 	
 	@Override
 	public void exiting() {
-		overlay = null;
+		background = null;
 		title = null;
 	}
 	

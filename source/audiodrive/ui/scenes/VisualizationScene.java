@@ -20,7 +20,7 @@ import audiodrive.utilities.Arithmetic;
 import audiodrive.utilities.Buffers;
 import audiodrive.utilities.Log;
 
-public class VisualizerScene extends Scene {
+public class VisualizationScene extends Scene {
 	
 	private enum Mode {
 		Normal, Direct, Logaritmic, Clamped
@@ -60,14 +60,11 @@ public class VisualizerScene extends Scene {
 	private double scale = 1;
 	private int combine = 0;
 	
-	public void enter(AnalyzedAudio audio) {
-		this.audio = audio;
-		super.enter();
-	}
-	
 	@Override
 	protected void entering() {
-		Log.info("visualizing audio...");
+		Log.info("Visualizing audio...");
+		audio = AudioDrive.getAnalyzedAudio();
+		Log.debug("Visualizing \"%s\"...", audio.getName());
 		title = new Text("Visualizing \"" + audio.getResource().getName() + "\"").setFont(AudioDrive.Font).setSize(32).setPosition(20, 20);
 		info = new Text().setFont(AudioDrive.Font).setSize(10).setPosition(20, 70).setAlignment(Alignment.UpperLeft);
 		canvas = new VertexBuffer(Buffers.create(0, 0, 0, getHeight(), getWidth(), getHeight(), getWidth(), 0), 2).mode(GL_QUADS);
@@ -287,7 +284,7 @@ public class VisualizerScene extends Scene {
 		super.keyReleased(key, character);
 		switch (key) {
 		case Keyboard.KEY_ESCAPE:
-			back();
+			Scene.get(MenuScene.class).enter();
 			break;
 		case Keyboard.KEY_UP:
 			showMixedPeaks = !showMixedPeaks;

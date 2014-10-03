@@ -70,14 +70,8 @@ public class GameScene extends Scene {
 	private double mouseSpeed;
 	private double volume;
 	
-	public void enter(Track track) {
-		this.track = track;
-		super.enter();
-	}
-	
-	@Override
-	protected void entering() {
-		Log.info("Starting game...");
+	public void setup() {
+		track = AudioDrive.getTrack();
 		colorizeCollectables = !AudioDrive.Settings.getBoolean("block.collectable.color.static");
 		colorizeObstacles = !AudioDrive.Settings.getBoolean("block.obstacle.color.static");
 		spectrum = visualization = AudioDrive.Settings.getBoolean("game.visualization");
@@ -97,6 +91,12 @@ public class GameScene extends Scene {
 		overlay = new GameOverlay(this);
 		background = new GameBackground(this);
 		playback = new Playback(track.getAudio().getResource()).setVolume(AudioDrive.Settings.getDouble("music.volume"));
+	}
+	
+	@Override
+	protected void entering() {
+		Log.info("Starting game...");
+		Log.debug("Playing \"%s\"...", track.getAudio().getName());
 		translation.reset();
 		rotation = 0;
 		time = 0;
@@ -312,9 +312,9 @@ public class GameScene extends Scene {
 			if (state != State.Animating) pause();
 			break;
 		case Keyboard.KEY_ESCAPE:
-			if (state == State.Running) pause();
-			else if (state == State.Animating && !startCameraPath.isFinished()) startCameraPath.skip();
-			else back();
+			if (state == State.Animating && startCameraPath.isSkippable()) startCameraPath.skip();
+			else if (state != State.Paused) pause();
+			else Scene.get(MenuScene.class).enter();
 			break;
 		case Keyboard.KEY_HOME:
 			translation.reset();

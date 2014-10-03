@@ -60,9 +60,9 @@ public class AudioAnalyzer {
 	public AudioAnalyzer analyze(AudioResource file) {
 		if (file.equals(this.file)) return null;
 		Log.info("Analyzing audio...");
+		Log.debug("Analyzing \"%s\"...", file.getName());
 		this.file = file;
 		done.set(false);
-		Log.debug("Analyzing \"%s\"...", file.getName());
 		stopwatch.start();
 		try {
 			samples = AudioDecoder.decode(file);

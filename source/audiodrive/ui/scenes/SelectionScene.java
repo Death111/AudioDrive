@@ -1,7 +1,6 @@
 package audiodrive.ui.scenes;
 
-import static org.lwjgl.opengl.GL11.GL_COLOR_BUFFER_BIT;
-import static org.lwjgl.opengl.GL11.glClear;
+import static org.lwjgl.opengl.GL11.*;
 
 import java.io.File;
 import java.util.Arrays;
@@ -41,7 +40,7 @@ import audiodrive.utilities.Log;
  * @author Death
  *
  */
-public class AudioSelectionScene extends Scene implements ItemListener {
+public class SelectionScene extends Scene implements ItemListener {
 	
 	private static final String PARENT_FILENAME = "..";
 	
@@ -69,6 +68,8 @@ public class AudioSelectionScene extends Scene implements ItemListener {
 	
 	private boolean silentHovering = true;
 	private double volume;
+	
+	private boolean play;
 	
 	@Override
 	public void entering() {
@@ -257,10 +258,9 @@ public class AudioSelectionScene extends Scene implements ItemListener {
 	@Override
 	public void keyReleased(int key, char character) {
 		super.keyReleased(key, character);
-		Log.trace("Key '" + character + "' was realeased,");
 		switch (key) {
 		case Keyboard.KEY_ESCAPE:
-			back();
+			Scene.get(MenuScene.class).enter();
 			break;
 		case Keyboard.KEY_RETURN:
 			onSelect(continueMenuItem, true);
@@ -287,10 +287,23 @@ public class AudioSelectionScene extends Scene implements ItemListener {
 		if (item == continueMenuItem) {
 			if (selectedFile != null) {
 				AudioResource audio = new AudioResource(selectedFile);
-				MenuScene menuScene = Scene.get(MenuScene.class);
-				AnalyzedAudio analyzedAudio = menuScene.getAudio();
-				if (analyzedAudio != null && analyzedAudio.getResource().equals(audio)) menuScene.enter(analyzedAudio);
-				else Scene.get(AnalyzationScene.class).enter(audio);
+				AnalyzedAudio analyzedAudio = AudioDrive.getAnalyzedAudio();
+				if (analyzedAudio == null || !analyzedAudio.getResource().equals(audio)) {
+					AudioDrive.setSelectedAudio(audio);
+					Scene.get(AnalyzationScene.class).enter();
+				} else {
+					switch (AudioDrive.getAction()) {
+					case None:
+						Scene.get(MenuScene.class).enter();
+						break;
+					case Play:
+						Scene.get(GenerationScene.class).enter();
+						break;
+					case Visualize:
+						Scene.get(VisualizationScene.class).enter();
+						break;
+					}
+				}
 			} else {
 				Log.warning("No file selected.");
 			}

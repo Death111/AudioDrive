@@ -114,6 +114,7 @@ public class Menu implements ItemListener, Input.Observer {
 			throw new RuntimeException("No space for menu item");
 		}
 		
+		item.reset();
 		items.add(item);
 		// reset old page
 		oldPage = -1;

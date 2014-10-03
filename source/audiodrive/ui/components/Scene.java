@@ -4,20 +4,15 @@ import static org.lwjgl.opengl.GL11.*;
 
 import java.awt.GraphicsDevice;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.Map;
-import java.util.Set;
 
 import org.lwjgl.input.Keyboard;
 
-import audiodrive.AudioDrive;
 import audiodrive.ui.control.Input;
 
 public class Scene implements Input.Observer {
 	
 	private static Map<Class<? extends Scene>, Scene> scenes = new HashMap<>();
-	private static Set<Scene> hierarchy = new LinkedHashSet<>();
 	private static Scene active;
 	private static Scene entering;
 	private static long frameTimestamp;
@@ -26,6 +21,8 @@ public class Scene implements Input.Observer {
 	private static double time;
 	private static int framerate;
 	private static int frames;
+	
+	private boolean hierarchical = true;
 	
 	@SuppressWarnings("unchecked")
 	public static <T extends Scene> T get(Class<T> clazz) {
@@ -59,7 +56,7 @@ public class Scene implements Input.Observer {
 	}
 	
 	public static void destroy() {
-		if (active != null) active.exit(false);
+		if (active != null) active.exit();
 	}
 	
 	public static Scene getActive() {
@@ -79,10 +76,9 @@ public class Scene implements Input.Observer {
 	public final void enter() {
 		if (active == this) return;
 		entering = this;
-		if (active != null) active.exit(false);
+		if (active != null) active.exit();
 		active = this;
 		Input.addObserver(this);
-		hierarchy.add(this);
 		entering();
 		entering = null;
 		frameTimestamp = System.nanoTime();
@@ -111,35 +107,15 @@ public class Scene implements Input.Observer {
 	protected void exiting() {}
 	
 	public final void exit() {
-		exit(false);
-		AudioDrive.exit();
+		exit(null);
 	}
 	
-	public final void back() {
-		exit(true);
-	}
-	
-	private void exit(boolean enterPredecessor) {
+	private void exit(Scene next) {
 		if (active != this) return;
 		exiting();
 		Input.removeObserver(this);
 		active = null;
-		if (!enterPredecessor) return;
-		Scene predecessor = getPredecessor();
-		hierarchy.remove(this);
-		if (predecessor != null) predecessor.enter();
-	}
-	
-	public Scene getPredecessor() {
-		if (hierarchy.isEmpty()) return null;
-		Iterator<Scene> iterator = hierarchy.iterator();
-		Scene current = null;
-		while (iterator.hasNext()) {
-			Scene next = iterator.next();
-			if (next.equals(this)) return current;
-			current = next;
-		}
-		return null;
+		if (next != null) next.enter();
 	}
 	
 	/** return time since game start, in seconds */
@@ -150,10 +126,6 @@ public class Scene implements Input.Observer {
 	/** return time since last frame, in seconds */
 	public static double deltaTime() {
 		return deltaTime;
-	}
-	
-	public static Set<Scene> hierarchy() {
-		return hierarchy;
 	}
 	
 	public int getWidth() {

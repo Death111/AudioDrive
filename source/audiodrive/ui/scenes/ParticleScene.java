@@ -1,8 +1,6 @@
 package audiodrive.ui.scenes;
 
-import static org.lwjgl.opengl.GL11.GL_COLOR_BUFFER_BIT;
-import static org.lwjgl.opengl.GL11.glClear;
-import static org.lwjgl.opengl.GL11.glClearColor;
+import static org.lwjgl.opengl.GL11.*;
 
 import org.lwjgl.input.Keyboard;
 
@@ -49,7 +47,7 @@ public class ParticleScene extends Scene {
 		super.keyReleased(key, character);
 		switch (key) {
 		case Keyboard.KEY_ESCAPE:
-			back();
+			Scene.get(MenuScene.class).enter();
 			break;
 		}
 	}
