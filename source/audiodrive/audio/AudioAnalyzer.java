@@ -66,6 +66,10 @@ public class AudioAnalyzer {
 		stopwatch.start();
 		try {
 			samples = AudioDecoder.decode(file);
+		} catch (OutOfMemoryError error) {
+			Log.debug("Not enough memory available to decode file \"%s\".", error, file.getName());
+			done.set(true);
+			return this;
 		} catch (Exception exception) {
 			done.set(true);
 			return this;
@@ -78,7 +82,7 @@ public class AudioAnalyzer {
 		try {
 			analyzedChannels = channels.stream().parallel().map(this::analyze).collect(Collectors.toList());
 		} catch (OutOfMemoryError error) {
-			Log.debug("Not enough memory available to analyze file \"%s\"", error, file.getName());
+			Log.debug("Not enough memory available to analyze file \"%s\".", error, file.getName());
 			done.set(true);
 			return this;
 		}
