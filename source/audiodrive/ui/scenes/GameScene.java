@@ -312,8 +312,9 @@ public class GameScene extends Scene {
 			if (state != State.Animating) pause();
 			break;
 		case Keyboard.KEY_ESCAPE:
-			if (state == State.Animating && startCameraPath.isSkippable()) startCameraPath.skip();
-			else if (state != State.Paused) pause();
+			if (state == State.Animating) {
+				if (startCameraPath.isSkippable()) startCameraPath.skip();
+			} else if (state == State.Running) pause();
 			else Scene.get(MenuScene.class).enter();
 			break;
 		case Keyboard.KEY_HOME:
