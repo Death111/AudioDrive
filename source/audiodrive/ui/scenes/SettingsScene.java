@@ -1,6 +1,7 @@
 package audiodrive.ui.scenes;
 
-import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL11.GL_COLOR_BUFFER_BIT;
+import static org.lwjgl.opengl.GL11.glClear;
 
 import java.util.Arrays;
 import java.util.List;
@@ -163,7 +164,7 @@ public class SettingsScene extends Scene implements ItemListener {
 		selectAudio = new AudioResource("sounds/Select.mp3");
 		volume = AudioDrive.Settings.getDouble("interface.volume");
 		
-		background = new Overlay().shader(new ShaderProgram("shaders/default.vs", "shaders/title.fs"));
+		background = new Overlay().shader(new ShaderProgram("shaders/Default.vs", "shaders/Title.fs"));
 		updateSettings();
 		Camera.overlay(getWidth(), getHeight());
 		Input.addObservers(saveMenu, graphicMenu, soundMenu, inputMenu, gameMenu);

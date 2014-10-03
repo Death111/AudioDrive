@@ -68,7 +68,7 @@ public class VisualizationScene extends Scene {
 		title = new Text("Visualizing \"" + audio.getResource().getName() + "\"").setFont(AudioDrive.Font).setSize(32).setPosition(20, 20);
 		info = new Text().setFont(AudioDrive.Font).setSize(10).setPosition(20, 70).setAlignment(Alignment.UpperLeft);
 		canvas = new VertexBuffer(Buffers.create(0, 0, 0, getHeight(), getWidth(), getHeight(), getWidth(), 0), 2).mode(GL_QUADS);
-		shader = new ShaderProgram("shaders/default.vs", "shaders/spectrum.fs");
+		shader = new ShaderProgram("shaders/Default.vs", "shaders/Spectrum.fs");
 		
 		freqencies = Math.min(audio.getBandCount(), 100);
 		leftChannel = audio.getChannel(0);

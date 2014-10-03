@@ -1,6 +1,7 @@
 package audiodrive.ui.scenes;
 
-import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL11.GL_COLOR_BUFFER_BIT;
+import static org.lwjgl.opengl.GL11.glClear;
 
 import java.io.File;
 import java.util.Arrays;
@@ -76,7 +77,7 @@ public class SelectionScene extends Scene implements ItemListener {
 		volume = AudioDrive.Settings.getDouble("interface.volume");
 		
 		Camera.overlay(getWidth(), getHeight());
-		background = new Overlay().shader(new ShaderProgram("shaders/default.vs", "shaders/title.fs"));
+		background = new Overlay().shader(new ShaderProgram("shaders/Default.vs", "shaders/Title.fs"));
 		
 		titleText = new Text("Select an AudioFile").setFont(AudioDrive.Font).setSize(48).setPosition(20, 20);
 		currentFolderText = new Text().setFont(AudioDrive.Font).setPosition(20, 125).setSize(22).setAlignment(Alignment.Left);
