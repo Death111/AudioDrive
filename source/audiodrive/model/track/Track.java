@@ -557,8 +557,8 @@ public class Track implements Renderable {
 		// draw ring reflections
 		glDisable(GL_CULL_FACE);
 		rings.forEach(ring -> {
-			double distance = ring.iteration() - index.integer;
-			double alpha = Arithmetic.scaleLinear(distance, 1, 0, 0, range * 1.5);
+			double distance = Math.abs(ring.iteration() - index.integer);
+			double alpha = Arithmetic.scaleLinear(distance, 1, 0, 0, range);
 			final Color color = ring.color();
 			ring.color(color.alpha(alpha));
 			ring.render();
@@ -571,12 +571,17 @@ public class Track implements Renderable {
 			Placement placement = block.placement();
 			Placement originalPlacement = placement.clone();
 			placement.position(placement.position().plus(placement.up().multiplied(-2 * flightHeight)));
+			double distance = Math.abs(block.iteration() - index.integer);
+			double alpha = Arithmetic.scaleLinear(distance, 1, 0, 0, range);
+			final Color color = block.color();
+			block.color(color.alpha(alpha));
 			block.model().setTexture(Resources.getReflectedBlockTexture());
 			block.model().transformations().add(flip);
 			block.render();
 			block.model().transformations().remove(flip);
 			block.placement(originalPlacement);
 			block.model().setTexture(Resources.getBlockTexture());
+			block.color(color);
 		});;
 		
 		// draw player reflection
