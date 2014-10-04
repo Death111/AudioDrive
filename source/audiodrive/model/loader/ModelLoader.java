@@ -26,6 +26,8 @@ import audiodrive.utilities.Log;
  */
 public class ModelLoader {
 	
+	private static boolean smoothShadingWarning;
+	
 	private ModelLoader() {
 		throw new IllegalStateException("This class shall not be instantiated.");
 	}
@@ -158,7 +160,10 @@ public class ModelLoader {
 					faces = new ArrayList<Face>();
 					break;
 				case "s": // smooth shading
-					Log.warning("Smooth Shading was used, but is not yet supported.");
+					if (!smoothShadingWarning) {
+						Log.warning("Smooth Shading was used, but is not yet supported.");
+						smoothShadingWarning = true;
+					}
 					break;
 				default:
 					Log.warning("unkown item '" + splitted[0] + "'");
