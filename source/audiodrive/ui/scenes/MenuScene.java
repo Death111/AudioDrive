@@ -149,7 +149,7 @@ public class MenuScene extends Scene implements ItemListener {
 		credits.render();
 		menu.render();
 		
-		if (!title.getText().equals(AudioDrive.Title)) return;
+		if (isExitMenu()) return;
 		
 		audioText.render();
 		audioInformationText.stream().forEach(Text::render);
@@ -200,12 +200,20 @@ public class MenuScene extends Scene implements ItemListener {
 		super.keyReleased(key, character);
 		switch (key) {
 		case Keyboard.KEY_ESCAPE:
-			onSelect(exitMenuItem, true);
+			if (isExitMenu()) {
+				onSelect(noMenuItem, true);
+			} else {
+				onSelect(exitMenuItem, true);
+			}
 			break;
 		case Keyboard.KEY_V:
 			onSelect(visualizeMenuItem, true);
 			break;
 		case Keyboard.KEY_RETURN:
+			if (isExitMenu()) {
+				onSelect(yesMenuItem, true);
+				break;
+			}
 		case Keyboard.KEY_P:
 			onSelect(playMenuItem, true);
 			break;
@@ -221,6 +229,10 @@ public class MenuScene extends Scene implements ItemListener {
 		default:
 			break;
 		}
+	}
+	
+	private boolean isExitMenu() {
+		return !title.getText().equals(AudioDrive.Title);
 	}
 	
 	@Override
