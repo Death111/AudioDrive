@@ -224,8 +224,11 @@ public class SettingsScene extends Scene implements ItemListener {
 	public void keyReleased(int key, char character) {
 		super.keyReleased(key, character);
 		switch (key) {
+		case Keyboard.KEY_RETURN:
+			onSelect(saveItem, true);
+			break;
 		case Keyboard.KEY_ESCAPE:
-			Scene.get(MenuScene.class).enter();
+			onSelect(closeItem, true);
 			break;
 		default:
 			break;
