@@ -1,6 +1,8 @@
 package audiodrive.ui.scenes;
 
-import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL11.GL_COLOR_BUFFER_BIT;
+import static org.lwjgl.opengl.GL11.GL_DEPTH_BUFFER_BIT;
+import static org.lwjgl.opengl.GL11.glClear;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -258,7 +260,7 @@ public class MenuScene extends Scene implements ItemListener {
 		}
 		if (item == playMenuItem) {
 			AudioDrive.setAction(Action.Play);
-			if (AudioDrive.getSelectedAudio() == null) {
+			if (AudioDrive.getAnalyzedAudio() == null) {
 				Scene.get(SelectionScene.class).enter();
 				return;
 			}
