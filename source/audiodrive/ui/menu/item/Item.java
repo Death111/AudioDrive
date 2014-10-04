@@ -98,7 +98,7 @@ public abstract class Item {
 			glEnd();
 		}
 		final Color color = box ? colors.foreground : colors.text;
-		text.setColor(color).setPosition(x + iconWidth, y).render();
+		text.setColor(color).setPosition(x + iconWidth, y + height / 2 - text.getHeight() / 2).render();
 		if (icon != null) {
 			Resources.getIconModel().position(new Vector(x, y, 0)).position().xAdd(iconWidth / 2).yAdd(iconWidth / 2);
 			Resources.getIconModel().scale(iconWidth / 2).color(color).setTexture(Resources.getIconTextures().get(icon)).render();
