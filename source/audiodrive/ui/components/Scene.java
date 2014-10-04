@@ -1,6 +1,7 @@
 package audiodrive.ui.components;
 
-import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL11.GL_COLOR_BUFFER_BIT;
+import static org.lwjgl.opengl.GL11.glClear;
 
 import java.awt.GraphicsDevice;
 import java.util.HashMap;
@@ -21,8 +22,6 @@ public class Scene implements Input.Observer {
 	private static double time;
 	private static int framerate;
 	private static int frames;
-	
-	private boolean hierarchical = true;
 	
 	@SuppressWarnings("unchecked")
 	public static <T extends Scene> T get(Class<T> clazz) {

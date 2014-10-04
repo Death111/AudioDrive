@@ -4,6 +4,7 @@ import static org.lwjgl.opengl.GL11.*;
 
 import org.lwjgl.opengl.Display;
 
+import audiodrive.AudioDrive;
 import audiodrive.model.geometry.Color;
 import audiodrive.ui.components.Text;
 import audiodrive.ui.components.Text.Alignment;
@@ -24,9 +25,9 @@ public class Dialog implements ItemListener {
 		CONFIRM, YES, NO
 	}
 	
-	final Item yesItem = new MenuItem("Yes", this).setIcon(Icon.Yes);
-	final Item noItem = new MenuItem("No", this).setIcon(Icon.No);
-	final Item confirmItem = new MenuItem("Ok", this).setIcon(Icon.Confirm);
+	final Item yesItem = new MenuItem("Yes", this).setIcon(Icon.Yes).setAlignment(Item.Alignment.Center);
+	final Item noItem = new MenuItem("No", this).setIcon(Icon.No).setAlignment(Item.Alignment.Center);
+	final Item confirmItem = new MenuItem("Ok", this).setIcon(Icon.Confirm).setAlignment(Item.Alignment.Center);
 	
 	DialogType type;
 	
@@ -47,7 +48,7 @@ public class Dialog implements ItemListener {
 		
 		centerX = width / 2;
 		centerY = height / 2;
-		this.text = new Text(text).setSize(47).setAlignment(Alignment.Center);
+		this.text = new Text(text).setFont(AudioDrive.Font).setSize(42).setAlignment(Alignment.LowerCenter);
 		this.type = type;
 		dialogWidth = Math.max(MenuItem.MENU_ITEM_WIDTH * 2, this.text.getWidth() + 50);
 		final int menuItemHeight = 51;
@@ -55,7 +56,7 @@ public class Dialog implements ItemListener {
 		
 		this.text.setPosition(centerX, centerY);
 		
-		menu = new Menu(centerX - dialogWidth / 2, centerY + dialogHeight / 2 - menuItemHeight, dialogWidth, menuItemHeight, 0);
+		menu = new Menu(centerX - dialogWidth / 2, centerY + dialogHeight / 2 - menuItemHeight - menuItemHeight / 2, dialogWidth, menuItemHeight, 0);
 		
 		switch (type) {
 		case CONFIRM:
@@ -87,12 +88,13 @@ public class Dialog implements ItemListener {
 	
 	private void drawDialog() {
 		drawQuad(centerX - dialogWidth / 2, centerY - 100, dialogWidth, 200, GL_LINE, Color.White);
+		drawQuad(centerX - dialogWidth / 2, centerY - 100, dialogWidth, 200, GL_FILL, Color.TransparentBlack);
 		text.render();
 		menu.render();
 	}
 	
 	private void drawBackgroundOverlay() {
-		drawQuad(0, 0, width, height, GL_FILL, Color.Black.alpha(.7));
+		drawQuad(0, 0, width, height, GL_FILL, Color.TransparentBlack);
 	}
 	
 	private void drawQuad(float posX, float posY, float width, float height, int style, Color color) {

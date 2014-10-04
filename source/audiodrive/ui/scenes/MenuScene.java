@@ -1,11 +1,11 @@
 package audiodrive.ui.scenes;
 
-import static org.lwjgl.opengl.GL11.GL_COLOR_BUFFER_BIT;
-import static org.lwjgl.opengl.GL11.GL_DEPTH_BUFFER_BIT;
-import static org.lwjgl.opengl.GL11.glClear;
+import static org.lwjgl.opengl.GL11.*;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.IntStream;
 
 import org.lwjgl.input.Keyboard;
@@ -35,7 +35,6 @@ import audiodrive.ui.menu.item.Item;
 import audiodrive.ui.menu.item.ItemListener;
 import audiodrive.ui.menu.item.MenuItem;
 import audiodrive.ui.menu.item.SettingsItem;
-import audiodrive.ui.overlays.GameOverlay;
 import audiodrive.utilities.Log;
 
 /**
@@ -69,10 +68,9 @@ public class MenuScene extends Scene implements ItemListener {
 	private Text audioText;
 	private List<Text> audioInformationText = new ArrayList<>();
 	private List<String> models;
-	private GameOverlay gameOverlay;
 	
-	private Dialog currentDialog;
-	private Dialog exitDialog = new Dialog("Do you really want to exit?", DialogType.YES_NO);
+	private Map<String, Dialog> dialogs = new HashMap<>();
+	private String dialog;
 	
 	@Override
 	public void entering() {
@@ -119,6 +117,9 @@ public class MenuScene extends Scene implements ItemListener {
 		modelValue.setValue(currentModel);
 		modelSelectionMenu.addItem(modelValue);
 		Input.addObservers(menu, audioSelectionMenu, modelSelectionMenu);
+		
+		dialogs.put("exit", new Dialog("Exit AudioDrive?", DialogType.YES_NO));
+		if (dialog != null) openDialog(dialog);
 		
 		audioInformationText.clear();
 		// Test if audio was selected
@@ -168,9 +169,9 @@ public class MenuScene extends Scene implements ItemListener {
 		playerModel.position().y(-0.15 * (1.1 - factor));
 		playerModel.scale(0.05 * factor).render();
 		
-		if (currentDialog != null) {
+		if (dialog != null) {
 			Camera.overlay(getWidth(), getHeight());
-			currentDialog.render();
+			dialogs.get(dialog).render();
 		}
 		
 		checkDialogAnswered();
@@ -181,19 +182,27 @@ public class MenuScene extends Scene implements ItemListener {
 		rotation.yAdd(10 * time);
 	}
 	
+	private void openDialog(String name) {
+		if (name == null || dialogs.get(name) == null) return;
+		dialog = name;
+		dialogs.get(dialog).activate();
+		Input.removeObservers(menu, audioSelectionMenu, modelSelectionMenu);
+	}
+	
 	private void checkDialogAnswered() {
-		if (currentDialog != null && currentDialog.answer != null) {
-			
-			if (currentDialog == exitDialog) {
-				if (currentDialog.answer == DialogAnswer.YES) {
-					AudioDrive.exit();
-				}
+		if (dialog == null) return;
+		Dialog currentDialog = dialogs.get(dialog);
+		if (currentDialog == null || currentDialog.answer == null) return;
+		if (dialog.equals("exit")) {
+			if (currentDialog.answer == DialogAnswer.YES) {
+				AudioDrive.exit();
+			} else {
+				exitMenuItem.reset();
 			}
-			
-			Input.addObservers(menu, audioSelectionMenu, modelSelectionMenu);
-			currentDialog.reset();
-			currentDialog = null;
 		}
+		Input.addObservers(menu, audioSelectionMenu, modelSelectionMenu);
+		currentDialog.reset();
+		dialog = null;
 	}
 	
 	@Override
@@ -201,6 +210,7 @@ public class MenuScene extends Scene implements ItemListener {
 		if (!Window.isRecreating() && getEntering() == null) AudioDrive.MenuSound.stop();
 		if (AudioDrive.getAction() == Action.Play || AudioDrive.getAction() == Action.Visualize) AudioDrive.MenuSound.setLooping(false);
 		Input.removeObservers(menu, audioSelectionMenu, modelSelectionMenu);
+		dialogs.clear();
 		title = null;
 		version = null;
 		credits = null;
@@ -220,13 +230,13 @@ public class MenuScene extends Scene implements ItemListener {
 	
 	@Override
 	public void keyReleased(int key, char character) {
-		if (currentDialog != null) {
+		if (dialog != null) {
 			switch (key) {
 			case Keyboard.KEY_ESCAPE:
-				currentDialog.cancel();
+				dialogs.get(dialog).cancel();
 				break;
 			case Keyboard.KEY_RETURN:
-				currentDialog.confirm();
+				dialogs.get(dialog).confirm();
 				break;
 			}
 			return;
@@ -240,6 +250,7 @@ public class MenuScene extends Scene implements ItemListener {
 		case Keyboard.KEY_V:
 			onSelect(visualizeMenuItem, true);
 			break;
+		case Keyboard.KEY_RETURN:
 		case Keyboard.KEY_P:
 			onSelect(playMenuItem, true);
 			break;
@@ -303,10 +314,7 @@ public class MenuScene extends Scene implements ItemListener {
 			return;
 		}
 		if (item == exitMenuItem) {
-			if (currentDialog == null) {
-				currentDialog = exitDialog.activate();
-				Input.removeObservers(menu, audioSelectionMenu, modelSelectionMenu);
-			}
+			openDialog("exit");
 			return;
 		}
 	}

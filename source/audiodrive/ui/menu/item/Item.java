@@ -16,6 +16,10 @@ import audiodrive.utilities.Log;
 
 public abstract class Item {
 	
+	public static enum Alignment {
+		Left, Center, Right
+	}
+	
 	public static enum State {
 		Normal, Hovering, Selected, Disabled
 	}
@@ -32,6 +36,7 @@ public abstract class Item {
 		DefaultColors.put(State.Disabled, new Colors(Color.Gray, Color.White, Color.TransparentGray));
 	}
 	
+	private Alignment alignment = Alignment.Left;
 	private State state = State.Normal;
 	protected Text text;
 	protected int x;
@@ -97,10 +102,22 @@ public abstract class Item {
 			glVertex2f(x + width, y);
 			glEnd();
 		}
+		int x = this.x;
+		switch (alignment) {
+		case Left:
+			x += iconWidth;
+			break;
+		case Center:
+			x += (width - text.getWidth()) / 2;
+			break;
+		case Right:
+			x += width - text.getWidth();
+			break;
+		}
 		final Color color = box ? colors.foreground : colors.text;
-		text.setColor(color).setPosition(x + iconWidth, y + height / 2 - text.getHeight() / 2).render();
+		text.setColor(color).setPosition(x, y).render();
 		if (icon != null) {
-			Resources.getIconModel().position(new Vector(x, y, 0)).position().xAdd(iconWidth / 2).yAdd(iconWidth / 2);
+			Resources.getIconModel().position(new Vector(x - iconWidth, y, 0)).position().xAdd(iconWidth / 2).yAdd(iconWidth / 2);
 			Resources.getIconModel().scale(iconWidth / 2).color(color).setTexture(Resources.getIconTextures().get(icon)).render();
 		}
 	}
@@ -127,6 +144,15 @@ public abstract class Item {
 		default:
 			break;
 		}
+	}
+	
+	public Item setAlignment(Alignment alignment) {
+		this.alignment = alignment;
+		return this;
+	}
+	
+	public Alignment getAlignment() {
+		return alignment;
 	}
 	
 	public Item setIcon(Icon icon) {

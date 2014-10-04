@@ -70,8 +70,6 @@ public class SelectionScene extends Scene implements ItemListener {
 	private boolean silentHovering = true;
 	private double volume;
 	
-	private boolean play;
-	
 	@Override
 	public void entering() {
 		volume = AudioDrive.Settings.getDouble("interface.volume");
