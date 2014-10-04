@@ -321,8 +321,7 @@ public class GameScene extends Scene {
 				if (startCameraPath.isSkippable()) startCameraPath.skip();
 			} else if (state == State.Running) pause();
 			else {
-				state = State.Ended;
-				Log.info("Game canceled.");
+				if (state != State.Ended && state != State.Destroyed) Log.info("Game canceled.");
 				Scene.get(MenuScene.class).enter();
 			}
 			break;
