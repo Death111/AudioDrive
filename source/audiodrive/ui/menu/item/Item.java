@@ -21,7 +21,7 @@ public abstract class Item {
 	}
 	
 	public static enum Icon {
-		Music, Folder, Normal, Next, Previous
+		Music, Folder, Normal, Next, Previous, Confirm, No, Yes
 	}
 	
 	protected static final Map<State, Colors> DefaultColors = new HashMap<>();

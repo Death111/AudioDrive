@@ -182,6 +182,9 @@ public class Resources {
 			iconTextures.put(Icon.Normal, getTexture("textures/icon/normal.png"));
 			iconTextures.put(Icon.Next, getTexture("textures/icon/normal.png"));
 			iconTextures.put(Icon.Previous, getTexture("textures/icon/normal.png"));
+			iconTextures.put(Icon.Confirm, getTexture("textures/icon/confirm.png"));
+			iconTextures.put(Icon.Yes, getTexture("textures/icon/yes.png"));
+			iconTextures.put(Icon.No, getTexture("textures/icon/no.png"));
 		}
 		return iconTextures;
 	}

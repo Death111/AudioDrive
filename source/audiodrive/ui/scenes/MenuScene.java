@@ -26,12 +26,16 @@ import audiodrive.ui.components.Text;
 import audiodrive.ui.components.Text.Alignment;
 import audiodrive.ui.components.Window;
 import audiodrive.ui.control.Input;
+import audiodrive.ui.dialog.Dialog;
+import audiodrive.ui.dialog.Dialog.DialogAnswer;
+import audiodrive.ui.dialog.Dialog.DialogType;
 import audiodrive.ui.effects.ShaderProgram;
 import audiodrive.ui.menu.Menu;
 import audiodrive.ui.menu.item.Item;
 import audiodrive.ui.menu.item.ItemListener;
 import audiodrive.ui.menu.item.MenuItem;
 import audiodrive.ui.menu.item.SettingsItem;
+import audiodrive.ui.overlays.GameOverlay;
 import audiodrive.utilities.Log;
 
 /**
@@ -53,8 +57,6 @@ public class MenuScene extends Scene implements ItemListener {
 	private MenuItem playMenuItem;
 	private MenuItem settingsMenuItem;
 	private MenuItem exitMenuItem;
-	private MenuItem yesMenuItem;
-	private MenuItem noMenuItem;
 	private Overlay background;
 	
 	private AudioResource hoverAudio;
@@ -67,6 +69,10 @@ public class MenuScene extends Scene implements ItemListener {
 	private Text audioText;
 	private List<Text> audioInformationText = new ArrayList<>();
 	private List<String> models;
+	private GameOverlay gameOverlay;
+	
+	private Dialog currentDialog;
+	private Dialog exitDialog = new Dialog("Do you really want to exit?", DialogType.YES_NO);
 	
 	@Override
 	public void entering() {
@@ -89,9 +95,6 @@ public class MenuScene extends Scene implements ItemListener {
 		menu.addItem(settingsMenuItem);
 		exitMenuItem = new MenuItem("Exit", this);
 		menu.addItem(exitMenuItem);
-		
-		yesMenuItem = new MenuItem("Yes", this);
-		noMenuItem = new MenuItem("No", this);
 		
 		hoverAudio = new AudioResource("sounds/Hover.mp3");
 		selectAudio = new AudioResource("sounds/Select.mp3");
@@ -151,8 +154,6 @@ public class MenuScene extends Scene implements ItemListener {
 		credits.render();
 		menu.render();
 		
-		if (isExitMenu()) return;
-		
 		audioText.render();
 		audioInformationText.stream().forEach(Text::render);
 		audioSelectionMenu.render();
@@ -166,11 +167,33 @@ public class MenuScene extends Scene implements ItemListener {
 		Model playerModel = AudioDrive.getPlayerModel();
 		playerModel.position().y(-0.15 * (1.1 - factor));
 		playerModel.scale(0.05 * factor).render();
+		
+		if (currentDialog != null) {
+			Camera.overlay(getWidth(), getHeight());
+			currentDialog.render();
+		}
+		
+		checkDialogAnswered();
 	}
 	
 	@Override
 	public void update(double time) {
 		rotation.yAdd(10 * time);
+	}
+	
+	private void checkDialogAnswered() {
+		if (currentDialog != null && currentDialog.answer != null) {
+			
+			if (currentDialog == exitDialog) {
+				if (currentDialog.answer == DialogAnswer.YES) {
+					AudioDrive.exit();
+				}
+			}
+			
+			Input.addObservers(menu, audioSelectionMenu, modelSelectionMenu);
+			currentDialog.reset();
+			currentDialog = null;
+		}
 	}
 	
 	@Override
@@ -190,8 +213,6 @@ public class MenuScene extends Scene implements ItemListener {
 		selectAudioMenuItem = null;
 		settingsMenuItem = null;
 		exitMenuItem = null;
-		yesMenuItem = null;
-		noMenuItem = null;
 		hoverAudio = null;
 		selectAudio = null;
 		System.gc();
@@ -199,23 +220,26 @@ public class MenuScene extends Scene implements ItemListener {
 	
 	@Override
 	public void keyReleased(int key, char character) {
+		if (currentDialog != null) {
+			switch (key) {
+			case Keyboard.KEY_ESCAPE:
+				currentDialog.cancel();
+				break;
+			case Keyboard.KEY_RETURN:
+				currentDialog.confirm();
+				break;
+			}
+			return;
+		}
+		
 		super.keyReleased(key, character);
 		switch (key) {
 		case Keyboard.KEY_ESCAPE:
-			if (isExitMenu()) {
-				onSelect(noMenuItem, true);
-			} else {
-				onSelect(exitMenuItem, true);
-			}
+			onSelect(exitMenuItem, true);
 			break;
 		case Keyboard.KEY_V:
 			onSelect(visualizeMenuItem, true);
 			break;
-		case Keyboard.KEY_RETURN:
-			if (isExitMenu()) {
-				onSelect(yesMenuItem, true);
-				break;
-			}
 		case Keyboard.KEY_P:
 			onSelect(playMenuItem, true);
 			break;
@@ -231,10 +255,6 @@ public class MenuScene extends Scene implements ItemListener {
 		default:
 			break;
 		}
-	}
-	
-	private boolean isExitMenu() {
-		return !title.getText().equals(AudioDrive.Title);
 	}
 	
 	@Override
@@ -283,23 +303,10 @@ public class MenuScene extends Scene implements ItemListener {
 			return;
 		}
 		if (item == exitMenuItem) {
-			title.setText("Exit?");
-			menu.removeAllItems();
-			menu.addItem(yesMenuItem);
-			menu.addItem(noMenuItem);
-			return;
-		}
-		if (item == yesMenuItem) {
-			AudioDrive.exit();
-			return;
-		}
-		if (item == noMenuItem) {
-			title.setText(AudioDrive.Title);
-			menu.removeAllItems();
-			menu.addItem(playMenuItem);
-			menu.addItem(visualizeMenuItem);
-			menu.addItem(settingsMenuItem);
-			menu.addItem(exitMenuItem);
+			if (currentDialog == null) {
+				currentDialog = exitDialog.activate();
+				Input.removeObservers(menu, audioSelectionMenu, modelSelectionMenu);
+			}
 			return;
 		}
 	}
