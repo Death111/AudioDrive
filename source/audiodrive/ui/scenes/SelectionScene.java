@@ -103,7 +103,6 @@ public class SelectionScene extends Scene implements ItemListener {
 		}
 		updateItemExplorer(rootFile);
 		if (selectedFile != null) {
-			setSelected(selectedFile);
 			Optional<FileChooserItem> item = itemMap.entrySet().stream().filter(entry -> entry.getValue().equals(selectedFile)).findAny().map(Entry::getKey);
 			if (item.isPresent()) {
 				FileChooserItem selected = item.get();
