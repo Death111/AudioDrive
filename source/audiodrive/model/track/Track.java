@@ -513,7 +513,6 @@ public class Track implements Renderable {
 		glClear(GL_DEPTH_BUFFER_BIT);
 		glColorMask(false, false, false, false);
 		splineArea2Buffer.draw();
-		double maxAlpha = .6;
 		// filter objects depending on visibility and depth buffer
 		int range = sight / 2;
 		Matrix mvpMatrix = GL.modelviewProjectionMatrix();
@@ -559,7 +558,7 @@ public class Track implements Renderable {
 		glDisable(GL_CULL_FACE);
 		rings.forEach(ring -> {
 			double distance = Math.abs(ring.iteration() - index.integer);
-			double alpha = Arithmetic.scaleLinear(distance, maxAlpha, 0, 0, range);
+			double alpha = Arithmetic.scaleLinear(distance, 1, 0, 0, range);
 			final Color color = ring.color();
 			ring.color(color.alpha(alpha));
 			ring.render();
@@ -573,7 +572,7 @@ public class Track implements Renderable {
 			Placement originalPlacement = placement.clone();
 			placement.position(placement.position().plus(placement.up().multiplied(-2 * flightHeight)));
 			double distance = Math.abs(block.iteration() - index.integer);
-			double alpha = Arithmetic.scaleLinear(distance, maxAlpha, 0, 0, range);
+			double alpha = Arithmetic.scaleLinear(distance, 1, 0, 0, range);
 			final Color color = block.color();
 			block.color(color.alpha(alpha));
 			block.model().setTexture(Resources.getReflectedBlockTexture());
