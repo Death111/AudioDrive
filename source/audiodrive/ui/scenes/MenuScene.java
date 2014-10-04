@@ -271,7 +271,7 @@ public class MenuScene extends Scene implements ItemListener {
 		AudioDrive.setAction(Action.None);
 		if (item == visualizeMenuItem) {
 			AudioDrive.setAction(Action.Visualize);
-			if (AudioDrive.getSelectedAudio() == null) {
+			if (AudioDrive.getAnalyzedAudio() == null) {
 				Scene.get(SelectionScene.class).enter();
 				return;
 			}
