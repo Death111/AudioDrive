@@ -63,6 +63,7 @@ public class Player implements Renderable {
 	private int hitboxEnd;
 	private double hitboxSide;
 	
+	private double glowing;
 	private boolean hit;
 	private boolean destroyed;
 	
@@ -91,6 +92,10 @@ public class Player implements Renderable {
 	@Override
 	public void update(double elapsed) {
 		model.placement(track.getPlacement(scene.playtime()));
+		if (glowing > 0) {
+			glowing -= elapsed;
+			if (glowing < 0) glowing = 0;
+		}
 		double newX = model.translation().x();
 		double moved = newX - oldX;
 		oldX = newX;
@@ -240,6 +245,7 @@ public class Player implements Renderable {
 			collected++;
 			Log.trace("collected %1s", block);
 			if (GameScene.particles) scene.particleEffects().createParticles(block);
+			glowing = 0.25;
 		} else {
 			CollideSound.play(volume);
 			collided++;
@@ -307,6 +313,10 @@ public class Player implements Renderable {
 	
 	public double zoom() {
 		return zoom;
+	}
+	
+	public boolean isGlowing() {
+		return glowing > 0;
 	}
 	
 	public void camera() {

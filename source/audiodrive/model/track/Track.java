@@ -16,7 +16,12 @@ import audiodrive.audio.AnalyzedChannel;
 import audiodrive.model.Player;
 import audiodrive.model.Renderable;
 import audiodrive.model.buffer.VertexBuffer;
-import audiodrive.model.geometry.*;
+import audiodrive.model.geometry.Color;
+import audiodrive.model.geometry.CuboidStripRenderer;
+import audiodrive.model.geometry.Matrix;
+import audiodrive.model.geometry.TextureCoordinate;
+import audiodrive.model.geometry.Vector;
+import audiodrive.model.geometry.Vertex;
 import audiodrive.model.geometry.transform.Placement;
 import audiodrive.model.geometry.transform.Rotation;
 import audiodrive.model.loader.Model;
@@ -104,12 +109,13 @@ public class Track implements Renderable {
 			leftBorderVertexBuffer.draw();
 			rightBorderVertexBuffer.draw();
 			visibleBlocks.stream().filter(block -> !block.isGlowing()).forEach(Block::render);
-			player.render();
+			if (!player.isGlowing()) player.render();
 		}).renderpass(() -> {
 			visibleBlocks.stream().filter(Block::isGlowing).forEach(Block::render);
 			visibleMusicTowers.stream().forEach(MusicTower::render);
 			visibleRings.stream().forEach(Ring::render);
 			particles.render();
+			if (player.isGlowing()) player.render();
 		});
 		skybox = ModelLoader.loadModel("models/skybox/skybox").scale(GameScene.Far / 4);
 		skybox.setTexture(Resources.getTexture(GameScene.night ? "models/skybox/night.png" : "models/skybox/day.png"));
