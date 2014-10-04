@@ -1,6 +1,7 @@
 package audiodrive.ui.components;
 
-import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL11.glDisable;
+import static org.lwjgl.opengl.GL11.glEnable;
 import static org.lwjgl.opengl.GL13.GL_MULTISAMPLE;
 
 import java.awt.GraphicsDevice;
@@ -114,9 +115,8 @@ public class Window {
 			throw new RuntimeException(exception);
 		}
 		Camera.reset();
-		if (antialiasing) glEnable(GL_MULTISAMPLE);
-		else glDisable(GL_MULTISAMPLE);
-		Display.setVSyncEnabled(vSync);
+		setAntialiasingEnabled(antialiasing);
+		setVSyncEnabled(vSync);
 		scene.ifPresent(Scene::entering);
 		recreating = false;
 	}
@@ -246,6 +246,7 @@ public class Window {
 	public static void setAntialiasingEnabled(boolean enabled) {
 		antialiasing = enabled;
 		if (Display.isCreated()) {
+			antialiasing = antialiasing && GLContext.getCapabilities().GL_ARB_multisample;
 			if (antialiasing) glEnable(GL_MULTISAMPLE);
 			else glDisable(GL_MULTISAMPLE);
 		}

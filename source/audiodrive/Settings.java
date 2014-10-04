@@ -26,7 +26,7 @@ public class Settings {
 		set("block.collectable.color", "1,1,1,1");
 		set("block.collectable.color.static", "true");
 		set("block.collectable.glowing", "true");
-		set("block.obstacle.color", "0,0,1,1");
+		set("block.obstacle.color", ".4,.4,.4,1");
 		set("block.obstacle.color.static", "false");
 		set("block.obstacle.glowing", "false");
 		set("color.intense", "1,0,0,1");
@@ -36,8 +36,8 @@ public class Settings {
 		set("game.visualization", "true");
 		set("game.night", "true");
 		set("game.sky", "true");
-		set("game.sight", "150");
-		set("game.difficulty", "0.5");
+		set("game.sight", "200");
+		set("game.difficulty", "0.9");
 		set("graphics.glow", "true");
 		set("graphics.particles", "true");
 		set("graphics.reflections", "true");
@@ -49,9 +49,9 @@ public class Settings {
 		set("music.volume", "1.0");
 		set("player.model", "xwing");
 		set("sound.volume", "1.0");
-		set("track.smoothing", "15");
-		set("window.antialiasing", "false");
-		set("window.multisampling", "0");
+		set("track.smoothing", "20");
+		set("window.antialiasing", "true");
+		set("window.multisampling", "2");
 		set("window.framerate", "0");
 		set("window.useSecondaryMonitor", "false");
 		set("window.vsync", "true");

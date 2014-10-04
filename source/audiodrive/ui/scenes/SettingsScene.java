@@ -35,7 +35,8 @@ public class SettingsScene extends Scene implements ItemListener {
 	private static final List<Boolean> booleanValues = Arrays.asList(false, true);
 	private static final List<Integer> multisamplingValues = Arrays.asList(0, 2, 4, 8);
 	private static final List<Integer> sightValues = Arrays.asList(50, 100, 150, 200, 250, 300);
-	private static final List<Double> difficultyValues = Arrays.asList(.1, .2, .3, .4, .5, .6, .7, .8, .9, .95, .96, .97, .98, .99, 1.);
+	private static final List<Double> difficultyValues = Arrays.asList(.1, .2, .3, .4, .5, .6, .7, .8, .9, .91, .92, .93, .94, .95, .96, .97, .98, .99, 1.);
+	private static final List<Integer> smoothingValues = Arrays.asList(10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 25, 30, 40, 50, 60, 70, 80, 90, 100);
 	private static final List<Double> controlValues = Arrays.asList(.5, .6, .7, .8, .9, 1., 1.2, 1.4, 1.6, 1.8, 2.0);
 	private static final List<Double> volumeValues = Arrays.asList(0., .1, .2, .3, .4, .5, .6, .7, .8, .9, 1.);
 	
@@ -59,6 +60,7 @@ public class SettingsScene extends Scene implements ItemListener {
 	private SettingsItem<Boolean> staticObstacleColor;
 	private SettingsItem<Boolean> glowingObstacles;
 	private SettingsItem<Double> difficulty;
+	private SettingsItem<Integer> smoothing;
 	private SettingsItem<Double> keyboard;
 	private SettingsItem<Double> mouse;
 	private SettingsItem<Double> interfaceVolume;
@@ -105,7 +107,7 @@ public class SettingsScene extends Scene implements ItemListener {
 			.setAlignment(Alignment.LowerLeft)
 			.setPosition(itemHeight + itemHeight + width, inputMenuY);
 		inputMenu = new Menu(itemHeight + itemHeight + width, inputMenuY, width + 1, height / 3, 1);
-		int gameMenuY = y + (itemHeight + 1) * 14;
+		int gameMenuY = y + (itemHeight + 1) * 13;
 		gameSettingsText = new Text("Game").setFont(AudioDrive.Font).setSize(headingSize).setAlignment(Alignment.LowerLeft).setPosition(itemHeight + itemHeight + width, gameMenuY);
 		gameMenu = new Menu(itemHeight + itemHeight + width, gameMenuY, width + 1, height / 3, 1);
 		
@@ -133,6 +135,7 @@ public class SettingsScene extends Scene implements ItemListener {
 		staticObstacleColor = new SettingsItem<Boolean>("Static Obstacle Color", booleanValues, width, itemHeight);
 		glowingObstacles = new SettingsItem<Boolean>("Glowing Obstacles", booleanValues, width, itemHeight);
 		difficulty = new SettingsItem<Double>("Difficulty", difficultyValues, width, itemHeight);
+		smoothing = new SettingsItem<Integer>("Smoothing", smoothingValues, width, itemHeight);
 		keyboard = new SettingsItem<Double>("Keyboard Sensitivity", controlValues, width, itemHeight);
 		mouse = new SettingsItem<Double>("Mouse Sensitivity", controlValues, width, itemHeight);
 		interfaceVolume = new SettingsItem<Double>("Interface Volume", volumeValues, width, itemHeight);
@@ -160,6 +163,7 @@ public class SettingsScene extends Scene implements ItemListener {
 		inputMenu.addItem(keyboard);
 		inputMenu.addItem(mouse);
 		gameMenu.addItem(difficulty);
+		gameMenu.addItem(smoothing);
 		
 		selectAudio = new AudioResource("sounds/Select.mp3");
 		volume = AudioDrive.Settings.getDouble("interface.volume");
@@ -183,6 +187,7 @@ public class SettingsScene extends Scene implements ItemListener {
 		night.setValue(AudioDrive.Settings.getBoolean("game.night"));
 		sky.setValue(AudioDrive.Settings.getBoolean("game.sky"));
 		difficulty.setValue(AudioDrive.Settings.getDouble("game.difficulty"));
+		smoothing.setValue(AudioDrive.Settings.getInteger("track.smoothing"));
 		staticCollectableColor.setValue(AudioDrive.Settings.getBoolean("block.collectable.color.static"));
 		glowingCollectables.setValue(AudioDrive.Settings.getBoolean("block.collectable.glowing"));
 		staticObstacleColor.setValue(AudioDrive.Settings.getBoolean("block.obstacle.color.static"));
@@ -254,6 +259,7 @@ public class SettingsScene extends Scene implements ItemListener {
 		AudioDrive.Settings.set("game.night", night.valueAsString());
 		AudioDrive.Settings.set("game.sky", sky.valueAsString());
 		AudioDrive.Settings.set("game.difficulty", difficulty.valueAsString());
+		AudioDrive.Settings.set("track.smoothing", smoothing.valueAsString());
 		AudioDrive.Settings.set("block.collectable.color.static", staticCollectableColor.valueAsString());
 		AudioDrive.Settings.set("block.collectable.glowing", glowingCollectables.valueAsString());
 		AudioDrive.Settings.set("block.obstacle.color.static", staticObstacleColor.valueAsString());

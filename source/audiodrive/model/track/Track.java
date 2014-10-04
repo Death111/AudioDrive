@@ -382,6 +382,7 @@ public class Track implements Renderable {
 				block.color(block.isCollectable() ? inverseBorderColor : borderColor);
 			} else if (block.isCollectable()) {
 				if (GameScene.colorizeCollectables) block.color(borderColor);
+				else if (!GameScene.night && block.color().equals(Color.White)) block.color(Color.Gray);
 			} else {
 				if (GameScene.colorizeObstacles) block.color(borderColor);
 			}

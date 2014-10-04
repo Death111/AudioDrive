@@ -42,6 +42,7 @@ public class AudioDrive {
 		SlickLog.bind();
 		Settings.load();
 		Natives.load();
+		Window.setTitle(AudioDrive.Title);
 		Window.useSecondaryMonitor(Settings.getBoolean("window.useSecondaryMonitor"));
 		Window.setBorderless(true);
 		Window.setFullscreen(true);
