@@ -143,13 +143,14 @@ public class GameScene extends Scene {
 			if (startCameraPath.isFinished()) {
 				state = State.Running;
 				playback.start();
+				Log.info("Game started.");
 			}
 			return;
 		}
 		if (state == State.Resuming && rotation == 0) {
 			state = State.Running;
-			if (playback.isPaused()) playback.resume();
-			else playback.start();
+			playback.resume();
+			Log.info("Game resumed.");
 			return;
 		}
 		if (state != State.Running) return;
@@ -158,11 +159,13 @@ public class GameScene extends Scene {
 			playback.stop();
 			rotate = true;
 			new AudioResource("sounds/Destroyed.mp3").play(volume);
+			Log.info("Destroyed. Game ended.");
 			return;
 		}
 		if (track.index().integer == track.lastIndex()) {
 			state = State.Ended;
 			rotate = true;
+			Log.info("Game ended.");
 			return;
 		}
 	}
@@ -294,8 +297,10 @@ public class GameScene extends Scene {
 		if (state == State.Running || state == State.Resuming) {
 			playback.pause();
 			state = State.Paused;
+			Log.info("Game paused.");
 		} else if (state == State.Paused) {
 			state = State.Resuming;
+			Log.info("Game resuming...");
 		}
 	}
 	
@@ -315,7 +320,11 @@ public class GameScene extends Scene {
 			if (state == State.Animating) {
 				if (startCameraPath.isSkippable()) startCameraPath.skip();
 			} else if (state == State.Running) pause();
-			else Scene.get(MenuScene.class).enter();
+			else {
+				state = State.Ended;
+				Log.info("Game canceled.");
+				Scene.get(MenuScene.class).enter();
+			}
 			break;
 		case Keyboard.KEY_HOME:
 			translation.reset();
