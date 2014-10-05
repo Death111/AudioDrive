@@ -49,7 +49,7 @@ public class Player implements Renderable {
 	private double zoomMaximum = 5.0;
 	private double zoomSpeed = 1.0;
 	
-	private double jumpHeight = 0.1;
+	private double jumpHeight = 0.05;
 	private double jumpRate = 1.5;
 	private double jumpProgress = 0.0;
 	private boolean jumpUpwards = true;
@@ -177,19 +177,17 @@ public class Player implements Renderable {
 	}
 	
 	private boolean checkCollisions(double elapsed) {
-		int start = track.index().integer;
-		int end = track.index().integer + (int) Math.ceil(track.indexRate() * elapsed);
+		double tiltFraction = 0.5 - Math.abs(0.5 - tiltProgress);
+		hitboxStart = track.index().integer - (int) (track.indexRate() * elapsed);
+		hitboxEnd = track.index().integer + (int) Math.ceil(track.index().fraction);
+		hitboxSide = track.railWidth() * Arithmetic.smooth(0.01, 0.5, tiltFraction);
 		long collisions = track
 			.getBlocks()
 			.stream()
-			.filter(block -> !block.isDestroyed() && (block.iteration() >= start && block.iteration() <= end))
+			.filter(block -> !block.isDestroyed() && (block.iteration() >= hitboxStart && block.iteration() <= hitboxEnd))
 			.filter(this::interact)
 			.filter(block -> !block.isCollectable())
 			.count();
-		double tiltFraction = 0.5 - Math.abs(0.5 - tiltProgress);
-		hitboxSide = track.railWidth() * Arithmetic.smooth(0.01, 0.5, tiltFraction);
-		hitboxStart = start;
-		hitboxEnd = end;
 		boolean collision = collisions > 0;
 		if (collision) {
 			double x = Math.max(-30, (inclination.x() - 5));
@@ -216,18 +214,22 @@ public class Player implements Renderable {
 	
 	private void renderHitbox() {
 		Vector side = model.placement().side().multiplied(hitboxSide);
-		Vector up = model.up().multiplied(0.1);
-		Vector start = track.spline().get(Math.max(0, hitboxStart)).plus(up);
-		Vector end = track.spline().get(Math.min(track.spline().size() - 1, hitboxEnd)).plus(up);
-		start.add(model.translation().vector());
-		end.add(model.translation().vector());
-		Color.TransparentRed.gl();
+		Vector start = track.spline().get(Math.max(0, hitboxStart)).plus(model.translation().vector());
+		Vector end = track.spline().get(Math.min(track.spline().size() - 1, hitboxEnd)).plus(model.translation().vector());
+		Vector up = model.up().multiplied(0.2);
+		start.add(up);
+		end.add(up);
+		Color.Red.gl();
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		glLineWidth(3);
 		glBegin(GL_QUADS);
 		start.plus(side.negated()).glVertex();
 		start.plus(side).glVertex();
 		end.plus(side).glVertex();
 		end.plus(side.negated()).glVertex();
 		glEnd();
+		glLineWidth(1);
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	}
 	
 	public boolean interact(Block block) {
