@@ -22,7 +22,7 @@ public class GameBackground extends Overlay {
 	public void render() {
 		Camera.overlay(width, height);
 		super.render();
-		if (GameScene.particles && !GameScene.sky) scene.particleEffects().render();
+		if (GameScene.particles && !GameScene.sky) scene.particles().render();
 	}
 	
 }

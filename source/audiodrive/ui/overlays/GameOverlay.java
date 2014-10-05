@@ -20,6 +20,7 @@ import audiodrive.ui.components.Overlay;
 import audiodrive.ui.components.Scene;
 import audiodrive.ui.components.Text;
 import audiodrive.ui.components.Text.Alignment;
+import audiodrive.ui.effects.Particles2D;
 import audiodrive.ui.scenes.GameScene;
 import audiodrive.ui.scenes.GameScene.State;
 import audiodrive.utilities.Arithmetic;
@@ -45,7 +46,7 @@ public class GameOverlay extends Overlay {
 	private float[] rightSpectrum;
 	private Color spectrumColor = Color.White;
 	private Color spectrumFadeColor = Color.Transparent;
-	
+
 	public GameOverlay(GameScene scene) {
 		this.scene = scene;
 		width = scene.getWidth();
@@ -127,7 +128,7 @@ public class GameOverlay extends Overlay {
 		super.render();
 		if (GameScene.visualization && GameScene.peaks) drawPeaks();
 		if (GameScene.visualization && GameScene.spectrum) drawSpectrum();
-		if (GameScene.particles && GameScene.sky && scene.getState() != State.Paused) scene.particleEffects().render();
+		if (GameScene.particles && GameScene.sky && scene.getState() != State.Paused) scene.particles().render();
 		trackOverview.render();
 		if (text("notification").isVisible()) drawNotificationBackground();
 		texts.values().forEach(Text::render);

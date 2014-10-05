@@ -40,6 +40,14 @@ public class Settings {
 		set("game.difficulty", "0.9");
 		set("graphics.glow", "true");
 		set("graphics.particles", "true");
+		set("graphics.particles.2d.count", "20");
+		set("graphics.particles.2d.lifetime", "1.0");
+		set("graphics.particles.2d.scale", "1.0");
+		set("graphics.particles.2d.velocity", "1.0");
+		set("graphics.particles.3d.count", "3000");
+		set("graphics.particles.3d.lifetime", "1.0");
+		set("graphics.particles.3d.scale", "1.0");
+		set("graphics.particles.3d.velocity", "1.0");
 		set("graphics.reflections", "true");
 		set("input.mouse.speed", "1.0");
 		set("input.keyboard.speed", "1.0");

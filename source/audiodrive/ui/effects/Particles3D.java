@@ -4,10 +4,7 @@ import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL13.GL_TEXTURE0;
 import static org.lwjgl.opengl.GL13.glActiveTexture;
 import static org.lwjgl.opengl.GL15.*;
-import static org.lwjgl.opengl.GL20.glDisableVertexAttribArray;
-import static org.lwjgl.opengl.GL20.glEnableVertexAttribArray;
-import static org.lwjgl.opengl.GL20.glUniform1i;
-import static org.lwjgl.opengl.GL20.glVertexAttribPointer;
+import static org.lwjgl.opengl.GL20.*;
 import static org.lwjgl.opengl.GL31.glDrawArraysInstanced;
 import static org.lwjgl.opengl.GL33.glVertexAttribDivisor;
 
@@ -16,53 +13,54 @@ import java.util.stream.IntStream;
 
 import org.newdawn.slick.opengl.Texture;
 
+import audiodrive.AudioDrive;
 import audiodrive.Resources;
 import audiodrive.model.Renderable;
 import audiodrive.model.geometry.Color;
 import audiodrive.model.geometry.Vector;
 import audiodrive.ui.components.Camera;
 import audiodrive.ui.effects.ShaderProgram.Uniform;
+import audiodrive.utilities.Arithmetic;
 import audiodrive.utilities.Buffers;
 
-class Particle implements Comparable<Particle> {
-	Vector position;
-	Vector speed;
-	Color color;
-	float size, angle, width;
-	float life;
-	double cameraDistance;
+public class Particles3D implements Renderable {
 	
-	@Override
-	public int compareTo(Particle that) {
-		if (cameraDistance > that.cameraDistance) return -1;
-		if (cameraDistance < that.cameraDistance) return 1;
-		return 0;
+	private int lastUsedParticle = 0;
+	
+	private Texture texture;
+	
+	private Particle3D[] particles;
+	private float[] particlePositionData;
+	private float[] particleColorData;
+	
+	private int particle_vertex_buffer = glGenBuffers();
+	private int particles_position_buffer = glGenBuffers();
+	private int particles_color_buffer = glGenBuffers();
+	
+	private ShaderProgram shader;
+	
+	private final int maxParticles;
+	private float scale = 0.5f;
+	private float lifetime = 2.0f;
+	private float velocity = 20f;
+	
+	public Particles3D() {
+		this(AudioDrive.Settings.getInteger("graphics.particles.3d.count"), AudioDrive.Settings.getDouble("graphics.particles.3d.scale"), AudioDrive.Settings
+			.getDouble("graphics.particles.3d.lifetime"), AudioDrive.Settings.getDouble("graphics.particles.3d.velocity"));
 	}
-}
-
-public class Particles implements Renderable {
 	
-	private static final int maxParticles = 3000;
-	Particle particles[] = new Particle[maxParticles];
-	int lastUsedParticle = 0;
-	
-	Texture texture;
-	
-	float particlePositionData[] = new float[maxParticles * 4];
-	float particleColorData[] = new float[maxParticles * 4];
-	
-	int vertexArray_buffer = glGenBuffers();
-	int particle_vertex_buffer = glGenBuffers();
-	int particles_position_buffer = glGenBuffers();
-	int particles_color_buffer = glGenBuffers();
-	
-	ShaderProgram shader;
-	
-	public Particles() {
+	public Particles3D(int count, double scale, double lifetime, double velocity) {
+		maxParticles = Arithmetic.clamp(count, 1, 30000);
+		this.scale *= (float) Arithmetic.clamp(scale, 0.01, 100);
+		this.lifetime *= (float) Arithmetic.clamp(lifetime, 0.01, 100);
+		this.velocity *= (float) Arithmetic.clamp(velocity, 0.01, 100);
+		particles = new Particle3D[maxParticles];
+		particlePositionData = new float[maxParticles * 4];
+		particleColorData = new float[maxParticles * 4];
 		texture = Resources.getTexture("textures/particle/particle.png");
 		// Create particles
 		for (int i = 0; i < maxParticles; i++) {
-			particles[i] = new Particle();
+			particles[i] = new Particle3D();
 			particles[i].life = -1.0f;
 			particles[i].cameraDistance = -1.0f;
 			particles[i].color = Color.Black;
@@ -71,8 +69,8 @@ public class Particles implements Renderable {
 		}
 		
 		shader = new ShaderProgram("shaders/Particle.vs", "shaders/Particle.fs");
-		final float scale = .5f;
-		float g_vertex_buffer_data[] = {-scale, -scale, 0.0f, scale, -scale, 0.0f, -scale, scale, 0.0f, scale, scale, 0.0f,};
+		final float s = this.scale;
+		float g_vertex_buffer_data[] = {-s, -s, 0.0f, s, -s, 0.0f, -s, s, 0.0f, s, s, 0.0f};
 		
 		glBindBuffer(GL_ARRAY_BUFFER, particle_vertex_buffer);
 		glBufferData(GL_ARRAY_BUFFER, Buffers.create(g_vertex_buffer_data), GL_STATIC_DRAW);
@@ -89,10 +87,16 @@ public class Particles implements Renderable {
 		
 	}
 	
+	@Override
+	protected void finalize() throws Throwable {
+		glDeleteBuffers(particle_vertex_buffer);
+		glDeleteBuffers(particles_position_buffer);
+		glDeleteBuffers(particles_color_buffer);
+	}
+	
 	private double lastTime = System.currentTimeMillis() / 1000;
 	
 	int particlesCount = 0;
-	final float particleLifetime = 2.0f;
 	
 	public void createParticles(Vector position, Color color, double amount) {
 		
@@ -102,14 +106,13 @@ public class Particles implements Renderable {
 		// Create new particles
 		IntStream.range(0, newParticles).parallel().forEach(idx -> {
 			int particleIndex = findUnusedParticle();
-			particles[particleIndex].life = particleLifetime;
+			particles[particleIndex].life = lifetime;
 			particles[particleIndex].position = position.clone();
 			
-			float spread = 8f;
 			Vector maindir = new Vector(Math.random() - .5f, 10f, Math.random() - .5f);
 			Vector randomdir = new Vector(Math.random() - .5, Math.random() - .5, Math.random() - .5f);
 			
-			particles[particleIndex].speed = maindir.add(randomdir.multiplied(spread * 2 * amount));
+			particles[particleIndex].speed = maindir.add(randomdir.multiplied(velocity * amount));
 			particles[particleIndex].color = Color.generateRandomColor(color);
 			particles[particleIndex].size = (float) Math.random();
 		});
@@ -135,7 +138,7 @@ public class Particles implements Renderable {
 				// add gravity
 				p.speed.yAdd(-9.81f * delta);
 				p.position.add(p.speed.multiplied(delta));
-				p.color = p.color.alpha(p.life * 1 / particleLifetime); // fade transparency
+				p.color = p.color.alpha(p.life * 1 / lifetime); // fade transparency
 				p.cameraDistance = p.position.minus(cameraPosition).length();
 				particlesCount++;
 			} else {
@@ -149,7 +152,7 @@ public class Particles implements Renderable {
 		
 		// fill gpu buffer
 		for (int i = 0; i < particlesCount; i++) {
-			Particle p = particles[i];
+			Particle3D p = particles[i];
 			
 			particlePositionData[4 * i + 0] = (float) p.position.x();
 			particlePositionData[4 * i + 1] = (float) p.position.y();
@@ -248,5 +251,21 @@ public class Particles implements Renderable {
 		shader.unbind();
 		glEnable(GL_CULL_FACE);
 		
+	}
+}
+
+class Particle3D implements Comparable<Particle3D> {
+	Vector position;
+	Vector speed;
+	Color color;
+	float size, angle, width;
+	float life;
+	double cameraDistance;
+	
+	@Override
+	public int compareTo(Particle3D that) {
+		if (cameraDistance > that.cameraDistance) return -1;
+		if (cameraDistance < that.cameraDistance) return 1;
+		return 0;
 	}
 }

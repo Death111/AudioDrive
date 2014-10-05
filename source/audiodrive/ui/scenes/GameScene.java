@@ -20,7 +20,7 @@ import audiodrive.ui.components.Camera;
 import audiodrive.ui.components.Light;
 import audiodrive.ui.components.Scene;
 import audiodrive.ui.components.Window;
-import audiodrive.ui.effects.ParticleEffects;
+import audiodrive.ui.effects.Particles2D;
 import audiodrive.ui.overlays.GameBackground;
 import audiodrive.ui.overlays.GameOverlay;
 import audiodrive.utilities.Arithmetic;
@@ -61,7 +61,7 @@ public class GameScene extends Scene {
 	private Playback playback;
 	private GameOverlay overlay;
 	private GameBackground background;
-	private ParticleEffects particleEffects;
+	private Particles2D particles2D;
 	
 	private CameraPath startCameraPath;
 	
@@ -84,7 +84,7 @@ public class GameScene extends Scene {
 		keyboardSpeed = AudioDrive.Settings.getDouble("input.keyboard.speed");
 		mouseSpeed = AudioDrive.Settings.getDouble("input.mouse.speed");
 		volume = AudioDrive.Settings.getDouble("sound.volume");
-		particleEffects = new ParticleEffects();
+		particles2D = new Particles2D();
 		track.build();
 		player = new Player(this).model(Resources.getCurrentPlayerModel());
 		player.model().scale(0.05);
@@ -214,7 +214,7 @@ public class GameScene extends Scene {
 		playback.stop();
 		playback = null;
 		startCameraPath = null;
-		particleEffects = null;
+		particles2D = null;
 		overlay = null;
 		background = null;
 		track = null;
@@ -245,8 +245,8 @@ public class GameScene extends Scene {
 		return state == State.Paused || state == State.Destroyed || state == State.Ended;
 	}
 	
-	public ParticleEffects particleEffects() {
-		return particleEffects;
+	public Particles2D particles() {
+		return particles2D;
 	}
 	
 	@Override

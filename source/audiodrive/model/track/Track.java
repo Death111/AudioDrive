@@ -33,7 +33,7 @@ import audiodrive.model.tower.TubeTower;
 import audiodrive.ui.GL;
 import audiodrive.ui.components.Viewport;
 import audiodrive.ui.effects.Glow;
-import audiodrive.ui.effects.Particles;
+import audiodrive.ui.effects.Particles3D;
 import audiodrive.ui.scenes.GameScene;
 import audiodrive.utilities.Arithmetic;
 import audiodrive.utilities.Range;
@@ -77,18 +77,18 @@ public class Track implements Renderable {
 	
 	private Texture trackTexture;
 	private Color trackColor;
-	private Color relaxedColor = AudioDrive.Settings.getColor("color.relaxed");
-	private Color averageColor = AudioDrive.Settings.getColor("color.average");
-	private Color intenseColor = AudioDrive.Settings.getColor("color.intense");
+	private Color relaxedColor;
+	private Color averageColor;
+	private Color intenseColor;
 	
-	private int sight = AudioDrive.Settings.getInteger("game.sight");
+	private int sight;
 	
 	private Glow glow;
 	private Model skybox;
+	private Particles3D particles;
 	
 	private Player player;
 	private Index index;
-	private Particles particles;
 	
 	public Track(AnalyzedAudio audio, List<Vector> spline, List<Block> blocks, int smoothing) {
 		this.audio = audio;
@@ -98,12 +98,16 @@ public class Track implements Renderable {
 		numberOfCollectables = (int) blocks.stream().filter(Block::isCollectable).count();
 		numberOfObstacles = blocks.size() - numberOfCollectables;
 		indexRate = spline.size() / audio.getDuration();
-		particles = new Particles();
 	}
 	
 	public void build() {
+		sight = AudioDrive.Settings.getInteger("game.sight");
 		trackColor = GameScene.night ? Color.Black : Color.White;
 		trackTexture = Resources.getTexture(GameScene.night ? "textures/track/track-black.png" : "textures/track/track-white.png");
+		relaxedColor = AudioDrive.Settings.getColor("color.relaxed");
+		averageColor = AudioDrive.Settings.getColor("color.average");
+		intenseColor = AudioDrive.Settings.getColor("color.intense");
+		particles = new Particles3D();
 		glow = new Glow().depthpass(() -> {
 			splineArea2Buffer.draw();
 			leftBorderVertexBuffer.draw();

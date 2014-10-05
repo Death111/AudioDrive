@@ -8,16 +8,16 @@ import audiodrive.model.geometry.Vector;
 import audiodrive.model.geometry.transform.Rotation;
 import audiodrive.ui.components.Camera;
 import audiodrive.ui.components.Scene;
-import audiodrive.ui.effects.Particles;
+import audiodrive.ui.effects.Particles3D;
 
 public class ParticleScene extends Scene {
 	
-	Particles particles;
+	Particles3D particles;
 	private Rotation rotation = new Rotation();
 	
 	@Override
 	public void entering() {
-		particles = new Particles();
+		particles = new Particles3D();
 		Camera.perspective(45, getWidth(), getHeight(), 1, 1000);
 		
 	}
