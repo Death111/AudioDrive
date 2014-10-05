@@ -336,14 +336,17 @@ public class GameScene extends Scene {
 			if (Keyboard.isKeyDown(Keyboard.KEY_RCONTROL) || Keyboard.isKeyDown(Keyboard.KEY_LCONTROL)) Window.toggleVSync();
 			else visualization = !visualization;
 			break;
+		case Keyboard.KEY_D:
+			if (Keyboard.isKeyDown(Keyboard.KEY_RCONTROL) || Keyboard.isKeyDown(Keyboard.KEY_LCONTROL)) { // debugging
+				if (state == State.Animating) startCameraPath.pause(!startCameraPath.isPaused());
+				hitbox = !hitbox;
+			}
+			break;
 		case Keyboard.KEY_E:
 			environment = !environment;
 			break;
 		case Keyboard.KEY_G:
 			glow = !glow;
-			break;
-		case Keyboard.KEY_H:
-			hitbox = !hitbox;
 			break;
 		case Keyboard.KEY_P:
 			if (Keyboard.isKeyDown(Keyboard.KEY_LSHIFT) || Keyboard.isKeyDown(Keyboard.KEY_RSHIFT)) peaks = !peaks;

@@ -509,10 +509,20 @@ public class Track implements Renderable {
 	}
 	
 	private void drawReflections() {
-		// write reflection surface to depth buffer
-		glClear(GL_DEPTH_BUFFER_BIT);
+		glClear(GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 		glColorMask(false, false, false, false);
+		
+		// write track-back-side to depth buffer
+		glCullFace(GL_FRONT);
 		splineArea2Buffer.draw();
+		glCullFace(GL_BACK);
+		
+		// write reflection surface to stencil and depth buffer
+		glEnable(GL_STENCIL_TEST);
+		glStencilFunc(GL_ALWAYS, 1, 0xffffffff);
+		glStencilOp(GL_REPLACE, GL_KEEP, GL_REPLACE);
+		splineArea2Buffer.draw();
+		
 		// filter objects depending on visibility and depth buffer
 		int range = sight / 2;
 		Matrix mvpMatrix = GL.modelviewProjectionMatrix();
@@ -533,26 +543,14 @@ public class Track implements Renderable {
 			return isVisible(viewport, leftScreenspaceVector, rightScreenspaceVector);
 		}).collect(Collectors.toList());
 		
-		// clear buffers
-		glClear(GL_STENCIL_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		
-		// write reflection surface to stencil buffer
-		glDisable(GL_DEPTH_TEST);
-		glEnable(GL_STENCIL_TEST);
-		glStencilFunc(GL_ALWAYS, 1, 0xffffffff);
-		glStencilOp(GL_REPLACE, GL_REPLACE, GL_REPLACE);
-		splineArea2Buffer.draw();
-		
 		// render objects according to stencil buffer
+		glClear(GL_DEPTH_BUFFER_BIT);
 		glColorMask(true, true, true, true);
-		glEnable(GL_STENCIL_TEST);
 		glStencilFunc(GL_EQUAL, 1, 0xffffffff);
 		glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
-		Model model = player.model();
 		
 		// create rotation to flip objects horizontally
 		Rotation flip = new Rotation().z(180);
-		glEnable(GL_DEPTH_TEST);
 		
 		// draw ring reflections
 		glDisable(GL_CULL_FACE);
@@ -585,6 +583,7 @@ public class Track implements Renderable {
 		});;
 		
 		// draw player reflection
+		Model model = player.model();
 		Placement placement = model.placement();
 		Placement originalPlacement = placement.clone();
 		placement.position(placement.position().plus(placement.up().multiplied(-2 * (flightHeight + model.translation().y()))));

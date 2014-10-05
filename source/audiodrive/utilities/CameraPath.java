@@ -33,6 +33,7 @@ public class CameraPath {
 	private Vector offsetPosition;
 	
 	private double time;
+	private boolean paused;
 	
 	/**
 	 * Creates a camera path from the given filename
@@ -125,7 +126,7 @@ public class CameraPath {
 	 */
 	public void camera() {
 		if (isFinished()) return;
-		time += Scene.deltaTime();
+		if (!paused) time += Scene.deltaTime();
 		
 		int index = Arithmetic.clamp((int) Math.round(time * frameRate), 0, frameCount - 1);
 		if (reverse) index = frameCount - 1 - index;
@@ -143,6 +144,14 @@ public class CameraPath {
 	
 	public boolean isSkippable() {
 		return time < duration - 0.8;
+	}
+	
+	public void pause(boolean pause) {
+		paused = pause;
+	}
+	
+	public boolean isPaused() {
+		return paused;
 	}
 	
 	public void skip() {
