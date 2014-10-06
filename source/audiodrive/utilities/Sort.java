@@ -1,5 +1,6 @@
 package audiodrive.utilities;
 
+import java.io.File;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Enumeration;
@@ -14,14 +15,19 @@ public class Sort {
 	}
 	
 	public static Comparator<Object> comparingToString() {
-		return new Comparator<Object>() {
-			@Override
-			public int compare(Object o1, Object o2) {
-				if (o1 != null && o2 != null) return o1.toString().compareTo(o2.toString());
-				if (o1 != null) return 1;
-				if (o2 != null) return -1;
-				return 0;
-			}
+		return (o1, o2) -> {
+			if (o1 != null && o2 != null) return o1.toString().compareTo(o2.toString());
+			if (o1 != null) return 1;
+			if (o2 != null) return -1;
+			return 0;
+		};
+	}
+	
+	public static Comparator<File> comparingIsDirectory() {
+		return (o1, o2) -> {
+			if (o1.isDirectory()) return o2.isDirectory() ? o1.compareTo(o2) : -1;
+			else if (o2.isDirectory()) return 1;
+			return o1.compareTo(o2);
 		};
 	}
 	

@@ -35,6 +35,7 @@ import audiodrive.ui.menu.item.Item;
 import audiodrive.ui.menu.item.ItemListener;
 import audiodrive.ui.menu.item.MenuItem;
 import audiodrive.utilities.Log;
+import audiodrive.utilities.Sort;
 
 /**
  * 
@@ -165,7 +166,7 @@ public class SelectionScene extends Scene implements ItemListener {
 			return;
 		}
 		
-		for (File file : listFiles) {
+		Arrays.stream(listFiles).sorted(Sort.comparingIsDirectory()).forEach(file -> {
 			final boolean directory = file.isDirectory();
 			final String fileName = file.getName();
 			final String extension = getFileExtension(fileName);
@@ -175,8 +176,7 @@ public class SelectionScene extends Scene implements ItemListener {
 				itemMenu.addItem(fci);
 				itemMap.put(fci, file);
 			}
-		}
-		
+		});
 	}
 	
 	@Override
