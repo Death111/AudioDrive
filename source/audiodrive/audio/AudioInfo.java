@@ -55,7 +55,7 @@ public class AudioInfo {
 		// Try get duration
 		try {
 			AudioFileFormat baseFileFormat = new MpegAudioFileReader().getAudioFileFormat(file);
-			Map properties = baseFileFormat.properties();
+			Map<String, Object> properties = baseFileFormat.properties();
 			Long duration = (Long) properties.get("duration");
 			this.duration = String.format(
 				"%d min, %d sec",

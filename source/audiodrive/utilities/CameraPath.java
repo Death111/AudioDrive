@@ -18,10 +18,10 @@ public class CameraPath {
 	private double duration;
 	private double frameRate;
 	private int frameCount;
-	private int sourceWidth;
-	private int sourceHeight;
-	private int sourcePixelAspectRatio;
-	private int compPixelAspectRatio;
+	// private int sourceWidth;
+	// private int sourceHeight;
+	// private int sourcePixelAspectRatio;
+	// private int compPixelAspectRatio;
 	private boolean reverse = false;
 	
 	private List<Vector> positions = null;
@@ -68,16 +68,16 @@ public class CameraPath {
 					frameRate = Double.parseDouble(tokens[2]);
 					break;
 				case "Source Width":
-					sourceWidth = Integer.parseInt(tokens[2]);
+					// sourceWidth = Integer.parseInt(tokens[2]);
 					break;
 				case "Source Height":
-					sourceHeight = Integer.parseInt(tokens[2]);
+					// sourceHeight = Integer.parseInt(tokens[2]);
 					break;
 				case "Source Pixel Aspect Ratio":
-					sourcePixelAspectRatio = Integer.parseInt(tokens[2]);
+					// sourcePixelAspectRatio = Integer.parseInt(tokens[2]);
 					break;
 				case "Comp Pixel Aspect Ratio":
-					compPixelAspectRatio = Integer.parseInt(tokens[2]);
+					// compPixelAspectRatio = Integer.parseInt(tokens[2]);
 					break;
 				}
 				

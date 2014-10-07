@@ -17,7 +17,6 @@ import audiodrive.model.Player;
 import audiodrive.model.Renderable;
 import audiodrive.model.buffer.VertexBuffer;
 import audiodrive.model.geometry.Color;
-import audiodrive.model.geometry.CuboidStripRenderer;
 import audiodrive.model.geometry.Matrix;
 import audiodrive.model.geometry.TextureCoordinate;
 import audiodrive.model.geometry.Vector;
@@ -66,9 +65,9 @@ public class Track implements Renderable {
 	private VertexBuffer splineBuffer;
 	private VertexBuffer splineAreaBuffer;
 	private VertexBuffer splineArea2Buffer;
-	private VertexBuffer leftBorderBuffer;
-	private VertexBuffer rightBorderBuffer;
-	private CuboidStripRenderer cuboidStripRenderer;
+	// private VertexBuffer leftBorderBuffer;
+	// private VertexBuffer rightBorderBuffer;
+	// private CuboidStripRenderer cuboidStripRenderer;
 	
 	private List<Vertex> leftVertexList;
 	private VertexBuffer leftBorderVertexBuffer;
@@ -205,9 +204,9 @@ public class Track implements Renderable {
 			rightBorder.add(upper.minus(width));
 			rightBorder.add(lower.minus(width));
 		}
-		cuboidStripRenderer = new CuboidStripRenderer(spline.size() - 1);
-		leftBorderBuffer = new VertexBuffer(leftBorder).mode(GL_QUAD_STRIP);
-		rightBorderBuffer = new VertexBuffer(rightBorder).mode(GL_QUAD_STRIP);
+		// cuboidStripRenderer = new CuboidStripRenderer(spline.size() - 1);
+		// leftBorderBuffer = new VertexBuffer(leftBorder).mode(GL_QUAD_STRIP);
+		// rightBorderBuffer = new VertexBuffer(rightBorder).mode(GL_QUAD_STRIP);
 		
 		leftVertexList = calcBorderVertexes(leftBorder);
 		rightVertexList = calcBorderVertexes(rightBorder);
@@ -622,6 +621,7 @@ public class Track implements Renderable {
 		}
 	}
 	
+	@SuppressWarnings("unused")
 	private void drawBorderNormals(List<Vertex> vertexList) {
 		Color.Blue.gl();
 		for (Vertex vertex : vertexList) {

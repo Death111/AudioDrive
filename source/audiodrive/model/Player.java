@@ -1,9 +1,6 @@
 package audiodrive.model;
 
 import static org.lwjgl.opengl.GL11.*;
-
-import java.util.concurrent.locks.Condition;
-
 import audiodrive.AudioDrive;
 import audiodrive.audio.AudioResource;
 import audiodrive.model.geometry.Color;
@@ -26,7 +23,6 @@ public class Player implements Renderable {
 	private static final AudioResource CollideSound = new AudioResource("sounds/Collide.mp3");
 	private static final Color CollisionColor = new Color(0.8, 0.2, 0.2, 1);
 	
-	private Condition condition;
 	private GameScene scene;
 	private Model model;
 	private Track track;

@@ -4,5 +4,6 @@ logs/
 .settings/
 !natives/*
 *.orig
+version
 audiodrive.properties
 AudioDrive.jar

@@ -20,7 +20,6 @@ import audiodrive.ui.components.Overlay;
 import audiodrive.ui.components.Scene;
 import audiodrive.ui.components.Text;
 import audiodrive.ui.components.Text.Alignment;
-import audiodrive.ui.effects.Particles2D;
 import audiodrive.ui.scenes.GameScene;
 import audiodrive.ui.scenes.GameScene.State;
 import audiodrive.utilities.Arithmetic;
@@ -46,7 +45,7 @@ public class GameOverlay extends Overlay {
 	private float[] rightSpectrum;
 	private Color spectrumColor = Color.White;
 	private Color spectrumFadeColor = Color.Transparent;
-
+	
 	public GameOverlay(GameScene scene) {
 		this.scene = scene;
 		width = scene.getWidth();
