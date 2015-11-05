@@ -120,7 +120,9 @@ public class GameOverlay extends Overlay {
 	
 	@Override
 	public void render() {
-		texts.get("framerate").setText(Scene.getFramerate() + " FPS");
+		final int framerate = Scene.getFramerate();
+		text("framerate").setText(framerate + " FPS");
+		text("framerate").setColor(framerate >= 60 ? Color.Green : framerate >= 30 ? Color.Orange : Color.Red);
 		text("memory").setText(Memory.used() + "/" + Memory.allocated());
 		Camera.overlay(width, height);
 		glDisable(GL_LIGHTING);

@@ -12,6 +12,7 @@ public class Color implements FloatData {
 	public static final Color White = new Color(1, 1, 1);
 	public static final Color Gray = new Color(0.5, 0.5, 0.5);
 	public static final Color Red = new Color(1, 0, 0);
+	public static final Color Orange = new Color(1, 1, 0);
 	public static final Color Green = new Color(0, 1, 0);
 	public static final Color Blue = new Color(0, 0, 1);
 	public static final Color Yellow = new Color(1, 1, 0);
