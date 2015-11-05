@@ -166,14 +166,15 @@ public class GameOverlay extends Overlay {
 		double y = height / 2;
 		double width = this.width / 2;
 		double height = (double) this.height / 2 / bands;
+		final Vector vector = new Vector();
 		for (int band = 0; band < bands; band++) {
 			double amplitude = leftSpectrum[band] * width;
 			spectrumColor.gl();
-			new Vector().x(x).y(y - height).glVertex();
-			new Vector().x(x).y(y).glVertex();
+			vector.x(x).y(y - height).glVertex();
+			vector.x(x).y(y).glVertex();
 			spectrumFadeColor.gl();
-			new Vector().x(x + amplitude).y(y).glVertex();
-			new Vector().x(x + amplitude).y(y - height).glVertex();
+			vector.x(x + amplitude).y(y).glVertex();
+			vector.x(x + amplitude).y(y - height).glVertex();
 			y -= height;
 		}
 		x = this.width;
@@ -181,11 +182,11 @@ public class GameOverlay extends Overlay {
 		for (int band = 0; band < bands; band++) {
 			double amplitude = rightSpectrum[band] * width;
 			spectrumColor.gl();
-			new Vector().x(x).y(y - height).glVertex();
-			new Vector().x(x).y(y).glVertex();
+			vector.x(x).y(y - height).glVertex();
+			vector.x(x).y(y).glVertex();
 			spectrumFadeColor.gl();
-			new Vector().x(x - amplitude).y(y).glVertex();
-			new Vector().x(x - amplitude).y(y - height).glVertex();
+			vector.x(x - amplitude).y(y).glVertex();
+			vector.x(x - amplitude).y(y - height).glVertex();
 			y -= height;
 		}
 		
@@ -194,11 +195,11 @@ public class GameOverlay extends Overlay {
 		for (int band = 0; band < bands; band++) {
 			double amplitude = leftSpectrum[band] * width;
 			spectrumColor.gl();
-			new Vector().x(x).y(y + height).glVertex();
-			new Vector().x(x).y(y).glVertex();
+			vector.x(x).y(y + height).glVertex();
+			vector.x(x).y(y).glVertex();
 			spectrumFadeColor.gl();
-			new Vector().x(x + amplitude).y(y).glVertex();
-			new Vector().x(x + amplitude).y(y + height).glVertex();
+			vector.x(x + amplitude).y(y).glVertex();
+			vector.x(x + amplitude).y(y + height).glVertex();
 			y += height;
 		}
 		x = this.width;
@@ -206,15 +207,14 @@ public class GameOverlay extends Overlay {
 		for (int band = 0; band < bands; band++) {
 			double amplitude = rightSpectrum[band] * width;
 			spectrumColor.gl();
-			new Vector().x(x).y(y + height).glVertex();
-			new Vector().x(x).y(y).glVertex();
+			vector.x(x).y(y + height).glVertex();
+			vector.x(x).y(y).glVertex();
 			spectrumFadeColor.gl();
-			new Vector().x(x - amplitude).y(y).glVertex();
-			new Vector().x(x - amplitude).y(y + height).glVertex();
+			vector.x(x - amplitude).y(y).glVertex();
+			vector.x(x - amplitude).y(y + height).glVertex();
 			y += height;
 		}
 		glEnd();
-		
 		glEnable(GL_CULL_FACE);
 	}
 	
