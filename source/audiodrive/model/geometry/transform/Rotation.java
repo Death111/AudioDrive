@@ -9,11 +9,10 @@ public class Rotation extends Transformation {
 	/**
 	 * No rotation. I. e. the rotation matrix is equal to identity.
 	 */
-	public static final Rotation Null = new Rotation().unmodifiable();
+	public static final Rotation Null = new Rotation();
 	
 	private double x, y, z;
 	private final Matrix matrix = new Matrix().identity();
-	private boolean modifiable = true;
 	
 	public Rotation x(double angle) {
 		set(angle, y, z);
@@ -173,13 +172,8 @@ public class Rotation extends Transformation {
 		return equals(Null);
 	}
 	
-	private Rotation unmodifiable() {
-		modifiable = false;
-		return this;
-	}
-	
 	private void assertModifiable() {
-		if (!modifiable) throw new UnsupportedOperationException("Can't modify a constant matrix.");
+		if (this == Null) throw new UnsupportedOperationException("Can't modify a constant matrix.");
 	}
 	
 	@Override

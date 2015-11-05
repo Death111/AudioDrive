@@ -14,11 +14,10 @@ public class Matrix {
 	
 	public static final int Dimension = 4;
 	
-	public static final Matrix Null = new Matrix().unmodifiable();
-	public static final Matrix Identity = new Matrix().identity().unmodifiable();
+	public static final Matrix Null = new Matrix();
+	public static final Matrix Identity = new Matrix().identity();
 	
 	public final double[][] M = new double[Dimension][Dimension];
-	private boolean modifiable = true;
 	
 	public Matrix() {}
 	
@@ -245,13 +244,8 @@ public class Matrix {
 		return buffer;
 	}
 	
-	private Matrix unmodifiable() {
-		modifiable = false;
-		return this;
-	}
-	
 	private void assertModifiable() {
-		if (!modifiable) throw new UnsupportedOperationException("Can't modify a constant matrix.");
+		if (this == Null || this == Identity) throw new UnsupportedOperationException("Can't modify a constant matrix.");
 	}
 	
 }

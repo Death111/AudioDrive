@@ -7,12 +7,11 @@ import audiodrive.model.geometry.Vector;
 
 public class Placement extends Transformation implements Cloneable {
 	
-	public static final Placement Default = new Placement().unmodifiable();
+	public static final Placement Default = new Placement();
 	
 	private final Vector position = new Vector();
 	private final Vector direction = new Vector().set(Vector.Z);
 	private final Vector up = new Vector().set(Vector.Y);
-	private boolean modifiable = true;
 	
 	public Placement set(Placement placement) {
 		position.set(placement.position());
@@ -128,18 +127,8 @@ public class Placement extends Transformation implements Cloneable {
 		return true;
 	}
 	
-	private Placement modifiable() {
-		modifiable = true;
-		return this;
-	}
-	
-	private Placement unmodifiable() {
-		modifiable = false;
-		return this;
-	}
-	
 	private void assertModifiable() {
-		if (!modifiable) throw new UnsupportedOperationException("Can't modify a constant matrix.");
+		if (this == Default) throw new UnsupportedOperationException("Can't modify a constant matrix.");
 	}
 	
 	@Override

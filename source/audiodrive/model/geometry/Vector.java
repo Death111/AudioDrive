@@ -10,16 +10,15 @@ public class Vector implements Cloneable, FloatData {
 	public static final int Dimension = 3;
 	
 	/** Null vector. */
-	public static final Vector Null = new Vector().unmodifiable();
+	public static final Vector Null = new Vector();
 	/** Unit vector in x direction. */
-	public static final Vector X = new Vector().x(1).unmodifiable();
+	public static final Vector X = new Vector().x(1);
 	/** Unit vector in y direction. */
-	public static final Vector Y = new Vector().y(1).unmodifiable();
+	public static final Vector Y = new Vector().y(1);
 	/** Unit vector in z direction. */
-	public static final Vector Z = new Vector().z(1).unmodifiable();
+	public static final Vector Z = new Vector().z(1);
 	
 	private double x, y, z;
-	private boolean modifiable = true;
 	
 	public Vector() {};
 	
@@ -219,7 +218,7 @@ public class Vector implements Cloneable, FloatData {
 	@Override
 	public Vector clone() {
 		try {
-			return ((Vector) super.clone()).modifiable();
+			return (Vector) super.clone();
 		} catch (CloneNotSupportedException exception) {
 			throw new RuntimeException(exception);
 		}
@@ -322,18 +321,8 @@ public class Vector implements Cloneable, FloatData {
 		glNormal3d(x(), y(), z());
 	}
 	
-	private Vector modifiable() {
-		modifiable = true;
-		return this;
-	}
-	
-	private Vector unmodifiable() {
-		modifiable = false;
-		return this;
-	}
-	
 	private void assertModifiable() {
-		if (!modifiable) throw new UnsupportedOperationException("Can't modify a constant vector.");
+		if (this == Null || this == X || this == Y || this == Z) throw new UnsupportedOperationException("Can't modify a constant vector.");
 	}
 	
 }
