@@ -1,9 +1,7 @@
 package audiodrive.model.geometry;
 
-import static org.lwjgl.opengl.GL11.*;
-
-import java.util.stream.Stream;
-
+import static org.lwjgl.opengl.GL11.glNormal3d;
+import static org.lwjgl.opengl.GL11.glVertex3d;
 import audiodrive.model.buffer.FloatData;
 import audiodrive.utilities.Matrices;
 
@@ -12,15 +10,16 @@ public class Vector implements Cloneable, FloatData {
 	public static final int Dimension = 3;
 	
 	/** Null vector. */
-	public static final Vector Null = new Vector();
+	public static final Vector Null = new Vector().unmodifiable();
 	/** Unit vector in x direction. */
-	public static final Vector X = new Vector().x(1);
+	public static final Vector X = new Vector().x(1).unmodifiable();
 	/** Unit vector in y direction. */
-	public static final Vector Y = new Vector().y(1);
+	public static final Vector Y = new Vector().y(1).unmodifiable();
 	/** Unit vector in z direction. */
-	public static final Vector Z = new Vector().z(1);
+	public static final Vector Z = new Vector().z(1).unmodifiable();
 	
 	private double x, y, z;
+	private boolean modifiable = true;
 	
 	public Vector() {};
 	
@@ -220,7 +219,7 @@ public class Vector implements Cloneable, FloatData {
 	@Override
 	public Vector clone() {
 		try {
-			return (Vector) super.clone();
+			return ((Vector) super.clone()).modifiable();
 		} catch (CloneNotSupportedException exception) {
 			throw new RuntimeException(exception);
 		}
@@ -323,8 +322,18 @@ public class Vector implements Cloneable, FloatData {
 		glNormal3d(x(), y(), z());
 	}
 	
+	private Vector modifiable() {
+		modifiable = true;
+		return this;
+	}
+	
+	private Vector unmodifiable() {
+		modifiable = false;
+		return this;
+	}
+	
 	private void assertModifiable() {
-		if (Stream.of(Null, X, Y, Z).anyMatch(vector -> vector == this)) throw new UnsupportedOperationException("Can't modify a constant vector.");
+		if (!modifiable) throw new UnsupportedOperationException("Can't modify a constant vector.");
 	}
 	
 }

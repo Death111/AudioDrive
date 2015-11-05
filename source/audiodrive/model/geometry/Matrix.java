@@ -1,10 +1,10 @@
 package audiodrive.model.geometry;
 
-import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL11.glLoadMatrix;
+import static org.lwjgl.opengl.GL11.glMultMatrix;
 
 import java.nio.DoubleBuffer;
 import java.util.Arrays;
-import java.util.stream.Stream;
 
 import org.lwjgl.BufferUtils;
 
@@ -14,10 +14,11 @@ public class Matrix {
 	
 	public static final int Dimension = 4;
 	
-	public static final Matrix Null = new Matrix();
-	public static final Matrix Identity = new Matrix().identity();
+	public static final Matrix Null = new Matrix().unmodifiable();
+	public static final Matrix Identity = new Matrix().identity().unmodifiable();
 	
 	public final double[][] M = new double[Dimension][Dimension];
+	private boolean modifiable = true;
 	
 	public Matrix() {}
 	
@@ -244,8 +245,13 @@ public class Matrix {
 		return buffer;
 	}
 	
+	private Matrix unmodifiable() {
+		modifiable = false;
+		return this;
+	}
+	
 	private void assertModifiable() {
-		if (Stream.of(Null, Identity).anyMatch(matrix -> matrix == this)) throw new UnsupportedOperationException("Can't modify a constant matrix.");
+		if (!modifiable) throw new UnsupportedOperationException("Can't modify a constant matrix.");
 	}
 	
 }
