@@ -130,7 +130,7 @@ public class Particles3D implements Renderable {
 		// Simulate all particles
 		particlesCount = 0;
 		// TODO why particles flicker when using parallel
-		Arrays.stream(particles).parallel().forEach(p -> {
+		Arrays.stream(particles).forEach(p -> {
 			if (p.life > 0.0f) {
 				// Decrease life
 			p.life -= delta;
