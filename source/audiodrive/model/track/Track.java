@@ -1,6 +1,9 @@
 package audiodrive.model.track;
 
 import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL12.GL_TEXTURE_MAX_LEVEL;
+import static org.lwjgl.opengl.GL14.GL_TEXTURE_LOD_BIAS;
+import static org.lwjgl.opengl.GL30.glGenerateMipmap;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -103,6 +106,10 @@ public class Track implements Renderable {
 		sight = AudioDrive.Settings.getInteger("game.sight");
 		trackColor = GameScene.night ? Color.Black : Color.White;
 		trackTexture = Resources.getTexture(GameScene.night ? "textures/track/track-black.png" : "textures/track/track-white.png");
+		glGenerateMipmap(GL_TEXTURE_2D);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_LOD_BIAS, -4.0f);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 2);
 		relaxedColor = AudioDrive.Settings.getColor("color.relaxed");
 		averageColor = AudioDrive.Settings.getColor("color.average");
 		intenseColor = AudioDrive.Settings.getColor("color.intense");
