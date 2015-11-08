@@ -1,6 +1,11 @@
 package audiodrive;
 
 import java.awt.Font;
+import java.io.File;
+import java.io.IOException;
+import java.lang.management.GarbageCollectorMXBean;
+import java.lang.management.ManagementFactory;
+import java.util.stream.Collectors;
 
 import audiodrive.audio.AnalyzedAudio;
 import audiodrive.audio.AudioResource;
@@ -35,10 +40,22 @@ public class AudioDrive {
 	private static Model playerModel;
 	private static Action action = Action.None;
 	
-	public static void main(String[] args) {
+	public static void main(String[] args) throws IOException {
+		String domain = new File(AudioDrive.class.getProtectionDomain().getCodeSource().getLocation().getPath()).getName();
+		// if started from a jar file ...
+		if (domain.toLowerCase().endsWith(".jar") && args.length == 0) {
+			// re-launch the application with the desired garbage collector
+			Runtime.getRuntime().exec(new String[]{"java", "-XX:+UseConcMarkSweepGC", "-jar", domain, "x"});
+			return;
+		}
+		start();
+	}
+	
+	public static void start() {
 		Log.info("AudioDrive");
 		Log.info("Version: " + Version);
 		Log.info("Creators: " + Creators);
+		Log.debug("Garbage Collector: " + ManagementFactory.getGarbageCollectorMXBeans().stream().map(GarbageCollectorMXBean::getName).collect(Collectors.joining(", ")));
 		SlickLog.bind();
 		Settings.load();
 		Natives.load();
