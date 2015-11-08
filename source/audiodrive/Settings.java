@@ -55,7 +55,7 @@ public class Settings {
 		set("interface.volume", "1.0");
 		set("music.directory", "music");
 		set("music.volume", "1.0");
-		set("player.model", "xwing");
+		set("player.model", "lightjet");
 		set("sound.volume", "1.0");
 		set("track.smoothing", "20");
 		set("window.antialiasing", "true");
