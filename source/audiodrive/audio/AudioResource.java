@@ -1,10 +1,14 @@
 package audiodrive.audio;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 
+import javax.sound.sampled.AudioFileFormat;
 import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.UnsupportedAudioFileException;
 
+import javazoom.spi.mpeg.sampled.file.MpegAudioFileReader;
 import audiodrive.Resources;
 
 public class AudioResource {
@@ -12,6 +16,7 @@ public class AudioResource {
 	private URL url;
 	private String path;
 	private String name;
+	private double duration;
 	
 	public AudioResource(URL url) {
 		this.url = url;
@@ -37,6 +42,19 @@ public class AudioResource {
 	
 	public URL getUrl() {
 		return url;
+	}
+	
+	/**
+	 * Returns the duration in seconds, or zero if the duration can't be determined.
+	 */
+	public double getDuration() {
+		if (duration == 0.0) {
+			try {
+				AudioFileFormat format = new MpegAudioFileReader().getAudioFileFormat(new File(new URL(path).getFile()));
+				duration = ((Long) format.properties().get("duration")).doubleValue() * 0.000001;
+			} catch (UnsupportedAudioFileException | IOException exception) {}
+		}
+		return duration;
 	}
 	
 	/**

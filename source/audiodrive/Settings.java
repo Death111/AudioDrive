@@ -23,6 +23,7 @@ public class Settings {
 		this.filename = filename;
 		set("audio.analyzation.threshold", "1.8");
 		set("audio.analyzation.window", "20");
+		set("audio.duration.limit", "15");
 		set("block.collectable.color", "1,1,1,1");
 		set("block.collectable.color.static", "true");
 		set("block.collectable.glowing", "true");
