@@ -1,6 +1,7 @@
 package audiodrive.model.geometry.transform;
 
-import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL11.glMultMatrix;
+import static org.lwjgl.opengl.GL11.glTranslated;
 import audiodrive.model.geometry.Matrix;
 import audiodrive.model.geometry.Vector;
 
@@ -127,7 +128,7 @@ public class Placement extends Transformation implements Cloneable {
 	}
 	
 	private void assertModifiable() {
-		if (this == Default) throw new UnsupportedOperationException("Can't modify the constant placement 'Default'.");
+		if (this == Default) throw new UnsupportedOperationException("Can't modify a constant matrix.");
 	}
 	
 	@Override

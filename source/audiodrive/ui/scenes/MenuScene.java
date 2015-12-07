@@ -48,8 +48,6 @@ public class MenuScene extends Scene implements ItemListener {
 	private Text version;
 	private Text credits;
 	private Menu menu;
-	private Menu audioSelectionMenu;
-	private MenuItem selectAudioMenuItem;
 	private SettingsItem<Integer> modelValue;
 	private Menu modelSelectionMenu;
 	private MenuItem visualizeMenuItem;
@@ -99,11 +97,6 @@ public class MenuScene extends Scene implements ItemListener {
 		
 		background = new Overlay().shader(new ShaderProgram("shaders/Default.vs", "shaders/Title.fs"));
 		
-		audioSelectionMenu = new Menu(958, 200, 600 + 1, 51, 0);
-		selectAudioMenuItem = new MenuItem("(Change)", this);
-		selectAudioMenuItem.setIcon(null);
-		audioSelectionMenu.addItem(selectAudioMenuItem);
-		
 		models = Resources.getAvailablePlayerModelPaths();
 		AudioDrive.setPlayerModel(Resources.getCurrentPlayerModel());
 		modelSelectionMenu = new Menu(600, 400, 600 + 1, 51, 0);
@@ -116,7 +109,7 @@ public class MenuScene extends Scene implements ItemListener {
 		modelValue = new SettingsItem<Integer>("Selected Model", modelIndexe, 600, 50, this);
 		modelValue.setValue(currentModel);
 		modelSelectionMenu.addItem(modelValue);
-		Input.addObservers(menu, audioSelectionMenu, modelSelectionMenu);
+		Input.addObservers(menu, modelSelectionMenu);
 		
 		dialogs.put("exit", new Dialog("Exit AudioDrive?", DialogType.YES_NO));
 		if (dialog != null) openDialog(dialog);
@@ -157,7 +150,6 @@ public class MenuScene extends Scene implements ItemListener {
 		
 		audioText.render();
 		audioInformationText.stream().forEach(Text::render);
-		audioSelectionMenu.render();
 		modelSelectionMenu.render();
 		
 		Camera.perspective(45, getWidth(), getHeight(), .1, 100);
@@ -186,7 +178,7 @@ public class MenuScene extends Scene implements ItemListener {
 		if (name == null || dialogs.get(name) == null) return;
 		dialog = name;
 		dialogs.get(dialog).activate();
-		Input.removeObservers(menu, audioSelectionMenu, modelSelectionMenu);
+		Input.removeObservers(menu, modelSelectionMenu);
 	}
 	
 	private void checkDialogAnswered() {
@@ -200,7 +192,7 @@ public class MenuScene extends Scene implements ItemListener {
 				exitMenuItem.reset();
 			}
 		}
-		Input.addObservers(menu, audioSelectionMenu, modelSelectionMenu);
+		Input.addObservers(menu, modelSelectionMenu);
 		currentDialog.reset();
 		dialog = null;
 	}
@@ -209,18 +201,16 @@ public class MenuScene extends Scene implements ItemListener {
 	public void exiting() {
 		if (!Window.isRecreating() && getEntering() == null) AudioDrive.MenuSound.stop();
 		if (AudioDrive.getAction() == Action.Play || AudioDrive.getAction() == Action.Visualize) AudioDrive.MenuSound.setLooping(false);
-		Input.removeObservers(menu, audioSelectionMenu, modelSelectionMenu);
+		Input.removeObservers(menu, modelSelectionMenu);
 		dialogs.clear();
 		title = null;
 		version = null;
 		credits = null;
 		background = null;
 		menu = null;
-		audioSelectionMenu = null;
 		modelSelectionMenu = null;
 		visualizeMenuItem = null;
 		playMenuItem = null;
-		selectAudioMenuItem = null;
 		settingsMenuItem = null;
 		exitMenuItem = null;
 		hoverAudio = null;
@@ -254,9 +244,6 @@ public class MenuScene extends Scene implements ItemListener {
 		case Keyboard.KEY_P:
 			onSelect(playMenuItem, true);
 			break;
-		case Keyboard.KEY_A:
-			onSelect(selectAudioMenuItem, true);
-			break;
 		case Keyboard.KEY_M:
 			Scene.get(ModelScene.class).enter();
 			break;
@@ -282,23 +269,11 @@ public class MenuScene extends Scene implements ItemListener {
 		AudioDrive.setAction(Action.None);
 		if (item == visualizeMenuItem) {
 			AudioDrive.setAction(Action.Visualize);
-			if (AudioDrive.getAnalyzedAudio() == null) {
-				Scene.get(SelectionScene.class).enter();
-				return;
-			}
-			Scene.get(VisualizationScene.class).enter();
+			Scene.get(SelectionScene.class).enter();
 			return;
 		}
 		if (item == playMenuItem) {
 			AudioDrive.setAction(Action.Play);
-			if (AudioDrive.getAnalyzedAudio() == null) {
-				Scene.get(SelectionScene.class).enter();
-				return;
-			}
-			Scene.get(GenerationScene.class).enter();
-			return;
-		}
-		if (item == selectAudioMenuItem) {
 			Scene.get(SelectionScene.class).enter();
 			return;
 		}

@@ -23,6 +23,7 @@ public class Settings {
 		this.filename = filename;
 		set("audio.analyzation.threshold", "1.8");
 		set("audio.analyzation.window", "20");
+		set("audio.duration.limit", "15");
 		set("block.collectable.color", "1,1,1,1");
 		set("block.collectable.color.static", "true");
 		set("block.collectable.glowing", "true");
@@ -55,7 +56,7 @@ public class Settings {
 		set("interface.volume", "1.0");
 		set("music.directory", "music");
 		set("music.volume", "1.0");
-		set("player.model", "xwing");
+		set("player.model", "lightjet");
 		set("sound.volume", "1.0");
 		set("track.smoothing", "20");
 		set("window.antialiasing", "true");

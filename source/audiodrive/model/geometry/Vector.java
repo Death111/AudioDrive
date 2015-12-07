@@ -1,9 +1,7 @@
 package audiodrive.model.geometry;
 
-import static org.lwjgl.opengl.GL11.*;
-
-import java.util.stream.Stream;
-
+import static org.lwjgl.opengl.GL11.glNormal3d;
+import static org.lwjgl.opengl.GL11.glVertex3d;
 import audiodrive.model.buffer.FloatData;
 import audiodrive.utilities.Matrices;
 
@@ -324,7 +322,7 @@ public class Vector implements Cloneable, FloatData {
 	}
 	
 	private void assertModifiable() {
-		if (Stream.of(Null, X, Y, Z).anyMatch(vector -> vector == this)) throw new UnsupportedOperationException("Can't modify a constant vector.");
+		if (this == Null || this == X || this == Y || this == Z) throw new UnsupportedOperationException("Can't modify a constant vector.");
 	}
 	
 }

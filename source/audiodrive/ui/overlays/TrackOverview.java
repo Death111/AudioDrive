@@ -83,7 +83,8 @@ public class TrackOverview {
 	
 	public void render() {
 		// Draw track
-		color.gl();
+		color.alpha(0.6).gl();
+		glLineWidth(1);
 		glBegin(GL_LINE_STRIP);
 		{
 			for (int i = 0; i < yCoordinates.size(); i++) {
@@ -94,16 +95,18 @@ public class TrackOverview {
 		glEnd();
 		
 		// Draw player position on screen
-		color.alpha(.9).gl();
-		// glBegin(GL_LINES);
-		// {
-		// final int index = indexToCompressedIndex(playerIndex);
-		// glVertex2d(posX + index, posY + height);
-		// glVertex2d(posX + index, posY);
-		// }
-		// glEnd();
+		color.alpha(1.0).gl();
+		glLineWidth(2);
+		glBegin(GL_LINE_STRIP);
+		{
+			for (int i = 0; i < indexToCompressedIndex(playerIndex); i++) {
+				Double value = yCoordinates.get(i);
+				glVertex2d(posX + i, posY + height - value);
+			}
+		}
+		glEnd();
 		
-		glPointSize(6);
+		glPointSize(8);
 		glBegin(GL_POINTS);
 		{
 			final int index = indexToCompressedIndex(playerIndex);

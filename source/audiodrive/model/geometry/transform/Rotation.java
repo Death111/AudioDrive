@@ -173,7 +173,7 @@ public class Rotation extends Transformation {
 	}
 	
 	private void assertModifiable() {
-		if (this == Null) throw new UnsupportedOperationException("Can't modify the constant rotation 'Null'.");
+		if (this == Null) throw new UnsupportedOperationException("Can't modify a constant matrix.");
 	}
 	
 	@Override
