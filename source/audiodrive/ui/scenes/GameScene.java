@@ -188,9 +188,12 @@ public class GameScene extends Scene {
 		
 		background.render();
 		
-		Camera.perspective(45, getWidth(), getHeight(), Near, Far);
-		if (state == State.Animating) startCameraPath.camera();
-		else player.camera();
+		if (state == State.Animating) {
+			Camera.perspective(45, getWidth(), getHeight(), Near, Far);
+			startCameraPath.camera();
+		} else {
+			player.camera();
+		}
 		
 		translation.apply();
 		
