@@ -1,9 +1,7 @@
 package audiodrive.model.track;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 
 import audiodrive.AudioDrive;
 import audiodrive.audio.AnalyzedAudio;
@@ -73,8 +71,10 @@ public class TrackGenerator {
 			int r = rail + 1;
 			if (previous[r] != null && iteration - previous[r].iteration() < minumumDistance) continue;
 			threshold = 0.4 + calmness * 0.2; // intense music -> more collectables, fewer obstacles
-			boolean allPreviousAreObstacles = Arrays.stream(previous).filter(Objects::nonNull).noneMatch(Block::isCollectable);
-			boolean collectable = allPreviousAreObstacles ? true : (leftFlux > threshold || rightFlux > threshold);
+			int collidables = 0;
+			for (int i = 0; i < previous.length; i++)
+				if (i != r && previous[i] != null && !previous[i].isCollectable()) collidables++;
+			boolean collectable = collidables == 2 ? true : (leftFlux > threshold || rightFlux > threshold);
 			blocks.add(previous[r] = new Block(collectable, iteration, rail));
 		}
 		Log.debug(blocks.size() + " blocks");
