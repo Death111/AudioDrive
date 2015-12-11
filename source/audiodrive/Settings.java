@@ -60,6 +60,7 @@ public class Settings {
 		set("player.model", "lightjet");
 		set("sound.volume", "1.0");
 		set("track.smoothing", "20");
+		set("track.rings", "true");
 		set("window.antialiasing", "true");
 		set("window.multisampling", "2");
 		set("window.framerate", "0");
