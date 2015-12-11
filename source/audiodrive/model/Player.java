@@ -35,9 +35,7 @@ public class Player implements Renderable {
 	
 	private double lookDistance = 2.5;
 	private double eyeHeight = 1.0;
-	private double eyeDistance = 2.0;
-	private double lookShifting = 0.3;
-	private double eyeShifting = 0.3;
+	private double eyeDistance = 1.0;
 	
 	private double zoom = 1.0;
 	private double zoomTarget = 1.0;
@@ -318,14 +316,14 @@ public class Player implements Renderable {
 	}
 	
 	public void camera() {
-		double slope = model().up().angle(Vector.Y) * Math.signum(model.direction().dot(Vector.Y));
-		double height = eyeHeight + eyeHeight * slope;
-		double distance = eyeDistance + eyeDistance * 0.6 * slope;
+		double slope = model.direction().dot(Vector.Y);
+		double height = eyeHeight + 0.8 * eyeHeight * slope;
+		double fieldOfView = Arithmetic.smooth(45.0, 60.0 - 30.0 * slope, scene.playtime());
+		double distance = eyeDistance * Arithmetic.smooth(4.0, 1.0, fieldOfView / 90.0);
 		height *= zoom;
 		distance *= zoom;
-		double fieldOfView = Arithmetic.smooth(45.0, 60.0 - 30.0 * slope, scene.playtime());
-		Vector eyePosition = model().position().plus(model().translation().vector().multiplied(eyeShifting));
-		Vector lookPosition = model().position().plus(model().translation().vector().multiplied(lookShifting));
+		Vector eyePosition = model().position();
+		Vector lookPosition = model().position();
 		Camera.perspective(fieldOfView, scene.getWidth(), scene.getHeight(), GameScene.Near, GameScene.Far);
 		Camera.position(eyePosition.plus(model().direction().multiplied(-distance)).plus(model().up().multiplied(height)));
 		Camera.lookAt(lookPosition.plus(model().direction().multiplied(lookDistance)));
