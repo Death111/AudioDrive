@@ -31,7 +31,7 @@ public class Settings {
 		set("block.obstacle.color.static", "false");
 		set("block.obstacle.glowing", "false");
 		set("color.intense", "1,0,0,1");
-		set("color.average", "0,1,0,1");
+		set("color.average", "0,0.6,0,1");
 		set("color.relaxed", "0,0,1,1");
 		set("game.environment", "true");
 		set("game.visualization", "true");

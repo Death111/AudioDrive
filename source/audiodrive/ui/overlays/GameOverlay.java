@@ -78,7 +78,7 @@ public class GameOverlay extends Overlay {
 		int passedCollectables = (int) passed.stream().filter(Block::isCollectable).count();
 		int passedObstacles = passed.size() - passedCollectables;
 		final int framerate = Scene.getFramerate();
-		text("framerate").setText(framerate + " FPS").setColor(framerate >= 60 ? Color.Green : framerate >= 30 ? Color.Orange : Color.Red);
+		text("framerate").setText(framerate + " FPS").setColor(Color.lerp(Color.Red, Color.Yellow, Color.Green, (framerate - 30) / 30.0));
 		text("memory").setText(Memory.used().toString(Unit.GB) + " / " + Memory.allocated().toString(Unit.GB));
 		text("time").setText(Format.seconds(scene.playtime(), 1) + " / " + Format.seconds(audio.getDuration(), 1));
 		text("points").setText(String.format("Points: %d / %d (%.0f%%)", player.points(), collectables, 100.0 * player.points() / collectables));
