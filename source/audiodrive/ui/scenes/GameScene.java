@@ -36,6 +36,7 @@ public class GameScene extends Scene {
 	public static boolean colorizeObstacles;
 	public static boolean visualization;
 	public static boolean environment;
+	public static boolean rings;
 	public static boolean reflections;
 	public static boolean particles;
 	public static boolean glow;
@@ -44,6 +45,7 @@ public class GameScene extends Scene {
 	public static boolean spectrum;
 	public static boolean peaks;
 	public static boolean hitbox;
+	public static boolean health;
 	
 	public static enum State {
 		Animating, Running, Paused, Resuming, Ended, Destroyed
@@ -76,6 +78,7 @@ public class GameScene extends Scene {
 		colorizeObstacles = !AudioDrive.Settings.getBoolean("block.obstacle.color.static");
 		spectrum = visualization = AudioDrive.Settings.getBoolean("game.visualization");
 		environment = AudioDrive.Settings.getBoolean("game.environment");
+		rings = AudioDrive.Settings.getBoolean("track.rings");
 		reflections = AudioDrive.Settings.getBoolean("graphics.reflections");
 		particles = AudioDrive.Settings.getBoolean("graphics.particles");
 		glow = AudioDrive.Settings.getBoolean("graphics.glow");
@@ -84,6 +87,7 @@ public class GameScene extends Scene {
 		keyboardSpeed = AudioDrive.Settings.getDouble("input.keyboard.speed");
 		mouseSpeed = AudioDrive.Settings.getDouble("input.mouse.speed");
 		volume = AudioDrive.Settings.getDouble("sound.volume");
+		health = AudioDrive.Settings.getBoolean("player.healthbar");
 		particles2D = new Particles2D();
 		track.build();
 		player = new Player(this).model(Resources.getCurrentPlayerModel());
@@ -205,6 +209,7 @@ public class GameScene extends Scene {
 		
 		track.render();
 		player.render();
+		if (health) player.renderHealth();
 		if (glow) track.glow().render();
 		
 		overlay.render();
@@ -351,12 +356,16 @@ public class GameScene extends Scene {
 		case Keyboard.KEY_G:
 			glow = !glow;
 			break;
+		case Keyboard.KEY_H:
+			health = !health;
+			break;
 		case Keyboard.KEY_P:
 			if (Keyboard.isKeyDown(Keyboard.KEY_LSHIFT) || Keyboard.isKeyDown(Keyboard.KEY_RSHIFT)) peaks = !peaks;
 			else particles = !particles;
 			break;
 		case Keyboard.KEY_R:
-			reflections = !reflections;
+			if (Keyboard.isKeyDown(Keyboard.KEY_LSHIFT) || Keyboard.isKeyDown(Keyboard.KEY_RSHIFT)) rings = !rings;
+			else reflections = !reflections;
 			break;
 		case Keyboard.KEY_S:
 			if (Keyboard.isKeyDown(Keyboard.KEY_LSHIFT) || Keyboard.isKeyDown(Keyboard.KEY_RSHIFT)) spectrum = !spectrum;

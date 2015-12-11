@@ -122,8 +122,8 @@ public class Track implements Renderable {
 			if (!player.isGlowing()) player.render();
 		}).renderpass(() -> {
 			visibleBlocks.stream().filter(Block::isGlowing).forEach(Block::render);
-			visibleMusicTowers.stream().forEach(MusicTower::render);
-			visibleRings.stream().forEach(Ring::render);
+			if (GameScene.environment) visibleMusicTowers.stream().forEach(MusicTower::render);
+			if (GameScene.rings) visibleRings.stream().forEach(Ring::render);
 			particles.render();
 			if (player.isGlowing()) player.render();
 		});
@@ -400,19 +400,21 @@ public class Track implements Renderable {
 		
 		AnalyzedChannel mix = audio.getMix();
 		visibleRings = new ArrayList<>();
-		double pulse = GameScene.visualization ? Arithmetic.smooth(0, 2, mix.getPeaks().getClamped(iteration)) : 0;
-		for (int i = minimum; i < maximum; i++) {
-			if (mix.getPeaks().getClamped(i) == 0) continue;
-			double ringScale = 5 - 3 * mix.getThreshold().getClamped(i);
-			Color ringColor = getColorAtIndex(i);
-			Placement placement = getPlacement(new Index(i, 0.5), true, 0);
-			visibleRings.add(new Ring(i, ringColor, placement).scale(ringScale).pulse(pulse));
+		if (GameScene.environment) {
+			double pulse = GameScene.visualization ? Arithmetic.smooth(0, 2, mix.getPeaks().getClamped(iteration)) : 0;
+			for (int i = minimum; i < maximum; i++) {
+				if (mix.getPeaks().getClamped(i) == 0) continue;
+				double ringScale = 5 - 3 * mix.getThreshold().getClamped(i);
+				Color ringColor = getColorAtIndex(i);
+				Placement placement = getPlacement(new Index(i, 0.5), true, 0);
+				visibleRings.add(new Ring(i, ringColor, placement).scale(ringScale).pulse(pulse));
+			}
 		}
 		
 		double linearIntensity = mix.getBands().get(1).getClamped(iteration);
-		double rotationSpeed = mix.getSpectralSum().getClamped(iteration) * 180;
 		
 		if (GameScene.environment) {
+			double rotationSpeed = mix.getSpectralSum().getClamped(iteration) * 180;
 			visibleMusicTowers = musicTowers
 				.stream()
 				.filter(musicTower -> musicTower.iteration() > index.integer - review && musicTower.iteration() < index.integer + preview * 5)
@@ -499,7 +501,7 @@ public class Track implements Renderable {
 		splineArea2Buffer.useColor(true);
 		glCullFace(GL_BACK);
 		
-		visibleMusicTowers.forEach(MusicTower::render);
+		if (GameScene.environment) visibleMusicTowers.forEach(MusicTower::render);
 		visibleBlocks.forEach(Block::render);
 		
 		// Draw borders
@@ -509,7 +511,7 @@ public class Track implements Renderable {
 		glDisable(GL_CULL_FACE);
 		glDisable(GL_LIGHTING);
 		if (GameScene.sky) skybox.render();
-		visibleRings.forEach(Ring::render);
+		if (GameScene.rings) visibleRings.forEach(Ring::render);
 		glEnable(GL_LIGHTING);
 		glEnable(GL_CULL_FACE);
 		particles.render();
@@ -563,16 +565,18 @@ public class Track implements Renderable {
 		Rotation flip = new Rotation().z(180);
 		
 		// draw ring reflections
-		glDisable(GL_CULL_FACE);
-		rings.forEach(ring -> {
-			double distance = Math.abs(ring.iteration() - index.integer);
-			double alpha = Arithmetic.scaleLinear(distance, 1, 0, 0, range);
-			final Color color = ring.color();
-			ring.color(color.alpha(alpha));
-			ring.render();
-			ring.color(color);
-		});
-		glEnable(GL_CULL_FACE);
+		if (GameScene.rings) {
+			glDisable(GL_CULL_FACE);
+			rings.forEach(ring -> {
+				double distance = Math.abs(ring.iteration() - index.integer);
+				double alpha = Arithmetic.scaleLinear(distance, 1, 0, 0, range);
+				final Color color = ring.color();
+				ring.color(color.alpha(alpha));
+				ring.render();
+				ring.color(color);
+			});
+			glEnable(GL_CULL_FACE);
+		}
 		
 		// draw block reflections
 		blocks.forEach(block -> {

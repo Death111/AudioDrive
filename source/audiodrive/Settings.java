@@ -31,7 +31,7 @@ public class Settings {
 		set("block.obstacle.color.static", "false");
 		set("block.obstacle.glowing", "false");
 		set("color.intense", "1,0,0,1");
-		set("color.average", "0,1,0,1");
+		set("color.average", "0,0.6,0,1");
 		set("color.relaxed", "0,0,1,1");
 		set("game.environment", "true");
 		set("game.visualization", "true");
@@ -56,9 +56,11 @@ public class Settings {
 		set("interface.volume", "1.0");
 		set("music.directory", "music");
 		set("music.volume", "1.0");
+		set("player.healthbar", "true");
 		set("player.model", "lightjet");
 		set("sound.volume", "1.0");
 		set("track.smoothing", "20");
+		set("track.rings", "true");
 		set("window.antialiasing", "true");
 		set("window.multisampling", "2");
 		set("window.framerate", "0");
