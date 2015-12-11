@@ -54,9 +54,9 @@ public class GameOverlay extends Overlay {
 		trackOverview = new TrackOverview(scene.getTrack());
 		Color color = scene.getTrack().color().inverse();
 		text("title").setColor(color).setText(scene.getTrack().getAudio().getName()).setSize(15).setPosition(width * 0.5, height - 10).setAlignment(Alignment.LowerCenter);
-		text("framerate").setColor(color).setSize(10).setPosition(scene.getWidth() - 10, 125).setAlignment(Alignment.UpperRight);
-		text("memory").setColor(color).setSize(10).setPosition(scene.getWidth() - 10, 140).setAlignment(Alignment.UpperRight);
-		text("time").setColor(color).setSize(10).setPosition(scene.getWidth() - 10, 155).setAlignment(Alignment.UpperRight);
+		text("time").setColor(color).setSize(15).setPosition(scene.getWidth() - 10, 130).setAlignment(Alignment.UpperRight);
+		text("memory").setColor(color).setSize(10).setPosition(scene.getWidth() - 10, 155).setAlignment(Alignment.UpperRight);
+		text("framerate").setColor(color).setSize(10).setPosition(scene.getWidth() - 10, 170).setAlignment(Alignment.UpperRight);
 		text("points").setColor(color).setSize(30).setPosition(10, 10);
 		text("damage").setColor(color).setSize(30).setPosition(10, 50);
 		text("collected").setColor(color).setSize(20).setPosition(10, 110);
@@ -76,7 +76,10 @@ public class GameOverlay extends Overlay {
 		List<Block> passed = scene.getTrack().getBlocks().stream().filter(block -> block.iteration() <= scene.getTrack().index().integer).collect(Collectors.toList());
 		int passedCollectables = (int) passed.stream().filter(Block::isCollectable).count();
 		int passedObstacles = passed.size() - passedCollectables;
-		text("time").setText(Format.seconds(scene.playtime(), 1));
+		final int framerate = Scene.getFramerate();
+		text("framerate").setText(framerate + " FPS").setColor(framerate >= 60 ? Color.Green : framerate >= 30 ? Color.Orange : Color.Red);
+		text("memory").setText(Memory.used() + " / " + Memory.allocated());
+		text("time").setText(Format.seconds(scene.playtime(), 1) + " / " + Format.seconds(audio.getDuration(), 1));
 		text("points").setText(String.format("Points: %d / %d (%.0f%%)", player.points(), collectables, 100.0 * player.points() / collectables));
 		text("damage").setText(String.format("Damage: %d / %d (%d%%)", player.collided(), player.hitpoints(), player.damage()));
 		text("collected").setText(
@@ -120,10 +123,6 @@ public class GameOverlay extends Overlay {
 	
 	@Override
 	public void render() {
-		final int framerate = Scene.getFramerate();
-		text("framerate").setText(framerate + " FPS");
-		text("framerate").setColor(framerate >= 60 ? Color.Green : framerate >= 30 ? Color.Orange : Color.Red);
-		text("memory").setText(Memory.used() + "/" + Memory.allocated());
 		Camera.overlay(width, height);
 		glDisable(GL_LIGHTING);
 		super.render();
