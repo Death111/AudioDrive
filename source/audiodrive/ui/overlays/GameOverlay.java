@@ -25,6 +25,7 @@ import audiodrive.ui.scenes.GameScene.State;
 import audiodrive.utilities.Arithmetic;
 import audiodrive.utilities.Format;
 import audiodrive.utilities.Memory;
+import audiodrive.utilities.Memory.Unit;
 
 public class GameOverlay extends Overlay {
 	
@@ -78,7 +79,7 @@ public class GameOverlay extends Overlay {
 		int passedObstacles = passed.size() - passedCollectables;
 		final int framerate = Scene.getFramerate();
 		text("framerate").setText(framerate + " FPS").setColor(framerate >= 60 ? Color.Green : framerate >= 30 ? Color.Orange : Color.Red);
-		text("memory").setText(Memory.used() + " / " + Memory.allocated());
+		text("memory").setText(Memory.used().toString(Unit.GB) + " / " + Memory.allocated().toString(Unit.GB));
 		text("time").setText(Format.seconds(scene.playtime(), 1) + " / " + Format.seconds(audio.getDuration(), 1));
 		text("points").setText(String.format("Points: %d / %d (%.0f%%)", player.points(), collectables, 100.0 * player.points() / collectables));
 		text("damage").setText(String.format("Damage: %d / %d (%d%%)", player.collided(), player.hitpoints(), player.damage()));

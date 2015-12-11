@@ -136,11 +136,14 @@ public class Memory {
 			return Unit.TB.convert(bytes);
 		}
 		
+		public String toString(Unit unit) {
+			if (bytes == Long.MAX_VALUE) return "Unlimited";
+			return String.format("%.1f %s", unit.convert(bytes), unit);
+		}
+		
 		@Override
 		public String toString() {
-			if (bytes == Long.MAX_VALUE) return "Unlimited";
-			Unit unit = Unit.valueOf(bytes);
-			return String.format("%.1f %s", unit.convert(bytes), unit);
+			return toString(Unit.valueOf(bytes));
 		}
 		
 	}
