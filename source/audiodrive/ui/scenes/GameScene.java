@@ -44,6 +44,7 @@ public class GameScene extends Scene {
 	public static boolean spectrum;
 	public static boolean peaks;
 	public static boolean hitbox;
+	public static boolean health;
 	
 	public static enum State {
 		Animating, Running, Paused, Resuming, Ended, Destroyed
@@ -84,6 +85,7 @@ public class GameScene extends Scene {
 		keyboardSpeed = AudioDrive.Settings.getDouble("input.keyboard.speed");
 		mouseSpeed = AudioDrive.Settings.getDouble("input.mouse.speed");
 		volume = AudioDrive.Settings.getDouble("sound.volume");
+		health = AudioDrive.Settings.getBoolean("player.healthbar");
 		particles2D = new Particles2D();
 		track.build();
 		player = new Player(this).model(Resources.getCurrentPlayerModel());
@@ -205,6 +207,7 @@ public class GameScene extends Scene {
 		
 		track.render();
 		player.render();
+		if (health) player.renderHealth();
 		if (glow) track.glow().render();
 		
 		overlay.render();
@@ -350,6 +353,9 @@ public class GameScene extends Scene {
 			break;
 		case Keyboard.KEY_G:
 			glow = !glow;
+			break;
+		case Keyboard.KEY_H:
+			health = !health;
 			break;
 		case Keyboard.KEY_P:
 			if (Keyboard.isKeyDown(Keyboard.KEY_LSHIFT) || Keyboard.isKeyDown(Keyboard.KEY_RSHIFT)) peaks = !peaks;

@@ -56,6 +56,7 @@ public class Settings {
 		set("interface.volume", "1.0");
 		set("music.directory", "music");
 		set("music.volume", "1.0");
+		set("player.healthbar", "true");
 		set("player.model", "lightjet");
 		set("sound.volume", "1.0");
 		set("track.smoothing", "20");

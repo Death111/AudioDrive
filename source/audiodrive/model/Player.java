@@ -9,6 +9,7 @@ import audiodrive.model.geometry.transform.Rotation;
 import audiodrive.model.loader.Model;
 import audiodrive.model.track.Block;
 import audiodrive.model.track.Track;
+import audiodrive.ui.GL;
 import audiodrive.ui.components.Camera;
 import audiodrive.ui.components.Scene;
 import audiodrive.ui.scenes.GameScene;
@@ -204,6 +205,31 @@ public class Player implements Renderable {
 			model.render();
 		}
 		if (GameScene.hitbox) renderHitbox();
+	}
+	
+	public void renderHealth() {
+		if (!hit) return;
+		Vector side = model.placement().side().multiplied(0.4);
+		Vector up = model.up().multiplied(0.2);
+		Vector start = model.position().plus(up).minus(side.multiplied(0.5));
+		double health = damage / 100.0;
+		GL.pushMatrix();
+		model.translation().apply();
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		glDisable(GL_LIGHTING);
+		glLineWidth(4);
+		glBegin(GL_LINES);
+		Color.Red.gl();
+		start.glVertex();
+		start.plus(side.multiplied(health)).glVertex();
+		Color.Green.gl();
+		start.plus(side.multiplied(health)).glVertex();
+		start.plus(side.multiplied(1.0)).glVertex();
+		glEnd();
+		glLineWidth(1);
+		glEnable(GL_LIGHTING);
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		GL.popMatrix();
 	}
 	
 	private void renderHitbox() {
