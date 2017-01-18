@@ -1,7 +1,6 @@
 package audiodrive.ui.components;
 
-import static org.lwjgl.opengl.GL11.glDisable;
-import static org.lwjgl.opengl.GL11.glEnable;
+import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL13.GL_MULTISAMPLE;
 
 import java.awt.GraphicsDevice;
@@ -131,6 +130,7 @@ public class Window {
 		int samples = capabilities.GL_ARB_multisample ? Arithmetic.clamp(Arithmetic.nextPowerOfTwo(AudioDrive.Settings.getInteger("window.multisampling")), 0, 16) : 0;
 		if (pixelFormat.getSamples() != samples) pixelFormat = pixelFormat.withSamples(samples);
 		// TODO check OpenGL version etc
+		Log.debug("OpenGL Version: " + glGetString(GL_VERSION));
 	}
 	
 	public static void close() {
