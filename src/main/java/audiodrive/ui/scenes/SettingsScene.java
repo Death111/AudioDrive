@@ -165,7 +165,7 @@ public class SettingsScene extends Scene implements ItemListener {
 		gameMenu.addItem(difficulty);
 		gameMenu.addItem(smoothing);
 		
-		selectAudio = new AudioResource("sounds/Select.mp3");
+		selectAudio = new AudioResource("sounds/Select.wav");
 		volume = AudioDrive.Settings.getDouble("interface.volume");
 		
 		background = new Overlay().shader(new ShaderProgram("shaders/Default.vs", "shaders/Title.fs"));

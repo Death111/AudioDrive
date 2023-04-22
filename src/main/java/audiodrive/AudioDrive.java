@@ -30,8 +30,8 @@ public class AudioDrive {
 	public static final String Version = Versioning.getVersion();
 	public static final String Creators = "Nico Mutter and Thomas Würstle";
 	public static final Settings Settings = new Settings("audiodrive.properties");
-	public static final Playback MenuSound = new Playback(new AudioResource("sounds/Menu.mp3"));
-	public static final Font Font = Text.getFont("Shojumaru");
+	public static final Playback MenuSound = new Playback(new AudioResource("sounds/Menu.wav"));
+	public static final Font Font = Text.getFont("Shojumaru/Shojumaru-Regular");
 	
 	private static AudioResource selectedAudio;
 	private static AnalyzedAudio analyzedAudio;

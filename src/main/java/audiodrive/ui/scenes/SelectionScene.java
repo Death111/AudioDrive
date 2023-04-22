@@ -137,8 +137,8 @@ public class SelectionScene extends Scene implements ItemListener {
 			rootMap.put(fci, file);
 		}
 		
-		hoverAudio = new AudioResource("sounds/Hover.mp3");
-		selectAudio = new AudioResource("sounds/Select.mp3");
+		hoverAudio = new AudioResource("sounds/Hover.wav");
+		selectAudio = new AudioResource("sounds/Select.wav");
 		Input.addObservers(rootMenu, itemMenu, continueMenu);
 	}
 	
