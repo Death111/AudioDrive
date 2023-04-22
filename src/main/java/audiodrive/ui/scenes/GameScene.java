@@ -162,7 +162,7 @@ public class GameScene extends Scene {
 			state = State.Destroyed;
 			playback.stop();
 			rotate = true;
-			new AudioResource("sounds/Destroyed.mp3").play(volume);
+			new AudioResource("sounds/Destroyed.wav").play(volume);
 			Log.info("Destroyed. Game ended.");
 			return;
 		}

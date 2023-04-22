@@ -1,6 +1,8 @@
 package audiodrive.ui.scenes;
 
-import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL11.GL_COLOR_BUFFER_BIT;
+import static org.lwjgl.opengl.GL11.glClear;
+
 import audiodrive.AudioDrive;
 import audiodrive.audio.AudioResource;
 import audiodrive.ui.components.Camera;
@@ -16,7 +18,7 @@ public class TitleScene extends Scene {
 	private Overlay background;
 	
 	static {
-		new AudioResource("sounds/Title.mp3").play();
+		new AudioResource("sounds/Title.wav").play();
 	}
 	
 	@Override

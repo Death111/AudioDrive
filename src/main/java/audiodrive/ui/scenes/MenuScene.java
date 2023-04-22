@@ -1,6 +1,8 @@
 package audiodrive.ui.scenes;
 
-import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL11.GL_COLOR_BUFFER_BIT;
+import static org.lwjgl.opengl.GL11.GL_DEPTH_BUFFER_BIT;
+import static org.lwjgl.opengl.GL11.glClear;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -92,8 +94,8 @@ public class MenuScene extends Scene implements ItemListener {
 		exitMenuItem = new MenuItem("Exit", this);
 		menu.addItem(exitMenuItem);
 		
-		hoverAudio = new AudioResource("sounds/Hover.mp3");
-		selectAudio = new AudioResource("sounds/Select.mp3");
+		hoverAudio = new AudioResource("sounds/Hover.wav");
+		selectAudio = new AudioResource("sounds/Select.wav");
 		
 		background = new Overlay().shader(new ShaderProgram("shaders/Default.vs", "shaders/Title.fs"));
 		

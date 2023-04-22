@@ -1,6 +1,7 @@
 package audiodrive.model;
 
 import static org.lwjgl.opengl.GL11.*;
+
 import audiodrive.AudioDrive;
 import audiodrive.audio.AudioResource;
 import audiodrive.model.geometry.Color;
@@ -20,8 +21,8 @@ import audiodrive.utilities.Range;
 
 public class Player implements Renderable {
 	
-	private static final AudioResource CollectSound = new AudioResource("sounds/Collect.mp3");
-	private static final AudioResource CollideSound = new AudioResource("sounds/Collide.mp3");
+	private static final AudioResource CollectSound = new AudioResource("sounds/Collect.wav");
+	private static final AudioResource CollideSound = new AudioResource("sounds/Collide.wav");
 	private static final Color CollisionColor = new Color(0.8, 0.2, 0.2, 1);
 	
 	private GameScene scene;
